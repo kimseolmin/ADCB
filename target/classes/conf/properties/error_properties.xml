@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+	<comment>error_properties</comment>
+	
+	<entry key="0">Success</entry>
+	<entry key="2">Data format or validation error</entry>
+	<entry key="3">Authentication error</entry>
+	<entry key="4">Internal server error</entry>
+	<entry key="5">Idempotent requestID operation mismatch</entry>
+	<entry key="6">Idempotent requestID parameter mismatch</entry>
+	<entry key="7">Unknown status</entry>
+	<entry key="103">Insufficient funds</entry>
+	<entry key="104">User account is in an inactive state</entry>
+	<entry key="105">User unknown</entry>
+	<entry key="106">Charge already reversed</entry>
+	<entry key="107">Transaction not found</entry>
+	<entry key="108">Charge exceeds transaction limit</entry>
+	<entry key="109">Spend limit reached</entry>
+	<entry key="110">Refund window expired</entry>
+	<entry key="111">Reverse window expired</entry>
+	<entry key="112">Transaction already refunded</entry>
+	<entry key="113">Refund amount cannot exceed the original transaction amount</entry>
+	<entry key="114">Transaction has been reversed</entry>
+	<entry key="115">Global rate limit reached</entry>
+	<entry key="116">Rate limit reached for user</entry>
+	<entry key="117">User in a permanent state of ineligibility</entry>
+	<entry key="118">User is not eligible for carrier billing</entry>
+	<entry key="119">User-related failure</entry>
+	<entry key="120">Bad debt</entry>
+	<entry key="121">User is barred</entry>
+	<entry key="122">User self-barred</entry>
+	<entry key="123">In Progress</entry>
+	<entry key="200">OTP value incorrect</entry>
+	<entry key="201">OTP expired</entry>
+	<entry key="202">Maximum OTP validation attempts reached</entry>
+	<entry key="203">OTP invalid session</entry>
+	<entry key="204">Maximum OTP resend attempts reached</entry>
+	<entry key="210">ACR known but has been deactivated</entry>
+	<entry key="300">Carrier Maintenance</entry>
+	<entry key="4xx">Custom Carrier Codes</entry>
+	
+	
+
+	<entry key="401">4011</entry>
+	<entry key="402">4002</entry>
+	<entry key="412">4012</entry>
+	<entry key="413">4013</entry>
+	<entry key="414">4014</entry>
+	<entry key="441">4041</entry>
+	<entry key="442">4042</entry>
+	<entry key="443">4043</entry>
+	<entry key="500">5001</entry>
+	<entry key="541">5041</entry>
+	<entry key="801">4013</entry>
+
+	<entry key="4002">Invalid Request Body</entry>
+	<entry key="4011">Invalid Access Token</entry>
+	<entry key="4012">Access Token Expired</entry>
+	<entry key="4013">Unauthorized (Invalid ClientId &amp; Secret)</entry>
+	<entry key="4014">Invalid Grant Type</entry>
+	<entry key="4041">Unregistered Device</entry>
+	<entry key="4042">Unregistered Group</entry>
+	<entry key="4043">Unregistered User</entry>
+	<entry key="5001">Internal Server Error</entry>
+	<entry key="5041">Gateway Timeout</entry>
+
+	<entry key="msg_url">Invalid IP</entry>
+	
+	<entry key="service20000000">SUCCESS</entry>
+	<entry key="service20000001">NOT FOUND</entry>
+	
+	<entry key="service32000002">CLIENT_ERROR_PARAM_VALUE</entry>
+	<entry key="service32000001">CLIENT_ERROR_PARAM_OMIT</entry>
+	
+	<entry key="service31000002">CLIENT_ERROR_PARAM_VALUE</entry>
+	<entry key="service30001001">CLIENT_ERROR_PARAM_OMIT</entry>
+	
+	
+	<entry key="service20000000">PROCESS_INSIDE_ERROR_IPS</entry>
+	
+	
+	<entry key="service50001001">PROCESS_INSIDE_ERROR_SERVER</entry>
+</properties>
+

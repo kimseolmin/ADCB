@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ipsProfile">
+    
+    <select id="selectProfileMappingData" parameterType = "hashmap" resultType="hashmap">
+        SELECT 
+		    DCM.DEV_TYPE||'.'||DCM.DEV_KEY AS CLI_DEV_PROFILE, 
+		    CASE DCM.TEMP_FLAG WHEN '1' THEN CDL.DEV_STATUS ELSE CASE WHEN CDL.DEV_STATUS IS NULL THEN CDL.DEV_STATUS ELSE DCM.DEV_STATUS END END DEV_STATUS  
+        FROM 
+		    TB_RES_MAP_INFO RSM 
+		INNER JOIN 
+		    TB_DEV_SEP_INFO DSI 
+		ON 
+		    RSM.SEP_CD = DSI.SEP_CD AND DSI.FLAG = #{flag}
+		INNER JOIN
+		    TB_DEV_CLI_MAP_INFO DCM 
+		ON 
+		    RSM.DEV_CD = DCM.DEV_CD AND DCM.FLAG=#{flag} AND DCM.SERVICE_ID = #{service_id} 
+		LEFT OUTER JOIN 
+		(
+		    SELECT 
+		        RMI.SEP_CD, RMI.DEV_CD, RMI.DEV_KEY, RMI.DEV_STATUS, RMI.FLAG, DCM.TEMP_FLAG
+		    FROM 
+		        TB_REQ_MAP_INFO RMI
+		    INNER JOIN 
+		        TB_DEV_CLI_MAP_INFO DCM
+		    ON
+		        DCM.DEV_CD = RMI.DEV_CD AND DCM.FLAG = #{flag} AND DCM.TEMP_FLAG = #{tempFlag} 
+		    UNION 
+		    SELECT 
+		        RMI.SEP_CD, RMI.DEV_CD, RMI.DEV_KEY, DTL.TEMP AS DEV_STATUS, RMI.FLAG, DCM.TEMP_FLAG 
+		    FROM 
+		        TB_REQ_MAP_INFO RMI
+		    INNER JOIN 
+		        TB_DEV_CLI_MAP_INFO DCM
+		    ON
+		        DCM.DEV_CD = RMI.DEV_CD AND DCM.FLAG = #{flag} AND DCM.TEMP_FLAG = #{flag}
+		    INNER JOIN 
+		        TB_DEV_TEMP_LIST DTL 
+		    ON
+		        DTL.FLAG=#{flag} AND DTL.SEP_CD = RMI.SEP_CD 
+		) CDL
+		ON 
+		    RSM.SEP_CD = CDL.SEP_CD AND RSM.DEV_CD = CDL.DEV_CD AND CDL.FLAG = #{flag} 
+		WHERE
+		    RSM.FLAG = #{flag} AND DSI.VENDER_CD = #{vendor_code} AND DSI.MODEL_NO = #{model} AND DSI.DEV_TYPE = #{type} 
+		ORDER BY CLI_DEV_PROFILE, LENGTH(DEV_STATUS), DEV_STATUS
+	</select>
+	
+	
+	<!-- 프로파일 정보조회용 테이블 추가로 인한 새로운 select문 -->
+	<select id="selectProfileMappingData2" parameterType = "hashmap" resultType="hashmap">
+		SELECT 
+		    PROFILE_SN
+		    ,SEP_CD
+		    ,DEV_PROFILE
+		    ,PERMISSION
+		    ,REMARK
+		    ,DEV_TYPE
+		    ,STATUS_VALUE
+		    ,VALUE_INTERVAL
+		FROM 
+		TB_DEV_PROFILE 
+		WHERE SEP_CD = (
+		                SELECT SEP_CD 
+		                FROM TB_DEV_SEP_INFO 
+		                WHERE VENDER_CD = #{vendor_code}
+		                    AND MODEL_NO = #{model}
+		                    AND DEV_TYPE = #{type}
+		                )
+	</select>
+    
+</mapper>

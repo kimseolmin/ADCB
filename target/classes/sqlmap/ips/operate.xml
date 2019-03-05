@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ipsOperate">
+	
+	<select id="selectOperateResult" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			DEV_UUID,
+			HOME_CD,
+			SUB_TYPE_NUM, 
+			RES_CD, 
+			RES_MSG, 
+			CREATE_TIME,
+			UPDATE_TIME 
+		FROM 
+			TB_LOG_INFO 
+		WHERE 
+			MSG_ID=#{msgId} AND PARTITION_ID IN (#{current_week}, #{next_week})
+	</select>
+	
+	<select id="selectOperateStatusResult" parameterType="hashmap" resultType="hashmap">
+		SELECT 
+			DEV_UUID,
+			HOME_CD,
+			SUB_TYPE_NUM, 
+			RES_CD, 
+			RES_MSG, 
+			CREATE_TIME,
+			UPDATE_TIME,
+			RES_STATUS
+		FROM 
+			TB_LOG_INFO 
+		WHERE 
+			MSG_ID=#{msgId} AND PARTITION_ID IN (#{current_week}, #{next_week})
+	</select>
+
+	<insert id="insertClientReqData" parameterType="hashmap">
+		INSERT INTO
+			TB_LOG_INFO
+		(
+			PARTITION_ID,
+			MSG_ID,
+			CONT_TYPE,
+			ACC_TKN, 
+			SESS_KEY,
+			DEV_UUID,
+			HOME_CD,
+			SUB_TYPE_NUM,
+			DEV_TYPE,
+			DEV_KEY,
+			DEV_STATUS,
+			CREATE_TIME,			
+			RES_CD, 
+			RES_MSG
+		)
+		VALUES
+		(
+			#{current_week},
+			SEQ_TB_LOG_INFO.nextval,
+			#{content_type},
+			#{access_token}, 
+			#{session_key},
+			#{uuid},
+			#{home_code},
+			#{switch_num},
+			#{cli_type},
+			#{cli_key},
+			#{cli_value},
+			#{regDate},
+			#{resultCode},
+			#{resultMsg}
+		)
+		<selectKey keyProperty="msgId" resultType="Integer" order="AFTER">
+			SELECT SEQ_TB_LOG_INFO.currval FROM dual
+		</selectKey>
+	</insert>
+
+	<select id="selectOperateReqInfo" parameterType="hashmap" resultType="hashmap">
+		SELECT  
+			DS.OPERATE_FORMAT,
+			U.HTTP_METHOD, 
+			U.HEADER_V, 
+			U.CONT_TYPE, 
+			U.CHANNEL_CD, 
+			U.SERVICE_CD,
+			U.REQ_CMD_ID,
+			DR.REQ_CMD,
+			DR.DEV_KEY, 
+			DR.DEV_STATUS  
+		FROM 
+			TB_DEV_SEP_INFO DS 
+		INNER JOIN 
+			TB_SERV_URL_INFO U
+		ON 
+			DS.SEP_CD = U.SEP_CD
+		INNER JOIN 
+		(
+			SELECT 
+				R.SEP_CD, R.DEV_KEY, R.DEV_STATUS, R.REQ_CMD
+			FROM 
+				TB_DEV_CLI_MAP_INFO C 
+			INNER JOIN 
+				TB_REQ_MAP_INFO R 
+			ON 
+				C.DEV_CD = R.DEV_CD AND R.FLAG  = #{flag} AND C.FLAG = #{flag}  
+			WHERE 
+				C.DEV_TYPE = #{cli_type} AND C.DEV_KEY = #{cli_key} AND C.DEV_STATUS = #{cli_value} AND C.TEMP_FLAG=#{tempFlag}
+			UNION
+            SELECT 
+				R.SEP_CD, R.DEV_KEY, DTL.TEMP AS DEV_STATUS, R.REQ_CMD
+			FROM 
+				TB_DEV_CLI_MAP_INFO C 
+			INNER JOIN 
+				TB_REQ_MAP_INFO R 
+			ON 
+				C.DEV_CD = R.DEV_CD AND R.FLAG  = #{flag} AND C.FLAG = #{flag}  
+            INNER JOIN
+                TB_DEV_TEMP_LIST DTL 
+			ON
+                DTL.SEP_CD = R.SEP_CD AND DTL.FLAG = #{flag} 
+			WHERE 
+				C.DEV_TYPE = #{cli_type} AND C.DEV_KEY = #{cli_key} AND DTL.TEMP=#{cli_value} AND C.TEMP_FLAG=#{flag}
+		) DR
+		ON 
+			DR.SEP_CD = DS.SEP_CD AND DS.FLAG = #{flag} AND U.FLAG = #{flag} 
+		WHERE 
+			DS.VENDER_CD = #{vendor_code} AND 
+			DS.MODEL_NO = #{model} AND 
+			DS.DEV_TYPE= #{type} AND 
+			U.REQ_STATUS = #{reqStatus}
+	</select>
+	
+	<update id="updateOperateResult" parameterType="hashmap">
+		UPDATE 
+			TB_LOG_INFO 
+		SET 
+			RES_CD=#{resultCode}, 
+			RES_MSG=#{resultMsg},
+			UPDATE_TIME=#{regDate},
+			RES_STATUS=#{statusList}
+		WHERE 
+			PARTITION_ID IN (#{current_week}, #{next_week}) AND MSG_ID=#{msgId}
+	</update>
+	
+	
+
+
+</mapper>

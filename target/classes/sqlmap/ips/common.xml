@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ipsCommon">
+	
+	<select id="getServiceId" parameterType="hashmap" resultType="hashmap">
+		SELECT  
+    		COUNT(TB.CLI_IP) AS RS_CNT,
+    		TB.SERVICE_ID AS service_id, 
+    		TB.SERVICE_NM AS service_name 
+		FROM 
+    		TB_CLI_INFO IP_CNT
+		LEFT OUTER JOIN 
+		(
+    		SELECT 
+    			CLI_IP, SERVICE_ID, SERVICE_NM 
+    		FROM 
+    			TB_CLI_INFO 
+    		WHERE 
+    			CLI_ID = #{client_id} AND FLAG = #{flag}
+		) TB 
+		ON 
+			IP_CNT.CLI_IP = TB.CLI_IP 
+		WHERE 
+    		IP_CNT.CLI_IP = #{clientIp} AND 
+    		IP_CNT.FLAG = #{flag} 
+		GROUP BY TB.SERVICE_ID, TB.SERVICE_NM
+	</select>
+	
+	<select id="getServiceId2" parameterType="hashmap" resultType="hashmap">
+		SELECT  
+    		SERVICE_ID AS service_id, 
+    		SERVICE_NM AS service_name 
+		FROM 
+    		TB_CLI_INFO IP_CNT
+    	WHERE FLAG = #{flag}
+    		AND CLI_ID=#{client_id} AND CLI_IP=#{clientIp}
+	</select>
+	
+	<select id="getIpCnt" parameterType="hashmap" resultType="int">
+		SELECT  
+    		count(CLI_IP)
+		FROM 
+    		TB_CLI_INFO IP_CNT
+    	WHERE FLAG = #{flag}
+    		AND CLI_IP=#{clientIp}
+	</select>
+
+</mapper>
