@@ -128,7 +128,7 @@ public class CommonException extends Exception{
 	
 	public Map<String, Object> sendException(){
 		Map<String, Object> result = new HashMap<>();
-		result.put("reasonCode", getResReasonCode());
+		result.put("reasonCode", Integer.parseInt(getResReasonCode()) );
 		result.put("message", getResMsg());
 		
 		return result;
@@ -187,7 +187,7 @@ public class CommonException extends Exception{
 		
 		CommonException adcbEx = new CommonException(paramMap.get("sCode").toString(), paramMap.get("apiResultCode").toString(), paramMap.get("eCode").toString(), flow);
 		
-		excMap.put("reasonCode", adcbEx.resReasonCode);
+		excMap.put("reasonCode", Integer.parseInt(adcbEx.resReasonCode));
 		excMap.put("message", adcbEx.resMsg);
 		
 		return excMap;

@@ -1,16 +1,20 @@
 package com.nexgrid.adcb.common.service;
 
+import java.net.ConnectException;
 import java.net.URLDecoder;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +24,7 @@ import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.UnknownHttpStatusCodeException;
 
+import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.util.Init;
@@ -32,8 +37,8 @@ import com.nexgrid.adcb.util.StringUtil;
 @Service("commonService")
 public class CommonServiceImpl implements CommonService{
 
-	/*@Resource(name = "commonDAO")
-	private CommonDAO commonDAO;*/
+	@Inject
+	private CommonDAO commonDAO;
 	
 	private org.slf4j.Logger serviceLog = LoggerFactory.getLogger(getClass());
 
@@ -94,7 +99,8 @@ public class CommonServiceImpl implements CommonService{
 	@Override
 	public void getNcasGetMethod(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		
-		String msisdn = StringUtil.getNcas444(paramMap.get("msisdn").toString());
+		//String msisdn = StringUtil.getNcas444(paramMap.get("msisdn").toString());
+		String msisdn = paramMap.get("msisdn").toString();
 		String ncasUrl = Init.readConfig.getNcas_url() + msisdn;
 		HttpHeaders headers = new HttpHeaders();
 		int connTimeout = Integer.parseInt(Init.readConfig.getNcas_connect_time_out());
@@ -110,40 +116,85 @@ public class CommonServiceImpl implements CommonService{
 			logVO.setFlow("[ADCB] <-- [NCAS]");
 			logVO.setNcasResTime();	// ncas 연동 종료
 			
-			//ncas연동 결과값
+			//NCAS연동 결과값
 			Map<String, String> ncasRes = getNcasResHeader(resEntity);
 			
 			
 			String ctn = ncasRes.get("CTN");
-	    	String respcode = ncasRes.get("RESPCODE");
-	    	String res_msg = ncasRes.get("RESPMSG");
-	    	String sub_no = ncasRes.get("SUB_NO");
-	    	String pers_name = ncasRes.get("PERS_NAME");
-	    	String fee_type = ncasRes.get("FEE_TYPE");	    	
-	    	String ban_unpaid_yn_code = ncasRes.get("BAN_UNPAID_YN_CODE");    	
-	    	String unit_loss_yn_code = ncasRes.get("UNIT_LOSS_YN_CODE");
-	    	String cust_type_code = ncasRes.get("CUST_TYPE_CODE");
-	    	String ctn_stus_code = ncasRes.get("CTN_STUS_CODE");
-	    	String pre_pay_code = StringUtils.defaultIfEmpty(ncasRes.get("PRE_PAY_CODE"), "");
-	    	String unit_mdl = ncasRes.get("UNIT_MDL");
-	    	String aceno = ncasRes.get("ACENO");
-	    	String ban = ncasRes.get("BAN");	
-	    	String svc_auth = ncasRes.get("SVC_AUTH");
-	    	String young_fee_yn = ncasRes.get("YOUNG_FEE_YN");
-	    	String frst_entr_dttm = ncasRes.get("FRST_ENTR_DTTM");
-	    	String sub_birth_pers_id = ncasRes.get("SUB_BIRTH_PERS_ID");
-	    	String sub_sex_pers_id = ncasRes.get("SUB_SEX_PERS_ID");
-	    	String cust_flag = ncasRes.get("CUST_FLAG"); //동의여부
+	    	String respcode = ncasRes.get("RESPCODE"); // RESPCODE
+	    	String res_msg = ncasRes.get("RESPMSG"); // 처리 결과 내용
+	    	String sub_no = ncasRes.get("SUB_NO");	// 고객의 가입번호
+	    	String pers_name = ncasRes.get("PERS_NAME"); // 실사용자명
+	    	String fee_type = ncasRes.get("FEE_TYPE"); //요금제 타입    	
+	    	String ban_unpaid_yn_code = ncasRes.get("BAN_UNPAID_YN_CODE"); // 연체여부
+	    	String unit_loss_yn_code = ncasRes.get("UNIT_LOSS_YN_CODE"); // 분실여부
+	    	String cust_type_code = ncasRes.get("CUST_TYPE_CODE"); // 개인,법인 구분 (I : 개인 / G : 법인)
+	    	String ctn_stus_code = ncasRes.get("CTN_STUS_CODE"); // CTN 상태코드 (A:정상 / S:일시 중지)
+	    	String pre_pay_code = StringUtils.defaultIfEmpty(ncasRes.get("PRE_PAY_CODE"), ""); // 선불가입코드(P:국제전화차단 / C:국제전화허용) 
+	    																					//-> NULL이 아닌 경우 선불가입자, NULL인 경우 선불가입자 아님.
+	    	String unit_mdl = ncasRes.get("UNIT_MDL"); // 단말기명
+	    	String aceno = ncasRes.get("ACENO"); // 가입자 계약번호(기기변경, 번호변경 시에는 유지되나, 명의변경 시 변경됨.)
+	    	String ban = ncasRes.get("BAN"); // 청구선 번호
+	    	String svc_auth = ncasRes.get("SVC_AUTH"); // 요금제, 부가서비스, 월정액 가입여부
+	    											// 입력정보: LRZ1111111|LRZ1111112|LRZ1111113
+	    											// 출력정보: 0|0|1 (가입은 '1', 미가입은 '0')
+	    	String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
+	    													// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
+	    	String frst_entr_dttm = ncasRes.get("FRST_ENTR_DTTM"); // 최초 개통일자
+	    	String sub_birth_pers_id = ncasRes.get("SUB_BIRTH_PERS_ID"); // 명의자 생년월일
+	    	String sub_sex_pers_id = ncasRes.get("SUB_SEX_PERS_ID"); // 명의자 성별
+	    	String cust_flag = ncasRes.get("CUST_FLAG"); //고객정보 구분값 (ex: YL00000000)
+	    											// 1번째 byte: 결제차단여부 ('Y':결제차단->결제이용동의 필요, 'N':결제가능->결제이용동의 완료)
+	    											// 2번째 byte: PIN번호 설정여부 ('Y':PIN번호사용, 'N':PIN번호사용안함, '0'(숫자):PIN번호미설정, 'L':5회실패로 잠금상태)
 	    	String law1HomeTelno = StringUtil.checkTrim(ncasRes.get("LAW1_HOME_TELNO")); //법정 대리인 전화번호
 	    	String law1PersName = ncasRes.get("LAW1_PERS_NAME"); //법정 대리인 이름
 	    	
+	    	//NCAS 응답코드 저장
+	    	logVO.setNcasResultCode(respcode);
+	    	
 	    	
 	    	//고객정보가 없거나 번호 이동된  사용자 차단 - 해지된 사용자는 고객정보 없음으로 나옴
-	    	//70 : 고객정보 없음  71 : SKT로 번호이동  76 : KTF로 번호이동
-			if("70".equals(respcode) || "71".equals(respcode) || "76".equals(respcode)) {
-				throw new CommonException("400", "105", "500000" + respcode, res_msg, logVO.getFlow());
+	    	//70 : 고객정보 없음  
+			if("70".equals(respcode) ) {
+				throw new CommonException("400", "105", "511000" + respcode, res_msg, logVO.getFlow());
 			}
-					
+			
+			// 71 : SKT로 번호이동  76 : KTF로 번호이동
+			if("71".equals(respcode) || "76".equals(respcode)) {
+				throw new CommonException("400", "104", "511000" + respcode, res_msg, logVO.getFlow());
+			}
+			
+			
+			//CTN 값이 정상값이 아닐경우 차단
+	    	int blockctn = 0;
+	    	if(ctn.length() == 12){
+	    		blockctn = commonDAO.getBlockCTN(ctn);
+	    	}else {
+	    		blockctn = 1;
+	    	}
+	    	if(blockctn != 0 ) {
+	    		logVO.setFlow("[ADCB] <-- [DB]");
+	    		throw new CommonException("400", "121", "51000"+"XXX", "BlockCTN", logVO.getFlow());
+	    	}
+	    	
+	    	//정상 요금제가 아니면 차단
+	    	int blockfeetype = 0;
+	    	if(!"".equals(fee_type)){
+	    		blockfeetype = commonDAO.getBlockFeeType(fee_type);
+	    	}else {
+	    		blockfeetype = 1;
+	    	}
+	    	if(blockfeetype != 0) {
+	    		logVO.setFlow("[ADCB] <-- [DB]");
+	    		throw new CommonException("400", "121", "51000"+"XXX", "BlockFeeType", logVO.getFlow());
+	    	}
+	    	
+	    	
+	    	
+	    	// paramMap에 NCAS 결과값 저장
+	    	paramMap.put("ncasRes", ncasRes);
+	    	
+	    						
 		}catch(HttpClientErrorException adcbExc){
 			
 			logVO.setFlow("[ADCB] <-- [NCAS]");
@@ -160,16 +211,32 @@ public class CommonServiceImpl implements CommonService{
 			throw new CommonException("500", "4", "59999999", "NCAS UnknownHttpStatusCode"+ adcbExc.getMessage(), logVO.getFlow());
 			
 		}catch (ResourceAccessException adcbExc) {
+			
 			// connect, read time out
 			if(adcbExc.getMessage().indexOf("Read") > 0) {
-				throw new CommonException("500", "4", "50000001", "NCAS ReadTimeout" + adcbExc.getMessage(), logVO.getFlow());
+				throw new CommonException("500", "4", "50000"+"XXX", "NCAS ReadTimeout" + adcbExc.getMessage(), logVO.getFlow());
 			}else {
-				throw new CommonException("500", "4", "50000002", "NCAS ConnectTimeout" + adcbExc.getMessage(), logVO.getFlow());
+				throw new CommonException("500", "4", "50000"+"XXX", "NCAS ConnectTimeout" + adcbExc.getMessage(), logVO.getFlow());
 			}
+		
+		}catch(DataAccessException adcbExc){
+			
+			SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			logVO.setFlow("[ADCB] --> [DB]");
+			throw new CommonException("500", "4", "48000000", se.getMessage(), logVO.getFlow());
+			
+		}catch(ConnectException adcbExc) {
+			
+			logVO.setFlow("[ADCB] <-- [DB]");
+			throw new CommonException("500", "4", "48000000", adcbExc.getMessage(), logVO.getFlow());
+			
 		}catch(CommonException adcbExc) {
+			
 			throw adcbExc;
-		}
-		catch (Exception adcbExc) {
+			
+		}catch (Exception adcbExc) {
+			
 			throw new CommonException("500", "4", "59999999", adcbExc.getMessage(), logVO.getFlow());
 		}
 		finally {
@@ -182,6 +249,7 @@ public class CommonServiceImpl implements CommonService{
 
 
 	// ncas 헤더 응답값 map으로 반환.
+	@Override
 	public Map<String,String> getNcasResHeader(ResponseEntity<String> responseEntity) throws Exception {
 		
 		Map<String, String> ncasRes = new HashMap<String, String>();
@@ -266,5 +334,92 @@ public class CommonServiceImpl implements CommonService{
 		
 		
 	}
+	
+	
+	
+	// 성공일 경우 boku 응답 결과리턴
+	@Override
+	public Map<String,Object> getSuccessResult() throws Exception {
+		
+		Map<String,Object> successResult = new HashMap<String,Object>();
+		
+		successResult.put("reasonCode", 0);
+		successResult.put("message", "Success");
+		
+		return successResult;
+	};
+	
+	
+	// 사용자 청구 자격 체크
+	public boolean userEligibilityCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		
+		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
+		
+		String ctn = ncasRes.get("CTN");
+    	String respcode = ncasRes.get("RESPCODE"); // RESPCODE
+    	String res_msg = ncasRes.get("RESPMSG"); // 처리 결과 내용
+    	String sub_no = ncasRes.get("SUB_NO");	// 고객의 가입번호
+    	String pers_name = ncasRes.get("PERS_NAME"); // 실사용자명
+    	String fee_type = ncasRes.get("FEE_TYPE"); //요금제 타입    	
+    	String ban_unpaid_yn_code = ncasRes.get("BAN_UNPAID_YN_CODE"); // 연체여부
+    	String unit_loss_yn_code = ncasRes.get("UNIT_LOSS_YN_CODE"); // 분실여부
+    	String cust_type_code = ncasRes.get("CUST_TYPE_CODE"); // 개인,법인 구분 (I : 개인 / G : 법인)
+    	String ctn_stus_code = ncasRes.get("CTN_STUS_CODE"); // CTN 상태코드 (A:정상 / S:일시 중지)
+    	String pre_pay_code = StringUtils.defaultIfEmpty(ncasRes.get("PRE_PAY_CODE"), ""); // 선불가입코드(P:국제전화차단 / C:국제전화허용) 
+    																					//-> NULL이 아닌 경우 선불가입자, NULL인 경우 선불가입자 아님.
+    	String unit_mdl = ncasRes.get("UNIT_MDL"); // 단말기명
+    	String aceno = ncasRes.get("ACENO"); // 가입자 계약번호(기기변경, 번호변경 시에는 유지되나, 명의변경 시 변경됨.)
+    	String ban = ncasRes.get("BAN"); // 청구선 번호
+    	String svc_auth = ncasRes.get("SVC_AUTH"); // 요금제, 부가서비스, 월정액 가입여부
+    											// 입력정보: LRZ1111111|LRZ1111112|LRZ1111113
+    											// 출력정보: 0|0|1 (가입은 '1', 미가입은 '0')
+    	String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
+    													// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
+    	String frst_entr_dttm = ncasRes.get("FRST_ENTR_DTTM"); // 최초 개통일자
+    	String sub_birth_pers_id = ncasRes.get("SUB_BIRTH_PERS_ID"); // 명의자 생년월일
+    	String sub_sex_pers_id = ncasRes.get("SUB_SEX_PERS_ID"); // 명의자 성별
+    	String cust_flag = ncasRes.get("CUST_FLAG"); //고객정보 구분값 (ex: YL00000000)
+    											// 1번째 byte: 결제차단여부 ('Y':결제차단->결제이용동의 필요, 'N':결제가능->결제이용동의 완료)
+    											// 2번째 byte: PIN번호 설정여부 ('Y':PIN번호사용, 'N':PIN번호사용안함, '0'(숫자):PIN번호미설정, 'L':5회실패로 잠금상태)
+    	String law1HomeTelno = StringUtil.checkTrim(ncasRes.get("LAW1_HOME_TELNO")); //법정 대리인 전화번호
+    	String law1PersName = ncasRes.get("LAW1_PERS_NAME"); //법정 대리인 이름
+    	
+ 
+    	// CTN_STUS_CODE : CTN 상태 코드 (A : 정상 / S : 일시 중지) - 일시중지폰 차단
+    	  if(!"A".equals(ctn_stus_code)){
+    		  throw new CommonException("400", "104", "51000"+"XXX", "일시중지폰 차단", logVO.getFlow());
+    	  }
+    	  
+    	  // UNIT_LOSS_YN_CODE : 분실여부(Y,N) - 분실등록폰 차단
+    	  if(!"N".equals(unit_loss_yn_code)) {
+    		 throw new CommonException("400", "104", "51000"+"XXX", "분실등록폰 차단", logVO.getFlow());
+    	  }
+    	  
+    	  
+    	  // PRE_PAY_CODE : NULL이 아닌 경우 선불가입자이며, NULL인 경우 선불가입자 아님. - 선불가입자 차단
+    	  if(!"".equals(pre_pay_code)) {
+    		 throw new CommonException("400", "118", "51000"+"XXX", "선불가입자 차단", logVO.getFlow());
+    	  }
+    	  
+    	  
+    	  // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
+    	  if(!"0".equals(svc_auth)) {
+    		 throw new CommonException("400", "118", "51000"+"XXX", "선불가입자 차단", logVO.getFlow());
+    	  }
+    	  
+    	  
+    	 // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
+    	  if(!"0".equals(svc_auth)) {
+    		 throw new CommonException("400", "118", "51000"+"XXX", "선불가입자 차단", logVO.getFlow());
+    	  }
+    	  
+    	  // 결제차단여부 ('Y':결제차단->결제이용동의 필요, 'N':결제가능->결제이용동의 완료)
+    	  cust_flag = cust_flag.substring(0, 1);
+    	  if(!"N".equals(cust_flag)) {
+    		  throw new CommonException("400", "4xx", "51000"+"XXX", "결제이용동의 필요", logVO.getFlow());
+    	  }
+    	  
+    	  return true;
+	};
 
 }

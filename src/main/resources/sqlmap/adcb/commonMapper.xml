@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.nexgrid.adcb.common.dao.CommonDAO">
+  
+  	<!-- CTN 정상 여부 -->
+ 	<select id="getBlockCTN" parameterType="java.lang.String" resultType="java.lang.Integer">
+ 		SELECT 
+		    COUNT(*) 
+		FROM 
+		    TB_BLOCK_CTN 
+		WHERE 
+		    CTN = #{ctn}
+ 	</select>
+ 	
+ 	
+ 	<!-- 요금제 정상 여부 -->
+ 	<select id="getBlockFeeType" parameterType="java.lang.String" resultType="java.lang.Integer">
+ 		SELECT 
+			COUNT(*) 
+		FROM 
+			TB_BLOCK_FEE_TYPE 
+		WHERE 
+			FEE_TYPE_CD = #{feetype}
+ 	</select>
+ 	
+ 	
+ 
+  
+ </mapper>

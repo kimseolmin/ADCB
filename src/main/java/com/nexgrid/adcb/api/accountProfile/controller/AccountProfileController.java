@@ -59,8 +59,11 @@ public class AccountProfileController {
 			// reqBody check
 			accountProfileService.reqBodyCheck(paramMap, logVO);
 			
-			// ncas 연동
+			// NCAS 연동
 			commonService.getNcasGetMethod(paramMap, logVO);
+			
+			// NCAS 연동 값 -> boku 결과 값
+			
 			
 			
 			

@@ -248,52 +248,6 @@ public class StringUtil {
             return str.toUpperCase();
         }
     }
-
-//	public static String utfEncorder(String msg) throws IOException {
-//		// TODO Auto-generated method stub
-//		
-//		String charSet = finderCharSet(msg);
-//		
-//		byte[] euckrStringBuffer = msg.getBytes("iso-8859-1");
-//		String decodedFromUtf = new String(euckrStringBuffer, "utf-8");
-//		
-//		return decodedFromUtf;
-//	}
-	
-//	public static String finderCharSet(String str) {
-//		byte[] strBuffer = str.getBytes();
-//		String charSet = "";
-//		String res = "";
-//		String token = "";
-//		String[] ary = {"euc-kr","utf-8","iso-8859-1","ksc5601","x-windows-949"};
-//		for( int i =0 ; i < ary.length; i++){
-//			for(int j=0; j < ary.length ; j++){
-//				try {
-//					for (int ix=0; ix<strBuffer.length; ix++) {
-//						token = Integer.toHexString(strBuffer[ix]);
-//						//   CommonUtil.println("[" + ix + "] token value : " + token + " len : " + token.length());
-//						if (token.length() >= 2) {
-//							token = token.substring(token.length()-2);
-//						} else {
-//							for(int jx=0; jx<2-token.length();jx++)
-//								token = "0" + token;
-//						}     
-//						res += " " + token;
-//					}
-//					
-//					System.out.println( ary[i]+"=>"+ ary[j]+ " \r\n ==> " +new String(str.getBytes(ary[i]),ary[j]));
-//				} catch (UnsupportedEncodingException e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//
-//		}
-//		
-//		
-//
-//		return "";
-//	}
     
     
     public static boolean hasSpecialCharacter(String str) {
@@ -373,22 +327,60 @@ public class StringUtil {
   		return ctn344.toString();
   	}
   	
-  	/**
-	 * 
-	 * <PRE>
-	 * Comment : 문자열 좌우 공백 제거. Null인 경우 "" 리턴
-	 *
-	 * </PRE>
-	 *   @return String
-	 *   @param sData
-	 *   @return
-	 */
+
+  	//문자열 좌우 공백 제거. Null인 경우 "" 리턴
 	public static String checkTrim(String sData) {
 		if (sData == null){
 			return "";
 		} 
 		return sData.trim();
 	}
+	
+	// 만나이 계산
+	// ssn : 주민등록번호 13자리 (예: "999999-1234567" or "9999991234567")
+	public static int calculateManAge(String sub_birth_pers_id, String sub_sex_pers_id) throws Exception{
+
+		  if(sub_birth_pers_id.length() < 6 || sub_sex_pers_id.length() < 1){
+		    return 0;
+		  }
+		  
+		  String today = "";     //오늘 날짜
+		  int manAge = 0;        //만 나이
+
+		  SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd");
+
+		  today = formatter.format(new Date());  //시스템 날짜를 가져와서 yyyyMMdd 형태로 변환
+		  
+		  //today yyyyMMdd
+		  int todayYear = Integer.parseInt( today.substring(0, 4) );
+		  int todayMonth = Integer.parseInt( today.substring(4, 6) );
+		  int todayDay = Integer.parseInt( today.substring(6, 8) );
+		  
+		  int ssnYear = Integer.parseInt( sub_birth_pers_id.substring(0, 2) );
+		  int ssnMonth = Integer.parseInt( sub_birth_pers_id.substring(2, 4) );
+		  int ssnDay = Integer.parseInt( sub_birth_pers_id.substring(4, 6) );
+		  
+		  if( sub_sex_pers_id.equals("0") || sub_sex_pers_id.equals("9") ){
+		    ssnYear += 1800;
+		  }else if( sub_sex_pers_id.equals("1") || sub_sex_pers_id.equals("2") || 
+				  sub_sex_pers_id.equals("5") || sub_sex_pers_id.equals("6") ){
+		    ssnYear += 1900;
+		  }else {              //3, 4, 7, 8
+		    ssnYear += 2000;
+		  }
+		  
+		  manAge = todayYear - ssnYear;
+		  
+		  if( todayMonth < ssnMonth ){          //생년월일 "월"이 지났는지 체크
+		    manAge--;
+		  }else if( todayMonth == ssnMonth ){  //생년월일 "일"이 지났는지 체크
+		    if( todayDay < ssnDay ){
+		      manAge--;                        //생일 안지났으면 (만나이 - 1)
+		    }
+		  }
+		      
+		  return manAge;
+		}
 
 
 
