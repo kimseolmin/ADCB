@@ -24,6 +24,6 @@ public interface CommonService {
 	
 	Map<String,Object> getSuccessResult() throws Exception;
 	
-	boolean userEligibilityCheck(Map<String, Object> ncasRes, LogVO logVO) throws Exception;
+	boolean userEligibilityCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
 }

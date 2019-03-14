@@ -2,6 +2,7 @@ package com.nexgrid.adcb.api.accountProfile.service;
 
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,16 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.UnknownHttpStatusCodeException;
 
 import com.nexgrid.adcb.common.exception.CommonException;
+import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.StringUtil;
 
 @Service("accountProfileService")
 public class AccountProfileService {
+	
+	@Autowired
+	private CommonService commonService;
 
 	
 	// AccountProfile API 필수 body값 체크
@@ -53,15 +58,32 @@ public class AccountProfileService {
 			account_type = "enterprise account";
 		}
 		
-
+		// 소비자가 통신사 청구서를 사용할 자격이 있는 경우 true, 그렇지 않은 경우 false
+		boolean eligibility = false;
+		if(commonService.userEligibilityCheck(paramMap, logVO)) {
+			eligibility = true;
+		}
+		
+		String account_status = ""; // 계정 상태 표시(예: 활성, 비활성)
+		
+		if(!"N".equals(ncasRes.get("UNIT_LOSS_YN_CODE")) || !"A".equals(ncasRes.get("CTN_STUS_CODE"))) { // 분실여부 || CTN상태 체크
+			account_status = "inactive"; // 비활성
+		}else{
+			account_status = "active"; // 활성
+		}
+		
+		String spend_limittype = "calendar "; // 한도초기화는 매월1일이기때문에 calendar로 고정
 		
 		
 		
 		
 	}
-	
-	
-	
-
-
+		
+		
 }
+	
+	
+	
+
+
+

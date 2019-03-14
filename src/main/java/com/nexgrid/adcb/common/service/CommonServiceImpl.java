@@ -159,10 +159,13 @@ public class CommonServiceImpl implements CommonService{
 				throw new CommonException("400", "105", "511000" + respcode, res_msg, logVO.getFlow());
 			}
 			
+
 			// 71 : SKT로 번호이동  76 : KTF로 번호이동
 			if("71".equals(respcode) || "76".equals(respcode)) {
 				throw new CommonException("400", "104", "511000" + respcode, res_msg, logVO.getFlow());
 			}
+
+			
 			
 			
 			//CTN 값이 정상값이 아닐경우 차단
@@ -421,5 +424,9 @@ public class CommonServiceImpl implements CommonService{
     	  
     	  return true;
 	};
+	
+	
+	
+	// 통합한도 연동
 
 }
