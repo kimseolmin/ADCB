@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+<comment>config_properties</comment>
+
+	<!-- OMS 서버번호 -->
+	<entry key="SERVER_NUM">001</entry>
+
+	<!-- NCAS 연동 -->
+	<entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_netflix&amp;CPPWD=05WbD6MQR6lVtq57V2o/HA==&amp;CPTYPE=I&amp;CASECODE=TF1306&amp;SUB_NO=</entry>
+	<!-- <entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_lgudcb&amp;CPPWD=lgudcb!01&amp;CPTYPE=I&amp;CASECODE=TF1226&amp;CTN=</entry> -->
+	<entry key="NCAS_CHARSET">UTF-8</entry>
+	<entry key="NCAS_CONNECT_TIME_OUT">5</entry>
+	<entry key="NCAS_READ_TIME_OUT">15</entry>
+	<entry key="NCAS_HEADER_NAME">RESP</entry>
+	
+
+
+	<!-- RBP(통합한도) 연동 -->
+	<entry key="RBP_SYSTEM_ID">GDCB01</entry>
+	<entry key="RBP_CDRDATA">1000</entry> <!-- VERSION(10) + TYPE(00) (TYPE: CMS-00, SMS-01, MMS-02, WAP-03)  -->
+	<entry key="RBP_CALLED_NETWORK">102200</entry> <!-- 착신 사업자 코드 -->
+	<entry key="RBP_PID">QDA011254407</entry> <!-- Product ID -->
+	<entry key="RBP_DBID">LICQ504403</entry> <!-- DETAIL BILLING ID -->
+	
+	<!-- das,ags timeout -->
+	<entry key="time_out">15</entry>
+	
+
+	
+</properties>
