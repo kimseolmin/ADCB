@@ -23,6 +23,7 @@
 	<entry key="RBP_CALLED_NETWORK">102200</entry> <!-- 착신 사업자 코드 -->
 	<entry key="RBP_PID">QDA011254407</entry> <!-- Product ID -->
 	<entry key="RBP_DBID">LICQ504403</entry> <!-- DETAIL BILLING ID -->
+	<entry key="RBP_SVC_CTG">GGSTO</entry> <!-- 서비스 구분 -->
 	
 	<!-- das,ags timeout -->
 	<entry key="time_out">15</entry>

@@ -51,6 +51,7 @@ public class Init{
 		    	readConfig.setRbp_called_network(props.getProperty("RBP_CALLED_NETWORK"));
 		    	readConfig.setRbp_pid(props.getProperty("RBP_PID"));
 		    	readConfig.setRbp_dbid(props.getProperty("RBP_DBID"));
+		    	readConfig.setRbp_svc_ctg(props.getProperty("RBP_SVC_CTG"));
 		    	
 		    	
 		    	readConfig.setTime_out(props.getProperty("time_out"));

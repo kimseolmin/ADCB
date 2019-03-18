@@ -18,7 +18,12 @@ public class ReadConfigVO {
 	private String rbp_called_network = "";
 	private String rbp_pid = "";
 	private String rbp_dbid = "";
-			
+	private String rbp_svc_ctg = "";
+	private String rbp_opcode_con_qry = "001"; // 연결 상태 확인
+	private String rbp_opcode_select = "111"; // 한도 조회
+	private String rbp_opcode_charge = "114"; // 한도 즉시 차감
+	private String rbp_msg_gbn_invoke = "1"; // 연결 상태 확인 시 메세지
+	private String rbp_msg_gbn_return = "2"; // 연결 상태 확인 시 응답에 대한 응답 메세지
 	
 	private String time_out = "";
 	
@@ -95,6 +100,42 @@ public class ReadConfigVO {
 	}
 	public void setRbp_dbid(String rbp_dbid) {
 		this.rbp_dbid = rbp_dbid;
+	}
+	public String getRbp_svc_ctg() {
+		return rbp_svc_ctg;
+	}
+	public void setRbp_svc_ctg(String rbp_svc_ctg) {
+		this.rbp_svc_ctg = rbp_svc_ctg;
+	}
+	public String getRbp_opcode_con_qry() {
+		return rbp_opcode_con_qry;
+	}
+	public void setRbp_opcode_con_qry(String rbp_opcode_con_qry) {
+		this.rbp_opcode_con_qry = rbp_opcode_con_qry;
+	}
+	public String getRbp_opcode_select() {
+		return rbp_opcode_select;
+	}
+	public void setRbp_opcode_select(String rbp_opcode_select) {
+		this.rbp_opcode_select = rbp_opcode_select;
+	}
+	public String getRbp_opcode_charge() {
+		return rbp_opcode_charge;
+	}
+	public void setRbp_opcode_charge(String rbp_opcode_charge) {
+		this.rbp_opcode_charge = rbp_opcode_charge;
+	}
+	public String getRbp_msg_gbn_invoke() {
+		return rbp_msg_gbn_invoke;
+	}
+	public void setRbp_msg_gbn_invoke(String rbp_msg_gbn_invoke) {
+		this.rbp_msg_gbn_invoke = rbp_msg_gbn_invoke;
+	}
+	public String getRbp_msg_gbn_return() {
+		return rbp_msg_gbn_return;
+	}
+	public void setRbp_msg_gbn_return(String rbp_msg_gbn_return) {
+		this.rbp_msg_gbn_return = rbp_msg_gbn_return;
 	}
 	public String getTime_out() {
 		return time_out;

@@ -499,15 +499,16 @@ public class CommonServiceImpl implements CommonService{
 		
 		// RBP연동을 윟안 파마리터 셋팅
 		rbpReqMap.put("CTN", reqCtn);	// 과금번호
-		rbpReqMap.put("SOC-CODE", fee_type); // 가입자의 요금제 코드 
+		rbpReqMap.put("SOC_CODE", fee_type); // 가입자의 요금제 코드 
 		rbpReqMap.put("CDRDATA", Init.readConfig.getRbp_cdrdata()); // CDR 버전
-		rbpReqMap.put("BR-ID", br_id); // Business RequestID
-		rbpReqMap.put("RCVER-CTN", reqCtn); // 수신자의 전화번호
-		rbpReqMap.put("SERVICE-FILTER", reqCtn); // 발신 번호
-		rbpReqMap.put("START-USE-TIME", currentDate); // 발신 번호
-		rbpReqMap.put("CALLED-NETWORK", Init.readConfig.getRbp_called_network()); // 착신 사업자 코드
+		rbpReqMap.put("BR_ID", br_id); // Business RequestID
+		rbpReqMap.put("RCVER_CTN", reqCtn); // 수신자의 전화번호
+		rbpReqMap.put("SERVICE_FILTER", reqCtn); // 발신 번호
+		rbpReqMap.put("START_USE_TIME", currentDate); // 발신 번호
+		rbpReqMap.put("CALLED_NETWORK", Init.readConfig.getRbp_called_network()); // 착신 사업자 코드
 		rbpReqMap.put("PID", Init.readConfig.getRbp_pid()); // Product ID
 		rbpReqMap.put("DBID", Init.readConfig.getRbp_dbid()); // DETAIL BILLING ID
+		
 		
 		logVO.setFlow("[SVC] --> [RBP]");
 		
