@@ -30,7 +30,7 @@ import org.springframework.web.client.UnknownHttpStatusCodeException;
 import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
-import com.nexgrid.adcb.interworking.tcp.util.RbpKeyGenerator;
+import com.nexgrid.adcb.interworking.rbp.util.RbpKeyGenerator;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.LogUtil;
 import com.nexgrid.adcb.util.SendUtil;

@@ -1,8 +1,9 @@
-package com.nexgrid.adcb.interworking.tcp.service;
+package com.nexgrid.adcb.interworking.rbp.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
 
 @Component
 public class RbpClientService {

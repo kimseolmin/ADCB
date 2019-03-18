@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.interworking.tcp.util;
+package com.nexgrid.adcb.interworking.rbp.util;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.Random;
 
 public class RbpKeyGenerator {
-
+	
 	private static RbpKeyGenerator generator;
 	private DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	private long currTimeMillis;

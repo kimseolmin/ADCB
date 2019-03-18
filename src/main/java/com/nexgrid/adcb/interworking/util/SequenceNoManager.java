@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.interworking.tcp.util;
+package com.nexgrid.adcb.interworking.util;
 
 import java.io.File;
 import java.io.FileOutputStream;

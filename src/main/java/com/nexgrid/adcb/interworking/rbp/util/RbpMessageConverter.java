@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.interworking.tcp.util;
+package com.nexgrid.adcb.interworking.rbp.util;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -6,11 +6,10 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
-@Component
-public class MessageConverter {
-	public static final Logger logger = LoggerFactory.getLogger(MessageConverter.class);
+public class RbpMessageConverter {
+
+public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.class);
 	
 	private static Map<String, String> tagMap;
 	private static Map<String, String> tagValMap;
@@ -78,11 +77,7 @@ public class MessageConverter {
 	}
 	
 	
-	public MessageConverter() {
+	public RbpMessageConverter() {
 		
 	}
-	
-	
-	// opCode별로 invoke message 생성
-	//public synchronized String getInvokeMessage(String )
 }

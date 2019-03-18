@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.interworking.tcp.util;
+package com.nexgrid.adcb.interworking.util;
 
 public class ByteConverter
 {

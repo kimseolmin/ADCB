@@ -1,15 +1,15 @@
-package com.nexgrid.adcb.interworking.tcp.legacy;
+package com.nexgrid.adcb.interworking.rbp.legacy;
 
 import java.net.Socket;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nexgrid.adcb.interworking.tcp.util.SequenceNoManager;
+import com.nexgrid.adcb.interworking.util.SequenceNoManager;
 
-public class TcpConnector implements Runnable{
-
-	public static final Logger logger = LoggerFactory.getLogger(TcpConnector.class);
+public class RbpConnector implements Runnable{
+	
+	public static final Logger logger = LoggerFactory.getLogger(RbpConnector.class);
 	
 	private static SequenceNoManager seqNoMgr;
 	
@@ -24,9 +24,7 @@ public class TcpConnector implements Runnable{
 	private long lastSendTime = System.currentTimeMillis();
 	
 	private Object sendTimelock = new Object();
-	
-	
-	
+
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
