@@ -24,6 +24,7 @@ public class ReadConfigVO {
 	private String rbp_opcode_charge = "114"; // 한도 즉시 차감
 	private String rbp_msg_gbn_invoke = "1"; // 연결 상태 확인 시 메세지
 	private String rbp_msg_gbn_return = "2"; // 연결 상태 확인 시 응답에 대한 응답 메세지
+	private String rbp_interface_version = ""; // 연동 버전 정의
 	
 	private String time_out = "";
 	
@@ -136,6 +137,12 @@ public class ReadConfigVO {
 	}
 	public void setRbp_msg_gbn_return(String rbp_msg_gbn_return) {
 		this.rbp_msg_gbn_return = rbp_msg_gbn_return;
+	}
+	public String getRbp_interface_version() {
+		return rbp_interface_version;
+	}
+	public void setRbp_interface_version(String rbp_interface_version) {
+		this.rbp_interface_version = rbp_interface_version;
 	}
 	public String getTime_out() {
 		return time_out;

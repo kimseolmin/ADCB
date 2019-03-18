@@ -46,10 +46,10 @@ public enum EnRbpInvokeCharge {
 	private int tagLength = 3;
 	private String defaultValue = null;
 	
-	private EnRbpInvokeCharge() {
+	EnRbpInvokeCharge() {
 	}
 	
-	private EnRbpInvokeCharge(String defaultValue) {
+	EnRbpInvokeCharge(String defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 

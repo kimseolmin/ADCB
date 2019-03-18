@@ -6,13 +6,17 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpHeader;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeCharge;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeConQry;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeSelectLimit;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnConQry;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.StringUtil;
 
+@Component
 public class RbpMessageConverter {
 
 public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.class);
@@ -104,33 +108,43 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 	}
 	
 	//opCode별로 invoke message를 생성
-	public synchronized String getInvokeMessage(String msgGbn, String opCode, Map<String, String> invokeMsg) {
+	public synchronized String getInvokeMessage(String msgGbn, String opCode, Map<String, String> reqMap) {
 		String header = "";
 		String body = "";
 		
-		
+		// 파라미터 구성부 설정
 		if(Init.readConfig.getRbp_opcode_con_qry().equals(opCode)) { // 연결 상태 확인
 			if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) { // 상태 확인 invoke
 				for(EnRbpInvokeConQry e : EnRbpInvokeConQry.values()) {
-					body += getStrParameter(tagMap.get(e.toString()), invokeMsg.get(e.toString()), null);
+					body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), null);
 				}
 			}else { // 상태 확인 응답에 대한 invoke
 				for(EnRbpReturnConQry e : EnRbpReturnConQry.values()) {
-					body += getStrParameter(tagMap.get(e.toString()), invokeMsg.get(e.toString()), null); 
+					body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), null); 
 				}
 			}
 		}else if(Init.readConfig.getRbp_opcode_select().equals(opCode)) { // 한도 조회
 			for(EnRbpInvokeSelectLimit e : EnRbpInvokeSelectLimit.values()) {
-				body += getStrParameter(tagMap.get(e.toString()), invokeMsg.get(e.toString()), e.getDefaultValue());
+				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
 			}
 		}else if(Init.readConfig.getRbp_opcode_charge().equals(opCode)) { // 한도 즉시 차감
-			
+			for(EnRbpInvokeCharge e : EnRbpInvokeCharge.values()) {
+				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
+			}
 		}
 		
 		
+		//header 설정
+		reqMap.put("BODY_LENGTH", body.length()+"");
+		for(EnRbpHeader e : EnRbpHeader.values()) {
+			String defaultValue = e.getDefaultValue();
+			header += StringUtil.lPad(defaultValue == null ? reqMap.get(e.toString()) : defaultValue, e.getTagLength());
+		}
+		
 		return header + body;
-				
 	}
+	
+	
 	
 	// 파라미터 구성부를 String 형태로 만듦
 	private String getStrParameter(String tag, String val, String defaultVal) {
@@ -149,4 +163,67 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 		
 		return str;
 	}
+	
+	
+	
+	// return 파라미터를  Map으로 변환
+	public Map<String, String> parseReturnMessage(String returnMessage){
+		
+		Map<String, String> resMap = new HashMap<String, String>();
+	
+		// header값 추출
+		int amount = 0;
+		amount = parseHeaderParameter(resMap, returnMessage);
+		
+		// body값 추출
+		parseBodyParamter(amount, resMap, returnMessage);
+		
+		return resMap;
+	}
+	
+	
+	
+	//  header message를 분석하여 map으로 전환
+	private int parseHeaderParameter(Map<String, String> resMap, String returnMessage) {
+		
+		int valLength = 0;
+		String val = null;
+		int amount = 0;
+		
+		for(EnRbpHeader e : EnRbpHeader.values()) {
+			valLength = e.getTagLength();
+			val = returnMessage.substring(amount, amount + valLength).trim();
+			amount += valLength;
+			resMap.put(e.toString(), val);
+		}
+		
+		return amount;
+	}
+	
+	
+	
+	// body message를 tag로 분석하여 map으로 전환
+	private void parseBodyParamter(int offset, Map<String, String> resMap, String returnMessage) {
+		String tag = null;
+		int valLength = 0;
+		String val = null;
+		int amount = offset;
+		
+		while(amount < returnMessage.length()) {
+			// 파라미터 구성부: TAG
+			tag = returnMessage.substring(amount, amount + 3).trim();
+			amount += 3;
+			
+			// 파라미터 구성부: LENGTH
+			valLength = Integer.parseInt(returnMessage.substring(amount, amount + 3).trim());
+			amount += 3;
+			
+			// 파라미터 구성부: VALUE
+			val = returnMessage.substring(amount, amount + valLength).trim();
+			amount += valLength;
+			
+			resMap.put(tagValMap.get(tag), val);
+		}
+	}
+	
 }

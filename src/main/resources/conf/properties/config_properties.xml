@@ -24,6 +24,7 @@
 	<entry key="RBP_PID">QDA011254407</entry> <!-- Product ID -->
 	<entry key="RBP_DBID">LICQ504403</entry> <!-- DETAIL BILLING ID -->
 	<entry key="RBP_SVC_CTG">GGSTO</entry> <!-- 서비스 구분 -->
+	<entry key="INTERFACE_VERSION">V01</entry> <!-- 연동 버전 정의 -->
 	
 	<!-- das,ags timeout -->
 	<entry key="time_out">15</entry>

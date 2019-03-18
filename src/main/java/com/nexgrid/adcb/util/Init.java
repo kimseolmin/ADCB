@@ -52,6 +52,7 @@ public class Init{
 		    	readConfig.setRbp_pid(props.getProperty("RBP_PID"));
 		    	readConfig.setRbp_dbid(props.getProperty("RBP_DBID"));
 		    	readConfig.setRbp_svc_ctg(props.getProperty("RBP_SVC_CTG"));
+		    	readConfig.setRbp_interface_version(props.getProperty("INTERFACE_VERSION"));
 		    	
 		    	
 		    	readConfig.setTime_out(props.getProperty("time_out"));

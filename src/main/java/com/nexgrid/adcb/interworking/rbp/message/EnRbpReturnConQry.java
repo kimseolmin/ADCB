@@ -6,7 +6,7 @@ public enum EnRbpReturnConQry {
 	
 	private int tagLength = 0;
 	
-	private EnRbpReturnConQry(int tagLength) {
+	EnRbpReturnConQry(int tagLength) {
 		this.tagLength = tagLength;
 	}
 
