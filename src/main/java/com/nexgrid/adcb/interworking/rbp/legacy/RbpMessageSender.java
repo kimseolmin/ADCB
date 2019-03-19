@@ -19,13 +19,11 @@ public class RbpMessageSender extends Thread{
 	private RbpConnector rbpConnector = null;
 	private RbpMessageConverter msgConverter = null;
 	private MessageQueue msgQueue = null;
-	private LogVO logVO = null;
 	
-	public RbpMessageSender(RbpConnector rbpConnector, LogVO logVO) {
+	public RbpMessageSender(RbpConnector rbpConnector) {
 		this.rbpConnector = rbpConnector;
 		this.msgConverter = new RbpMessageConverter();
 		this.msgQueue = new MessageQueue();
-		this.logVO = logVO;
 	}
 	
 	
@@ -46,8 +44,14 @@ public class RbpMessageSender extends Thread{
 			
 			if(reqMap != null) {
 				try {
-					
+					sendMsg(reqMap);
 				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			}else {
+				try {
+					Thread.sleep(10);
+				}catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
@@ -72,17 +76,35 @@ public class RbpMessageSender extends Thread{
 		
 		int seqNo = Integer.parseInt(reqMap.get("SEQUENCE_NO"));
 		
-		String logSeq = "[" + logVO.getSeqId() + "] ";
-		logger.info(logSeq + "RBP Request(Map): " + reqMap.toString());
+		// health check 구분
+		String logSeq = "";
+		if(Init.readConfig.getRbp_opcode_con_qry().equals(opCode)) {
+			if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
+				logSeq = "[Health Check (invoke)] ";
+			}else {
+				logSeq = "[Health Check (return)] ";
+			}
+			
+		}else {
+			logSeq = "[" + rbpConnector.getLogVO().getSeqId() + "] ";
+		}
+		logger.info(logSeq + "RBP Request Map: " + reqMap.toString());
 		
 		String invokeMsg = msgConverter.getInvokeMessage(msgGbn, opCode, reqMap);
-		logger.info(logSeq + "RBP Request(Invoke Message): " + invokeMsg);
+		
 		
 		if(invokeMsg == null) {
 			return;
 		}
 		
 		byte[] reqByte = invokeMsg.getBytes();
+		
+		synchronized (rbpConnector.getSocket().getOutputStream()) {
+			rbpConnector.getSocket().getOutputStream().write(reqByte);
+			rbpConnector.getSocket().getOutputStream().flush();
+			
+			logger.info(logSeq + "RBP Request Invoke Message: " + invokeMsg);
+		}
 		
 		
 	}

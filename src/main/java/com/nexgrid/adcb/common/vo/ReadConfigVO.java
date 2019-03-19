@@ -2,6 +2,9 @@ package com.nexgrid.adcb.common.vo;
 
 public class ReadConfigVO {
 	
+	//ADCB
+	private String adcb_config_path = "";
+	
 	// OMS 서버번호
 	private String server_num = "";
 	
@@ -13,6 +16,13 @@ public class ReadConfigVO {
 	private String ncas_header_name = "";
 	
 	//RBP 연동
+	private String rbp_primary_ip = "";
+	private String rbp_primary_port = "";
+	private String rbp_secondary_ip = "";
+	private String rbp_secondary_port = "";
+	private String rbp_connect_time_out = "";
+	private String rbp_receive_time_out = "";
+	private String rbp_reconnect_sleep_time = "";
 	private String rbp_system_id ="";
 	private String rbp_cdrdata = "";
 	private String rbp_called_network = "";
@@ -32,6 +42,12 @@ public class ReadConfigVO {
 	
 	
 	
+	public String getAdcb_config_path() {
+		return adcb_config_path;
+	}
+	public void setAdcb_config_path(String adcb_config_path) {
+		this.adcb_config_path = adcb_config_path;
+	}
 	public String getServer_num() {
 		return server_num;
 	}
@@ -72,6 +88,48 @@ public class ReadConfigVO {
 	
 	
 	
+	public String getRbp_primary_ip() {
+		return rbp_primary_ip;
+	}
+	public void setRbp_primary_ip(String rbp_primary_ip) {
+		this.rbp_primary_ip = rbp_primary_ip;
+	}
+	public String getRbp_primary_port() {
+		return rbp_primary_port;
+	}
+	public void setRbp_primary_port(String rbp_primary_port) {
+		this.rbp_primary_port = rbp_primary_port;
+	}
+	public String getRbp_secondary_ip() {
+		return rbp_secondary_ip;
+	}
+	public void setRbp_secondary_ip(String rbp_secondary_ip) {
+		this.rbp_secondary_ip = rbp_secondary_ip;
+	}
+	public String getRbp_secondary_port() {
+		return rbp_secondary_port;
+	}
+	public void setRbp_secondary_port(String rbp_secondary_port) {
+		this.rbp_secondary_port = rbp_secondary_port;
+	}
+	public String getRbp_connect_time_out() {
+		return rbp_connect_time_out;
+	}
+	public void setRbp_connect_time_out(String rbp_connect_time_out) {
+		this.rbp_connect_time_out = rbp_connect_time_out;
+	}
+	public String getRbp_receive_time_out() {
+		return rbp_receive_time_out;
+	}
+	public void setRbp_receive_time_out(String rbp_receive_time_out) {
+		this.rbp_receive_time_out = rbp_receive_time_out;
+	}
+	public String getRbp_reconnect_sleep_time() {
+		return rbp_reconnect_sleep_time;
+	}
+	public void setRbp_reconnect_sleep_time(String rbp_reconnect_sleep_time) {
+		this.rbp_reconnect_sleep_time = rbp_reconnect_sleep_time;
+	}
 	public String getRbp_system_id() {
 		return rbp_system_id;
 	}

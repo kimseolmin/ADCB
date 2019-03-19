@@ -1,0 +1,74 @@
+package com.nexgrid.adcb.interworking.rbp.sync;
+
+import java.util.Map;
+
+public class RbpSyncObject {
+	
+	private Map<String, String> resMap = null;
+	private String seqId = null;
+	private long createTime = 0L;
+	
+	public RbpSyncObject(String seqId) {
+		this.seqId = seqId;
+		this.createTime = System.currentTimeMillis();
+	}
+
+	public String getSeqId() {
+		return seqId;
+	}
+	
+	
+	
+	// waitTime 밀리세컨드만큼 waiting한 후 resume
+	public void setWait(long waitTime) throws InterruptedException{
+		synchronized (this) {
+			if(resMap == null) {
+				this.wait(waitTime);
+			}
+		}
+	}
+	
+	
+	
+	// waiting하고 있는 쓰레드를 resume 한다.
+	public void setNotify() throws InterruptedException{
+		synchronized (this) {
+			this.notify();
+		}
+	}
+	
+	
+	
+	// 응답 객체를 할당한다.
+	public void setResponseMap(Map<String, String> resMap) {
+		synchronized (this) {
+			this.resMap = resMap;
+		}
+	}
+
+	
+	
+	// 응답 객체 리턴
+	public Map<String, String> getResMap() {
+		return resMap;
+	}
+
+	public long getCreateTime() {
+		return createTime;
+	}
+
+	
+	
+	// waiting 되어진 시간을 할당한다.
+	public void setCreateTime(long createTime) {
+		this.createTime = createTime;
+	}
+	
+	
+	
+	
+	
+	
+	
+
+ }

@@ -56,6 +56,8 @@ public class LogVO {
 	public String getSeqId() {
 		return seqId;
 	}
+	
+
 
 	public void setSeqId() {
 		if (this.seqId.equalsIgnoreCase("") ) {

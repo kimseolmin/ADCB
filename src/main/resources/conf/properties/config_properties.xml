@@ -4,6 +4,9 @@
 <properties>
 <comment>config_properties</comment>
 
+	<!-- ADCB -->
+	<entry key="ADCB_CONFIG_PATH">C:/project/03.ADCB/workspace/ADCB.BokuAPI/src/main/webapp/WEB-INF/config</entry>
+
 	<!-- OMS 서버번호 -->
 	<entry key="SERVER_NUM">001</entry>
 
@@ -18,13 +21,20 @@
 
 
 	<!-- RBP(통합한도) 연동 -->
+	<entry key="RBP_PRIMARY_IP">127.0.0.1</entry>
+	<entry key="RBP_PRIMARY_PORT">5000</entry>
+	<entry key="RBP_SECONDARY_IP">127.0.0.1</entry>
+	<entry key="RBP_SECONDARY_PORT">1470</entry>
+	<entry key="RBP_CONNECT_TIME_OUT">5000</entry>
+	<entry key="RBP_RECEIVE_TIME_OUT">1000</entry>
+	<entry key="RBP_RECONNECT_SLEEP_TIME">1000</entry>
 	<entry key="RBP_SYSTEM_ID">GDCB01</entry>
 	<entry key="RBP_CDRDATA">1000</entry> <!-- VERSION(10) + TYPE(00) (TYPE: CMS-00, SMS-01, MMS-02, WAP-03)  -->
 	<entry key="RBP_CALLED_NETWORK">102200</entry> <!-- 착신 사업자 코드 -->
 	<entry key="RBP_PID">QDA011254407</entry> <!-- Product ID -->
 	<entry key="RBP_DBID">LICQ504403</entry> <!-- DETAIL BILLING ID -->
 	<entry key="RBP_SVC_CTG">GGSTO</entry> <!-- 서비스 구분 -->
-	<entry key="INTERFACE_VERSION">V01</entry> <!-- 연동 버전 정의 -->
+	<entry key="RBP_INTERFACE_VERSION">V01</entry> <!-- 연동 버전 정의 -->
 	
 	<!-- das,ags timeout -->
 	<entry key="time_out">15</entry>

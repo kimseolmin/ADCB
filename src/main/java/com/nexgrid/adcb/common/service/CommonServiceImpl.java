@@ -497,7 +497,7 @@ public class CommonServiceImpl implements CommonService{
 		String br_id = RbpKeyGenerator.getInstance(Init.readConfig.getRbp_system_id()).generateKey();
 		String reqCtn = StringUtil.getCtn344(ctn);
 		
-		// RBP연동을 윟안 파마리터 셋팅
+		// RBP연동을 위한 파마리터 셋팅
 		rbpReqMap.put("CTN", reqCtn);	// 과금번호
 		rbpReqMap.put("SOC_CODE", fee_type); // 가입자의 요금제 코드 
 		rbpReqMap.put("CDRDATA", Init.readConfig.getRbp_cdrdata()); // CDR 버전

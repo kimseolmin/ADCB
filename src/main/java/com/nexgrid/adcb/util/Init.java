@@ -33,6 +33,9 @@ public class Init{
 		    	InputStream isU = Resources.getResourceAsStream("/conf/properties/config_properties.xml");
 		    	props.loadFromXML(isU); 
 		    	
+		    	//ADCB
+		    	readConfig.setAdcb_config_path(props.getProperty("ADCB_CONFIG_PATH"));
+		    	
 		    	// OMS 서버번호
 		    	readConfig.setServer_num(props.getProperty("SERVER_NUM"));
 		    	
@@ -46,13 +49,20 @@ public class Init{
 		    	
 		    	
 		    	//RBP 연동
+		    	readConfig.setRbp_primary_ip(props.getProperty("RBP_PRIMARY_IP"));
+		    	readConfig.setRbp_primary_port(props.getProperty("RBP_PRIMARY_PORT"));
+		    	readConfig.setRbp_secondary_ip(props.getProperty("RBP_SECONDARY_IP"));
+		    	readConfig.setRbp_secondary_port(props.getProperty("RBP_SECONDARY_PORT"));
+		    	readConfig.setRbp_connect_time_out(props.getProperty("RBP_CONNECT_TIME_OUT"));
+		    	readConfig.setRbp_receive_time_out(props.getProperty("RBP_RECEIVE_TIME_OUT"));
+		    	readConfig.setRbp_reconnect_sleep_time(props.getProperty("RBP_RECONNECT_SLEEP_TIME"));
 		    	readConfig.setRbp_system_id(props.getProperty("RBP_SYSTEM_ID"));
 		    	readConfig.setRbp_cdrdata(props.getProperty("RBP_CDRDATA"));
 		    	readConfig.setRbp_called_network(props.getProperty("RBP_CALLED_NETWORK"));
 		    	readConfig.setRbp_pid(props.getProperty("RBP_PID"));
 		    	readConfig.setRbp_dbid(props.getProperty("RBP_DBID"));
 		    	readConfig.setRbp_svc_ctg(props.getProperty("RBP_SVC_CTG"));
-		    	readConfig.setRbp_interface_version(props.getProperty("INTERFACE_VERSION"));
+		    	readConfig.setRbp_interface_version(props.getProperty("RBP_INTERFACE_VERSION"));
 		    	
 		    	
 		    	readConfig.setTime_out(props.getProperty("time_out"));
