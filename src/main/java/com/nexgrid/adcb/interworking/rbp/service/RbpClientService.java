@@ -35,12 +35,13 @@ public class RbpClientService {
 		serverIp[0] = Init.readConfig.getRbp_primary_ip();
 		serverPort[0] = Integer.parseInt(Init.readConfig.getRbp_primary_port());
 		serverIp[1] = Init.readConfig.getRbp_secondary_ip();
-		serverPort[1] = Integer.parseInt(Init.readConfig.getRbp_primary_port());
+		serverPort[1] = Integer.parseInt(Init.readConfig.getRbp_secondary_port());
 		
-		Thread[] threads = new Thread[serverIp.length];
+		//Thread[] threads = new Thread[serverIp.length];
+		Thread[] threads = new Thread[1];
 		
 		for(int i=0; i<threads.length; i++) {
-			RbpConnector rbpConn = new RbpConnector(serverIp[i], serverPort[i], new LogVO("HealthCheck"));
+			RbpConnector rbpConn = new RbpConnector(serverIp[i], serverPort[i]);
 			rbpConn.setName("RBP_CONNECTOR_" + i);
 			
 			connList.add(rbpConn);

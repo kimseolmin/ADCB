@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -30,6 +31,7 @@ import org.springframework.web.client.UnknownHttpStatusCodeException;
 import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.interworking.rbp.service.RbpClientService;
 import com.nexgrid.adcb.interworking.rbp.util.RbpKeyGenerator;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.LogUtil;
@@ -43,6 +45,9 @@ public class CommonServiceImpl implements CommonService{
 
 	@Inject
 	private CommonDAO commonDAO;
+	
+	@Autowired
+	private RbpClientService rbpClientService;
 	
 	private org.slf4j.Logger serviceLog = LoggerFactory.getLogger(getClass());
 
@@ -103,8 +108,8 @@ public class CommonServiceImpl implements CommonService{
 	@Override
 	public void getNcasGetMethod(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		
-		//String msisdn = StringUtil.getNcas444(paramMap.get("msisdn").toString());
-		String msisdn = paramMap.get("msisdn").toString();
+		String msisdn = StringUtil.getNcas444(paramMap.get("msisdn").toString());
+		//String msisdn = paramMap.get("msisdn").toString();
 		String ncasUrl = Init.readConfig.getNcas_url() + msisdn;
 		HttpHeaders headers = new HttpHeaders();
 		int connTimeout = Integer.parseInt(Init.readConfig.getNcas_connect_time_out());
@@ -169,8 +174,6 @@ public class CommonServiceImpl implements CommonService{
 				throw new CommonException("400", "104", "511000" + respcode, res_msg, logVO.getFlow());
 			}
 
-			
-			
 			
 			//CTN 값이 정상값이 아닐경우 차단
 	    	int blockctn = 0;
@@ -412,7 +415,7 @@ public class CommonServiceImpl implements CommonService{
     	  
     	  // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
     	  if(!"0".equals(svc_auth)) {
-    		 throw new CommonException("400", "118", "51000"+"XXX", "선불가입자 차단", logVO.getFlow());
+    		 throw new CommonException("400", "118", "51000"+"XXX", "부정사용자 차단", logVO.getFlow());
     	  }
     	  
     	  
@@ -440,6 +443,7 @@ public class CommonServiceImpl implements CommonService{
 			// 14세 이상 중에 청소년요금제가 아닌 경우
 			if("N".equals(young_fee_yn)){
 				//통합한도 연동
+				return userGradeCheck(paramMap, logVO);
 			}
 			
 		}
@@ -449,7 +453,7 @@ public class CommonServiceImpl implements CommonService{
 	
 	
 	
-	// 통합한도 연동
+	// 통합한도 연동: 한도조회 -> 사용자 등급 체크 (7등급이면 차단)
 	public boolean userGradeCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		
 		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
@@ -504,22 +508,23 @@ public class CommonServiceImpl implements CommonService{
 		rbpReqMap.put("BR_ID", br_id); // Business RequestID
 		rbpReqMap.put("RCVER_CTN", reqCtn); // 수신자의 전화번호
 		rbpReqMap.put("SERVICE_FILTER", reqCtn); // 발신 번호
-		rbpReqMap.put("START_USE_TIME", currentDate); // 발신 번호
+		rbpReqMap.put("START_USE_TIME", currentDate); 
 		rbpReqMap.put("CALLED_NETWORK", Init.readConfig.getRbp_called_network()); // 착신 사업자 코드
 		rbpReqMap.put("PID", Init.readConfig.getRbp_pid()); // Product ID
 		rbpReqMap.put("DBID", Init.readConfig.getRbp_dbid()); // DETAIL BILLING ID
+		rbpReqMap.put("RBP_SVC_CTG", Init.readConfig.getRbp_svc_ctg());
 		
 		
 		logVO.setFlow("[SVC] --> [RBP]");
+		rbpResMap = rbpClientService.doRequest(logVO, Init.readConfig.getRbp_opcode_select(), rbpReqMap);
+		
+		paramMap.put("RbpRes", rbpResMap);
+		String resCode = rbpResMap.get("REUSLT");
+		if(resCode.equals("0000") && !rbpResMap.get("CUST-GRD-CD").equals("7")) {
+			return true;
+		}
 		
 		
-		
-		
-		
-		
-		
-		
-		
-		return true;
+		return false;
 	}
 }

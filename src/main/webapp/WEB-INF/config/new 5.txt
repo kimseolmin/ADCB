@@ -1,0 +1,8 @@
+-- server에서 health check invoke message
+OCSV01GDCB011   99999001  10 21  11
+
+
+
+-- client의 health check에 대한 server response
+
+

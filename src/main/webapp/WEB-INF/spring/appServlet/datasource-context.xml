@@ -35,6 +35,7 @@
     </bean>
  
  	<mybatis:scan base-package="com.nexgrid.adcb.common.dao" />
+ 	<mybatis:scan base-package="com.nexgrid.adcb.api.accountProfile.dao" />
 	<!-- <context:component-scan base-package="classpath:/sqlmap/*.xml"/> -->
 	
 	

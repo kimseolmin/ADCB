@@ -77,18 +77,19 @@ public class RbpMessageSender extends Thread{
 		int seqNo = Integer.parseInt(reqMap.get("SEQUENCE_NO"));
 		
 		// health check 구분
-		String logSeq = "";
+		String logSeq = "[" + rbpConnector.getLogVO().getSeqId() + "] ";
+		String reqLog = "";
 		if(Init.readConfig.getRbp_opcode_con_qry().equals(opCode)) {
 			if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
-				logSeq = "[Health Check (invoke)] ";
+				reqLog = "RBP Health Check(invoke) Request";
 			}else {
-				logSeq = "[Health Check (return)] ";
+				reqLog = "RBP Health Check(return) Request";
 			}
 			
 		}else {
-			logSeq = "[" + rbpConnector.getLogVO().getSeqId() + "] ";
+			reqLog = "RBP Request";
 		}
-		logger.info(logSeq + "RBP Request Map: " + reqMap.toString());
+		
 		
 		String invokeMsg = msgConverter.getInvokeMessage(msgGbn, opCode, reqMap);
 		
@@ -100,10 +101,16 @@ public class RbpMessageSender extends Thread{
 		byte[] reqByte = invokeMsg.getBytes();
 		
 		synchronized (rbpConnector.getSocket().getOutputStream()) {
+			
+			
+			logger.info(logSeq + reqLog + " IP: " + rbpConnector.getServerIp());
+			logger.info(logSeq + reqLog + " PORT: " + rbpConnector.getServerPort());
+			reqLog = reqLog + " Data: ";
+			logger.info(logSeq + reqLog + reqMap);
+			logger.info(logSeq + new String(new char[reqLog.length()]).replace("\0", " ") + invokeMsg);
 			rbpConnector.getSocket().getOutputStream().write(reqByte);
 			rbpConnector.getSocket().getOutputStream().flush();
 			
-			logger.info(logSeq + "RBP Request Invoke Message: " + invokeMsg);
 		}
 		
 		

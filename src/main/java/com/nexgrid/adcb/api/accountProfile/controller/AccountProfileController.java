@@ -63,9 +63,7 @@ public class AccountProfileController {
 			commonService.getNcasGetMethod(paramMap, logVO);
 			
 			// NCAS 연동 값 -> boku 결과 값
-			
-			
-			
+			dataMap = accountProfileService.getAccountProfile(paramMap, logVO);
 			
 		}
 		catch(CommonException commonEx) {
@@ -73,6 +71,7 @@ public class AccountProfileController {
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
+			dataMap.put("msisdn", paramMap.get("msisdn"));
 			dataMap.put("result", commonEx.sendException());
 			response.setStatus(Integer.parseInt(commonEx.getStatusCode()));
 			
@@ -90,6 +89,7 @@ public class AccountProfileController {
 			logVO.setResultCode("49999999");
 			logVO.setApiResultCode("4");
 			
+			dataMap.put("msisdn", paramMap.get("msisdn"));
 			Map<String, Object> result = CommonException.checkException(paramMap, logVO.getSeqId(), logVO.getFlow());
 			dataMap.put("result", result);
 			

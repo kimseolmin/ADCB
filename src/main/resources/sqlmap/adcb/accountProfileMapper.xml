@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.nexgrid.adcb.api.accountProfile.dao.AccountProfileDAO">
+ 
+ 	<!-- 30일 이내 구매 여부 -->
+ 	<select id="getPurchase" resultType="java.lang.Integer">
+ 		SELECT COUNT (*)
+ 		FROM TB_CHARGE_INFO
+		WHERE PARTITION_ID IN (#{param.current_month}, #{param.last_month})
+			AND CTN = #{param.ncasRes.CTN}
+			AND TO_CHAR (CREATE_DT, 'yyyymmdd') >= #{param.before_30}
+ 	</select>
+ 
+ 
+ </mapper>

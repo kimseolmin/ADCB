@@ -53,10 +53,10 @@ public class RbpConnector implements Runnable{
 		}
 	}
 	
-	public RbpConnector(String ip, int port, LogVO logVO) {
+	public RbpConnector(String ip, int port) {
 		this.serverIp = ip;
 		this.serverPort = port;
-		this.logVO = logVO;
+		this.logVO = new LogVO("healthCheck");
 	}
 	
 	public String getName() {
@@ -85,6 +85,14 @@ public class RbpConnector implements Runnable{
 	
 	public boolean isRun() {
 		return isRun;
+	}
+	
+	public String getServerIp() {
+		return serverIp;
+	}
+
+	public int getServerPort() {
+		return serverPort;
 	}
 
 	// health check timer 설정
@@ -133,9 +141,11 @@ public class RbpConnector implements Runnable{
 	// health check
 	private void invokeHealthCheck() {
 		try {
+			boolean test = true;
 			// 마지막 sendTime에서 10초가 지났을 경우 
 			// (health check는 10초마다 한번씩, 다른 요청이 있었을 경우 마지막 보낸 시간에서 10초)
-			if(lastSendTime < System.currentTimeMillis() - 1000 * 10) {
+			if(test) {
+			//if(lastSendTime < System.currentTimeMillis() - 1000 * 10) {
 				Map<String, String> reqMap = new HashMap<String, String>();
 				reqMap.put("CON_ID", conId + "");
 				Map<String, String> resMap = sendMsg(Init.readConfig.getRbp_msg_gbn_invoke(), Init.readConfig.getRbp_opcode_con_qry(), reqMap);
@@ -143,6 +153,7 @@ public class RbpConnector implements Runnable{
 				if(resMap == null || !"1".equals(resMap.get("CON_STS"))) {
 					isConnected = false;
 				}
+				test = false;
 			}
 		}catch (Exception e) {
 			logger.error("[Health Check " + getName() + "] RCSG Error : " + e.getMessage(), e);
@@ -166,16 +177,18 @@ public class RbpConnector implements Runnable{
 			reqMap.put("MESSAGE_GBN", "2");
 		}
 		
-		msgSender.putMessage(reqMap);
-		
 		String logSeq = "[" + logVO.getSeqId() + "] ";
-		logger.info(logSeq + "RBP Message Put at sender = " + reqMap);
+		logger.debug(logSeq + "RBP Message Put at sender = " + reqMap);
+		
+		msgSender.putMessage(reqMap);
 		
 		// 메시지를 수신받을 때까지 기다린다.
 		RbpSyncObject syncObj = new RbpSyncObject(logVO.getSeqId());
 		RbpSyncManager.getInstance().put(sequenceNo, syncObj);
+		
 		syncObj.setWait(Long.parseLong(Init.readConfig.getRbp_receive_time_out()));
 		
+		//timeout시간 안에 메시지 응답을 받지 못하면 null을 반환
 		return syncObj.getResMap();
 	}
 	
