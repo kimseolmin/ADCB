@@ -208,25 +208,25 @@ public class CommonServiceImpl implements CommonService{
 		}catch(HttpClientErrorException adcbExc){
 			
 			logVO.setFlow("[ADCB] <-- [NCAS]");
-			throw new CommonException("500", "4", "59999999", "NCAS HttpClientError" + adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException("500", "4", "51999999", "NCAS HttpClientError: " + adcbExc.getMessage(), logVO.getFlow());
 		
 		}catch(HttpServerErrorException adcbExc) {
 			
 			logVO.setFlow("[ADCB] <-- [NCAS]");
-			throw new CommonException("500", "4", "59999999", "NCAS HttpServerError"+ adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException("500", "4", "51999999", "NCAS HttpServerError: "+ adcbExc.getMessage(), logVO.getFlow());
 			
 		}catch(UnknownHttpStatusCodeException adcbExc) {
 			
 			logVO.setFlow("[ADCB] <-- [NCAS]");
-			throw new CommonException("500", "4", "59999999", "NCAS UnknownHttpStatusCode"+ adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException("500", "4", "51999999", "NCAS UnknownHttpStatusCode: "+ adcbExc.getMessage(), logVO.getFlow());
 			
 		}catch (ResourceAccessException adcbExc) {
 			
 			// connect, read time out
 			if(adcbExc.getMessage().indexOf("Read") > 0) {
-				throw new CommonException("500", "4", "50000"+"XXX", "NCAS ReadTimeout" + adcbExc.getMessage(), logVO.getFlow());
+				throw new CommonException("500", "4", "51000"+"XXX", "NCAS ReadTimeout: " + adcbExc.getMessage(), logVO.getFlow());
 			}else {
-				throw new CommonException("500", "4", "50000"+"XXX", "NCAS ConnectTimeout" + adcbExc.getMessage(), logVO.getFlow());
+				throw new CommonException("500", "4", "51000"+"XXX", "NCAS ConnectTimeout: " + adcbExc.getMessage(), logVO.getFlow());
 			}
 		
 		}catch(DataAccessException adcbExc){
@@ -247,7 +247,7 @@ public class CommonServiceImpl implements CommonService{
 			
 		}catch (Exception adcbExc) {
 			
-			throw new CommonException("500", "4", "59999999", adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException("500", "4", "51999999", adcbExc.getMessage(), logVO.getFlow());
 		}
 		finally {
 			
@@ -329,6 +329,11 @@ public class CommonServiceImpl implements CommonService{
 			sb.append("NCAS_REQ_TIME=").append(logVO.getNcasReqTime() == null ? "" : logVO.getNcasReqTime()).append("|");
 			sb.append("NCAS_RES_TIME=").append(logVO.getNcasResTime() == null ? "" : logVO.getNcasResTime()).append("|");
 			sb.append("NCAS_RESULT_CODE=").append(logVO.getNcasResultCode() == null ? "" : logVO.getNcasResultCode()).append("|");
+			
+			
+			sb.append("RBP_REQ_TIME=").append(logVO.getRbpReqTime() == null ? "" : logVO.getRbpReqTime()).append("|");
+			sb.append("RBP_RES_TIME=").append(logVO.getRbpResTime() == null ? "" : logVO.getRbpResTime()).append("|");
+			sb.append("RBP_RESULT_CODE=").append(logVO.getRbpResultCode() == null ? "" : logVO.getRbpResultCode()).append("|");
 				
 			
 			
@@ -396,6 +401,11 @@ public class CommonServiceImpl implements CommonService{
     	//String law1PersName = ncasRes.get("LAW1_PERS_NAME"); //법정 대리인 이름
     	
  
+    	// CUST_TYPE_CODE : 개인,법인구분(I : 개인 / G : 법인) - 법인폰 차단
+    	if(!"I".equals(cust_type_code)) {
+    		throw new CommonException("400", "117", "51000"+"XXX", "법인폰 차단", logVO.getFlow());
+    	}
+    	
     	// CTN_STUS_CODE : CTN 상태 코드 (A : 정상 / S : 일시 중지) - 일시중지폰 차단
     	  if(!"A".equals(ctn_stus_code)){
     		  throw new CommonException("400", "104", "51000"+"XXX", "일시중지폰 차단", logVO.getFlow());
@@ -421,9 +431,9 @@ public class CommonServiceImpl implements CommonService{
     	  
     	  // 결제차단여부 ('Y':결제차단->결제이용동의 필요, 'N':결제가능->결제이용동의 완료)
     	  cust_flag = cust_flag.substring(0, 1);
-    	  if(!"N".equals(cust_flag)) {
+    	  /*if(!"N".equals(cust_flag)) {
     		  throw new CommonException("400", "4xx", "51000"+"XXX", "결제이용동의 필요", logVO.getFlow());
-    	  }
+    	  }*/
     	  
     	  
     	// 실사용자 만나이 구하기
@@ -519,8 +529,9 @@ public class CommonServiceImpl implements CommonService{
 		rbpResMap = rbpClientService.doRequest(logVO, Init.readConfig.getRbp_opcode_select(), rbpReqMap);
 		
 		paramMap.put("RbpRes", rbpResMap);
-		String resCode = rbpResMap.get("REUSLT");
-		if(resCode.equals("0000") && !rbpResMap.get("CUST-GRD-CD").equals("7")) {
+		String resCode = rbpResMap.get("RESULT");
+		logVO.setRbpResultCode(resCode);
+		if(resCode.equals("0000") && !rbpResMap.get("CUST_GRD_CD").equals("7")) {
 			return true;
 		}
 		

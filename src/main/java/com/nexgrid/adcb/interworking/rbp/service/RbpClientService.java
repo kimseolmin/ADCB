@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.interworking.rbp.legacy.RbpConnector;
 import com.nexgrid.adcb.util.Init;
@@ -71,17 +72,21 @@ public class RbpClientService {
 					rbpConn.setLogVO(logVO);
 					resMap = rbpConn.sendMsg(Init.readConfig.getRbp_msg_gbn_invoke(), opCode, reqMap);
 				}catch(Exception e) {
-					logger.error("[" + logVO.getSeqId() + "] RBP Request Error : Name=" + rbpConn.getName() + ", Error_Msg" + e.getMessage(), e );
+					logVO.setFlow("[SVC] --> [RBP]");
+					throw new CommonException("500", "4", "52000"+"XXX", "RBP Request Error:" + e.getMessage(), logVO.getFlow());
 				}
 			}
 			
 			if(resMap != null) {
+				logVO.setFlow("[SVC] <-- [RBP]");
+				logVO.setRbpResTime();
 				break;
 			}
 		}
 		
 		if(resMap == null) {
-			logger.error("[" + logVO.getSeqId() + "] RBP Error (not connected)");
+			logVO.setFlow("[SVC] --> [RBP]");
+			throw new CommonException("500", "4", "52000"+"XXX", "RBP Error (not connected)", logVO.getFlow());
 		}
 		
 		

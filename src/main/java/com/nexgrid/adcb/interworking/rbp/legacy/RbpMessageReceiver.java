@@ -62,7 +62,7 @@ public class RbpMessageReceiver extends Thread{
 		String msgGbn = null;
 		String opCode = null;
 		
-		String logSeq = "[" + rbpConnector.getLogVO().getSeqId() + "] ";
+		String logSeq = "";
 		String resLog = "RBP Response Data: ";
 		
 		Map<String, String> resMap = msgConverter.parseReturnMessage(resMsg);
@@ -72,7 +72,7 @@ public class RbpMessageReceiver extends Thread{
 		
 		// return일 경우
 		if(Init.readConfig.getRbp_msg_gbn_return().equals(msgGbn)) {
-			
+			resLog = "RBP Response Data: ";
 			seqId = RbpSyncManager.getInstance().free(seqNo, resMap);
 			logSeq = "[" + seqId + "] ";
 			logger.info(logSeq + resLog + resMsg);
@@ -80,8 +80,15 @@ public class RbpMessageReceiver extends Thread{
 			
 		}else if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) { // rbp server로부터 health check인 경우
 			
-			rbpConnector.setLogVO(new LogVO("healthCheck(return)"));
+			resLog = "RBP Health Check Response";
+			rbpConnector.setLogVO(new LogVO("healthCheck"));
+			logSeq = "[" + rbpConnector.getLogVO().getSeqId() + "] ";
+			logger.info(logSeq + resLog + " IP: " + rbpConnector.getServerIp());
+			logger.info(logSeq + resLog + " PORT: " + rbpConnector.getServerPort());
+			resLog += " Data: ";
+			logger.info(logSeq + resLog + resMsg);
 			logger.info(logSeq + new String(new char[resLog.length()]).replace("\0", " ") + resMap);
+			
 			// 연결상태 확인일 경우에만.
 			if(Init.readConfig.getRbp_opcode_con_qry().equals(opCode)) {
 				rbpConnector.returnHealthCheck(resMap);

@@ -33,7 +33,7 @@ public class ReadConfigVO {
 	private String rbp_opcode_select = "111"; // 한도 조회
 	private String rbp_opcode_charge = "114"; // 한도 즉시 차감
 	private String rbp_msg_gbn_invoke = "1"; // 연결 상태 확인 시 메세지
-	private String rbp_msg_gbn_return = "2"; // 연결 상태 확인 시 응답에 대한 응답 메세지
+	private String rbp_msg_gbn_return = "2"; // 서버로부터 연결 상태 확인 시 응답에 대한 응답 메세지
 	private String rbp_interface_version = ""; // 연동 버전 정의
 	
 	private String time_out = "";

@@ -102,12 +102,16 @@ public class RbpMessageSender extends Thread{
 		
 		synchronized (rbpConnector.getSocket().getOutputStream()) {
 			
+			if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
+				logger.info(logSeq + reqLog + " IP: " + rbpConnector.getServerIp());
+				logger.info(logSeq + reqLog + " PORT: " + rbpConnector.getServerPort());
+			}
 			
-			logger.info(logSeq + reqLog + " IP: " + rbpConnector.getServerIp());
-			logger.info(logSeq + reqLog + " PORT: " + rbpConnector.getServerPort());
 			reqLog = reqLog + " Data: ";
 			logger.info(logSeq + reqLog + reqMap);
 			logger.info(logSeq + new String(new char[reqLog.length()]).replace("\0", " ") + invokeMsg);
+			rbpConnector.getLogVO().setRbpReqTime();
+			
 			rbpConnector.getSocket().getOutputStream().write(reqByte);
 			rbpConnector.getSocket().getOutputStream().flush();
 			

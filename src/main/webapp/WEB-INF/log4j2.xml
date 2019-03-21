@@ -116,6 +116,11 @@
 		</logger> -->
 		
 		
+		<Logger name="jdbc.sqlonly" additivity="false" level="info"> 
+	         <!-- <AppenderRef ref="console" /> -->
+	    </Logger>
+		
+		
 		
 		<!-- 
 		=====================================================================

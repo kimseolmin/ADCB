@@ -33,7 +33,12 @@ public class LogVO {
 	
 	private String ncasReqTime = "";				// NCAS 접속 요청 발생 시간			
 	private String ncasResTime = "";				// NCAS 접속 응답 발생 시간
-	private String ncasResultCode = "";				// NCAS 접속 응답 발생 시간
+	private String ncasResultCode = "";				// NCAS 결과 코드
+	
+	
+	private String rbpReqTime = "";					// RBP 접속 요청 발생 시간
+	private String rbpResTime = "";					// RBP 접속 요청 발생 시간
+	private String rbpResultCode = "";				// RBP 결과 코드
 	
 	
 	
@@ -243,11 +248,37 @@ public class LogVO {
 	public void setNcasResultCode(String ncasResultCode) {
 		this.ncasResultCode = ncasResultCode;
 	}
+	
+	public String getRbpReqTime() {
+		return rbpReqTime;
+	}
 
 
-	
-	
-	
+	public void setRbpReqTime() {
+		this.rbpReqTime = StringUtil.getCurrentTimeMilli();
+	}
+
+
+	public String getRbpResTime() {
+		return rbpResTime;
+	}
+
+
+	public void setRbpResTime() {
+		this.rbpResTime = StringUtil.getCurrentTimeMilli();
+	}
+
+
+	public String getRbpResultCode() {
+		return rbpResultCode;
+	}
+
+
+	public void setRbpResultCode(String rbpResultCode) {
+		this.rbpResultCode = rbpResultCode;
+	}
+
+
 	public String getFlow() {
 		return flow;
 	}

@@ -75,7 +75,7 @@ public class AccountProfileService {
 			account_status = "active"; // 활성
 		}
 		
-		String spend_limittype = "calendar "; // 한도초기화는 매월1일이기때문에 calendar로 고정
+		String spend_limittype = "calendar"; // 한도초기화는 매월1일이기때문에 calendar로 고정
 		
 		String iccid = ncasRes.getOrDefault("USIM_ICCID_NO", "");
 		String imei = ncasRes.getOrDefault("IMEI", "");

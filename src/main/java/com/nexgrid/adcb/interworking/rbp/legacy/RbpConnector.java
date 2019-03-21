@@ -33,6 +33,7 @@ public class RbpConnector implements Runnable{
 	private int conId = 0;
 	private boolean isConnected = false;
 	private boolean isRun = true;
+	private boolean test = true;
 	private LogVO logVO = null;
 	
 	private long lastSendTime = System.currentTimeMillis();
@@ -112,7 +113,7 @@ public class RbpConnector implements Runnable{
 	}
 	
 	
-	// healthcheck message 수신 후 응답
+	// 서버로부터 healthcheck 응답
 	public void returnHealthCheck(Map<String, String> reqMap) {
 		try {
 			// 정상으로 보냄.
@@ -130,8 +131,13 @@ public class RbpConnector implements Runnable{
 
 		@Override
 		public void run() {
-			// 정기적으로 health check
-			invokeHealthCheck();
+			
+			if(test) {
+				// 정기적으로 health check
+				invokeHealthCheck();
+				test = false;
+			}
+			
 		}
 		
 	}
@@ -141,11 +147,10 @@ public class RbpConnector implements Runnable{
 	// health check
 	private void invokeHealthCheck() {
 		try {
-			boolean test = true;
 			// 마지막 sendTime에서 10초가 지났을 경우 
 			// (health check는 10초마다 한번씩, 다른 요청이 있었을 경우 마지막 보낸 시간에서 10초)
-			if(test) {
-			//if(lastSendTime < System.currentTimeMillis() - 1000 * 10) {
+			if(lastSendTime < System.currentTimeMillis() - 1000 * 10) {
+				this.logVO = new LogVO("healthCheck");
 				Map<String, String> reqMap = new HashMap<String, String>();
 				reqMap.put("CON_ID", conId + "");
 				Map<String, String> resMap = sendMsg(Init.readConfig.getRbp_msg_gbn_invoke(), Init.readConfig.getRbp_opcode_con_qry(), reqMap);
@@ -153,7 +158,6 @@ public class RbpConnector implements Runnable{
 				if(resMap == null || !"1".equals(resMap.get("CON_STS"))) {
 					isConnected = false;
 				}
-				test = false;
 			}
 		}catch (Exception e) {
 			logger.error("[Health Check " + getName() + "] RCSG Error : " + e.getMessage(), e);
@@ -167,10 +171,12 @@ public class RbpConnector implements Runnable{
 	public Map<String, String> sendMsg(String msgGbn, String opCode, Map<String, String> reqMap) throws Exception{
 		updateLastSendTime();
 		
-		String sequenceNo = seqNoManager.getNext() + "";
+		
 		reqMap.put("OP_CODE", opCode);
 		
+		String sequenceNo = "";
 		if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
+			sequenceNo = seqNoManager.getNext() + "";
 			reqMap.put("SEQUENCE_NO", sequenceNo);
 			reqMap.put("MESSAGE_GBN", "1");
 		}else {
@@ -182,14 +188,21 @@ public class RbpConnector implements Runnable{
 		
 		msgSender.putMessage(reqMap);
 		
-		// 메시지를 수신받을 때까지 기다린다.
-		RbpSyncObject syncObj = new RbpSyncObject(logVO.getSeqId());
-		RbpSyncManager.getInstance().put(sequenceNo, syncObj);
 		
-		syncObj.setWait(Long.parseLong(Init.readConfig.getRbp_receive_time_out()));
+		if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) { // 서버의 health check에 대한 응답이 아닐 경우에만
+			// 메시지를 수신받을 때까지 기다린다.
+			RbpSyncObject syncObj = new RbpSyncObject(logVO.getSeqId());
+			RbpSyncManager.getInstance().put(sequenceNo, syncObj);
+			
+			syncObj.setWait(Long.parseLong(Init.readConfig.getRbp_receive_time_out()));
+			
+			//timeout시간 안에 메시지 응답을 받지 못하면 null을 반환
+			return syncObj.getResMap();
+		}else {
+			return reqMap;
+		}
 		
-		//timeout시간 안에 메시지 응답을 받지 못하면 null을 반환
-		return syncObj.getResMap();
+		
 	}
 	
 	

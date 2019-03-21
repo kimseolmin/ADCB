@@ -26,7 +26,7 @@
 	<entry key="RBP_SECONDARY_IP">127.0.0.1</entry>
 	<entry key="RBP_SECONDARY_PORT">6000</entry>
 	<entry key="RBP_CONNECT_TIME_OUT">5000</entry>
-	<entry key="RBP_RECEIVE_TIME_OUT">1000000</entry>
+	<entry key="RBP_RECEIVE_TIME_OUT">60000</entry>
 	<entry key="RBP_RECONNECT_SLEEP_TIME">1000</entry>
 	<entry key="RBP_SYSTEM_ID">GDCB01</entry>
 	<entry key="RBP_CDRDATA">1000</entry> <!-- VERSION(10) + TYPE(00) (TYPE: CMS-00, SMS-01, MMS-02, WAP-03)  -->
