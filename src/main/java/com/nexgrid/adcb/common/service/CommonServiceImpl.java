@@ -530,9 +530,14 @@ public class CommonServiceImpl implements CommonService{
 		
 		paramMap.put("RbpRes", rbpResMap);
 		String resCode = rbpResMap.get("RESULT");
-		logVO.setRbpResultCode(resCode);
-		if(resCode.equals("0000") && !rbpResMap.get("CUST_GRD_CD").equals("7")) {
-			return true;
+		if(resCode.equals("0000") ) {
+			if(!rbpResMap.get("CUST_GRD_CD").equals("7")) {
+				return true;
+			}else { // 7등급 차단
+				throw new CommonException("400", "118", "52000"+"XXX", "7등급 차단", logVO.getFlow());
+			}
+		}else {
+			
 		}
 		
 		

@@ -90,7 +90,8 @@ public class AccountProfileService {
 		cal.add(Calendar.DATE, -30);
 		paramMap.put("before_30", new SimpleDateFormat("yyyyMMdd").format(cal.getTime()));
 		
-		try {	
+		try {
+			// 30일 이내 구매이력 체크
 			int purchaseCnt = accountProfileDAO.getPurchase(paramMap);
 			if(purchaseCnt > 0) {
 				purchase = true;

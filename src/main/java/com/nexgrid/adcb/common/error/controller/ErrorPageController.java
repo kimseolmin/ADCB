@@ -1,5 +1,6 @@
 package com.nexgrid.adcb.common.error.controller;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -16,6 +17,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.util.EnAdcbOmsBack;
+import com.nexgrid.adcb.util.EnAdcbOmsFront;
 import com.nexgrid.adcb.util.LogUtil;
 
 
@@ -65,11 +68,17 @@ public class ErrorPageController {
 		//Service Start Log Print
 		LogUtil.startServiceLog(logVO, request);
 		
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		
+		paramMap.put("sCode", "400");
+		paramMap.put("eCode", EnAdcbOmsFront.SERVICE_URL.getDefaultCode() + EnAdcbOmsBack.INVALID_URL.getDefaultCode());
+		paramMap.put("apiResultCode", "4");
+		
 		Map<String, Object> errMap = new LinkedHashMap<String, Object>();
 		
-		errMap.put("errId", logVO.getSeqId());
+		/*errMap.put("errId", logVO.getSeqId());
 		errMap.put("errCode", "4002");
-		errMap.put("errMsg", "Invalid Request Body");
+		errMap.put("errMsg", "Invalid Request Body");*/
 		
 		response.setStatus(400);
 		

@@ -167,16 +167,28 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 	
 	
 	// return 파라미터를  Map으로 변환
-	public Map<String, String> parseReturnMessage(String returnMessage){
+	public Map<String, String> parseReturnMessage(String returnMessage)throws Exception{
 		
 		Map<String, String> resMap = new HashMap<String, String>();
-	
+		
 		// header값 추출
 		int amount = 0;
-		amount = parseHeaderParameter(resMap, returnMessage);
+		try {
+			amount = parseHeaderParameter(resMap, returnMessage);
+		}catch (Exception e) {
+			// header형식  오류의 경우 그냥 예외를 던진다. (header가 정확하지 않으면 어떤 thread의 요청이었는지 알 수 없다.)
+			throw e;
+		}
+		
 		
 		// body값 추출
-		parseBodyParamter(amount, resMap, returnMessage);
+		try {
+			parseBodyParamter(amount, resMap, returnMessage);
+		}catch(Exception e){
+			// body형식의 오류인 경우 요청 thread를 알 수 있기 때문에 변환 된 것 까지만 반환하고 오류에러는 요청 thread에서 찍는다.
+			return resMap;
+		}
+		
 		
 		return resMap;
 	}

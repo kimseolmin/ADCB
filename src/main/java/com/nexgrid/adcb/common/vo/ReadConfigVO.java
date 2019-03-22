@@ -32,6 +32,7 @@ public class ReadConfigVO {
 	private String rbp_opcode_con_qry = "001"; // 연결 상태 확인
 	private String rbp_opcode_select = "111"; // 한도 조회
 	private String rbp_opcode_charge = "114"; // 한도 즉시 차감
+	private String rbp_opcode_cancel= "116"; // 결제 취소
 	private String rbp_msg_gbn_invoke = "1"; // 연결 상태 확인 시 메세지
 	private String rbp_msg_gbn_return = "2"; // 서버로부터 연결 상태 확인 시 응답에 대한 응답 메세지
 	private String rbp_interface_version = ""; // 연동 버전 정의
@@ -183,6 +184,12 @@ public class ReadConfigVO {
 	}
 	public void setRbp_opcode_charge(String rbp_opcode_charge) {
 		this.rbp_opcode_charge = rbp_opcode_charge;
+	}
+	public String getRbp_opcode_cancel() {
+		return rbp_opcode_cancel;
+	}
+	public void setRbp_opcode_cancel(String rbp_opcode_cancel) {
+		this.rbp_opcode_cancel = rbp_opcode_cancel;
 	}
 	public String getRbp_msg_gbn_invoke() {
 		return rbp_msg_gbn_invoke;

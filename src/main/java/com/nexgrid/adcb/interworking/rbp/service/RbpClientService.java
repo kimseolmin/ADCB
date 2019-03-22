@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.interworking.rbp.legacy.RbpConnector;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpResultCode;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnSelectLimit;
 import com.nexgrid.adcb.util.Init;
 
 
@@ -71,15 +73,53 @@ public class RbpClientService {
 				try {
 					rbpConn.setLogVO(logVO);
 					resMap = rbpConn.sendMsg(Init.readConfig.getRbp_msg_gbn_invoke(), opCode, reqMap);
-				}catch(Exception e) {
+				}catch(CommonException common) {
+					throw common;
+				}
+				catch(Exception e) {
 					logVO.setFlow("[SVC] --> [RBP]");
 					throw new CommonException("500", "4", "52000"+"XXX", "RBP Request Error:" + e.getMessage(), logVO.getFlow());
 				}
 			}
 			
+			
+			
 			if(resMap != null) {
 				logVO.setFlow("[SVC] <-- [RBP]");
 				logVO.setRbpResTime();
+				
+				// 응답 형식 정상여부 체크
+				if(Init.readConfig.getRbp_opcode_select().equals(opCode)) {
+					for(EnRbpReturnSelectLimit e: EnRbpReturnSelectLimit.values()) {
+						if(!resMap.containsKey(e.toString())) {
+							throw new CommonException("500", "4", "52000"+"XXX", "RBP Response Body 형식 오류", logVO.getFlow());
+						}
+					}
+				}
+				
+				
+				
+				// RESULT값 정상 아닐 경우
+				String result = resMap.get("RESULT");
+				logVO.setRbpResultCode(result);
+				if(!"0000".equals(resMap.get("RESULT"))) {
+					for(EnRbpResultCode e : EnRbpResultCode.values()) {
+						// 에러코드를 찾아서 매핑한다.
+						if(e.getDefaultValue().equals(result)) {
+							if("".equals(e.getOpCode())) { 
+								throw new CommonException("500", e.getMappingCode(), "5210"+e.getDefaultValue(), e.getResMsg(), logVO.getFlow());
+							}else { // RBP의 결과를 boku의 Reason코드로 매핑 시 opCode에 따라 다른 reasonCode를 줘야 하는 경우
+								if(e.getOpCode().equals(opCode)) {
+									throw new CommonException("500", e.getMappingCode(), "5210"+e.getDefaultValue(), e.getResMsg(), logVO.getFlow());
+								}
+							}
+						}
+					}
+					
+					// 정의되지 않은 RESULT가 왔을 경우
+					throw new CommonException("500", EnRbpResultCode.RS_INVALID.getMappingCode(), "5210"+result, EnRbpResultCode.RS_INVALID.getResMsg(), logVO.getFlow());
+				}
+				
 				break;
 			}
 		}
