@@ -20,6 +20,7 @@ import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.util.EnAdcbOmsBack;
+import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.EnAdcbOmsFront;
 import com.nexgrid.adcb.util.LogUtil;
 
@@ -66,7 +67,7 @@ public class AccountProfileController {
 			
 			// NCAS 연동 값 -> boku 결과 값
 			dataMap = accountProfileService.getAccountProfile(paramMap, logVO);
-			logVO.setResultCode(EnAdcbOmsFront.SUCCESS.getDefaultCode() + EnAdcbOmsBack.SUCCESS.getDefaultCode());
+			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			
 		}
 		catch(CommonException commonEx) {
@@ -93,6 +94,7 @@ public class AccountProfileController {
 			logVO.setApiResultCode("4");
 			
 			dataMap.put("msisdn", paramMap.get("msisdn"));
+			
 			Map<String, Object> result = CommonException.checkException(paramMap, logVO.getSeqId(), logVO.getFlow());
 			dataMap.put("result", result);
 			

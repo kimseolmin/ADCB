@@ -5,7 +5,7 @@
 <comment>config_properties</comment>
 
 	<!-- ADCB -->
-	<entry key="ADCB_CONFIG_PATH">C:/project/03.ADCB/workspace/ADCB.BokuAPI/src/main/webapp/WEB-INF/config</entry>
+	<entry key="ADCB_CONFIG_PATH">C:/Project/02.ADCB/workspace/adcb.bokuAPI/src/main/webapp/WEB-INF/config</entry>
 
 	<!-- OMS 서버번호 -->
 	<entry key="SERVER_NUM">001</entry>

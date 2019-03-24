@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.nexgrid.adcb.api.accountProfile.dao.AccountProfileDAO;
@@ -35,7 +36,7 @@ public class AccountProfileService {
 		
 		// body key 체크
 		if( paramMap==null || paramMap.size() == 0 || !paramMap.containsKey("msisdn") ) {
-			throw new CommonException("400", "2", "30300001", "Invalid Request Body[Key]: msisdn", logVO.getFlow());
+			throw new CommonException(HttpStatus.BAD_REQUEST.value(), "2", "30300001", "Invalid Request Body[Key]: msisdn", logVO.getFlow());
 		}
 		
 		// body value 체크

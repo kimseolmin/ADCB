@@ -40,8 +40,8 @@ public class RbpClientService {
 		serverIp[1] = Init.readConfig.getRbp_secondary_ip();
 		serverPort[1] = Integer.parseInt(Init.readConfig.getRbp_secondary_port());
 		
-		//Thread[] threads = new Thread[serverIp.length];
-		Thread[] threads = new Thread[1];
+		Thread[] threads = new Thread[serverIp.length];
+		//Thread[] threads = new Thread[1];
 		
 		for(int i=0; i<threads.length; i++) {
 			RbpConnector rbpConn = new RbpConnector(serverIp[i], serverPort[i]);
@@ -77,7 +77,7 @@ public class RbpClientService {
 					throw common;
 				}
 				catch(Exception e) {
-					logVO.setFlow("[SVC] --> [RBP]");
+					logVO.setFlow("[ADCB] --> [RBP]");
 					throw new CommonException("500", "4", "52000"+"XXX", "RBP Request Error:" + e.getMessage(), logVO.getFlow());
 				}
 			}
@@ -85,7 +85,7 @@ public class RbpClientService {
 			
 			
 			if(resMap != null) {
-				logVO.setFlow("[SVC] <-- [RBP]");
+				logVO.setFlow("[ADCB] <-- [RBP]");
 				logVO.setRbpResTime();
 				
 				// 응답 형식 정상여부 체크
@@ -125,7 +125,7 @@ public class RbpClientService {
 		}
 		
 		if(resMap == null) {
-			logVO.setFlow("[SVC] --> [RBP]");
+			logVO.setFlow("[ADCB] --> [RBP]");
 			throw new CommonException("500", "4", "52000"+"XXX", "RBP Error (not connected)", logVO.getFlow());
 		}
 		

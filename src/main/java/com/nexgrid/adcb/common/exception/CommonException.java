@@ -22,7 +22,7 @@ public class CommonException extends Exception{
 	String logMsg = "";			// Service log message
 	String flow = "";			
 	
-	String statusCode = "";
+	int statusCode;
 	
 	Exception cause;
 	
@@ -40,10 +40,10 @@ public class CommonException extends Exception{
 		return omsErrCode;
 	}
 	
-	public String getStatusCode() {
+	public int getStatusCode() {
 		return statusCode;
 	}
-	
+
 	public String getFlow() {
 		return flow;
 	}
@@ -65,7 +65,7 @@ public class CommonException extends Exception{
 	 * @param sCode
 	 * @summary 다이렉트 에러 발생 처리
 	 */
-	public CommonException (String statusCode, String mappingCode, String eCode, String msg, String flow) {
+	public CommonException (int statusCode, String mappingCode, String eCode, String msg, String flow) {
 	
     	Properties prop = new Properties(); 
     	readProp(prop);
@@ -96,7 +96,7 @@ public class CommonException extends Exception{
 	 * @param sCode
 	 * @summary 다이렉트 에러 발생 처리
 	 */
-	public CommonException (String statusCode, String mappingCode, String eCode, String flow) {
+	public CommonException (int statusCode, String mappingCode, String eCode, String flow) {
 	
     	Properties prop = new Properties(); 
     	readProp(prop);
@@ -134,35 +134,6 @@ public class CommonException extends Exception{
 		return result;
 	}
 
-
-	public static Map<String, Object> sendException(Exception e, String seq) {
-		// TODO Auto-generated method stub
-		Map<String, Object> excMap = new HashMap<String, Object>();
-		excMap.put("errId", seq);
-		excMap.put("errCode", 9999);
-		excMap.put("errStatusCode", 400);
-		return excMap;
-	}
-
-
-	public static Map<String, Object> sendExceptionAuth(CommonException ipsExc) {
-		// TODO Auto-generated method stub
-		Map<String, Object> excMap = new HashMap<String, Object>();
-//		excMap.put("errParam", ipsExc.errParam);
-		excMap.put("errStatusCode", ipsExc.statusCode);
-		return excMap;
-	}
-
-	public static Map<String, Object> getErrorMap(String sCode, String eCode){
-		// TODO Auto-generated method stub
-    	
-		Map<String, Object> excMap = new LinkedHashMap<String, Object>();
-		excMap.put("errId", "");
-		excMap.put("errCode", sCode);
-		excMap.put("errMsg", eCode);
-		
-		return excMap;
-	}
 	
 	public static void readProp(Properties prop) {
 		// TODO Auto-generated method stub
@@ -185,7 +156,7 @@ public class CommonException extends Exception{
 		// TODO Auto-generated method stub
 		Map<String, Object> excMap = new HashMap<String, Object>();
 		
-		CommonException adcbEx = new CommonException(paramMap.get("sCode").toString(), paramMap.get("apiResultCode").toString(), paramMap.get("eCode").toString(), flow);
+		CommonException adcbEx = new CommonException((int)paramMap.get("sCode"), paramMap.get("apiResultCode").toString(), paramMap.get("eCode").toString(), flow);
 		
 		excMap.put("reasonCode", Integer.parseInt(adcbEx.resReasonCode));
 		excMap.put("message", adcbEx.resMsg);

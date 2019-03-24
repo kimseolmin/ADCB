@@ -239,7 +239,7 @@ public class RbpConnector implements Runnable{
 					reconnect();
 					logger.info("RBP Connected!!! [serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
 				}catch(Exception e) {
-					logger.error("RBP not Connected... Sleep for" + Init.readConfig.getRbp_reconnect_sleep_time() + "[serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
+					logger.error("RBP not Connected...... Sleep for " + Init.readConfig.getRbp_reconnect_sleep_time() + " [serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
 					try {
 						Thread.sleep(Long.parseLong(Init.readConfig.getRbp_reconnect_sleep_time()));
 					}catch (Exception e1) {
@@ -296,7 +296,7 @@ public class RbpConnector implements Runnable{
 		// healthCheck timer 설정
 		initHealthChecker();
 		
-		logger.info("RBP Connected[ " + getName() + "] =========================================");
+		logger.info("RBP Connected [" + getName() + "] ============================================");
 		
 	}
 	
