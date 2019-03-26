@@ -18,6 +18,7 @@ import com.nexgrid.adcb.api.accountProfile.dao.AccountProfileDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.StringUtil;
 
 @Service("accountProfileService")
@@ -29,21 +30,6 @@ public class AccountProfileService {
 	@Inject
 	private AccountProfileDAO accountProfileDAO;
 
-	
-	// AccountProfile API 필수 body값 체크
-	public void reqBodyCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception {
-		
-		
-		// body key 체크
-		if( paramMap==null || paramMap.size() == 0 || !paramMap.containsKey("msisdn") ) {
-			throw new CommonException(HttpStatus.BAD_REQUEST.value(), "2", "30300001", "Invalid Request Body[Key]: msisdn", logVO.getFlow());
-		}
-		
-		// body value 체크
-		if( paramMap.get("msisdn") == null || paramMap.get("msisdn").equals("")  ) {
-			throw new CommonException("400", "2", "30300002", "Invalid Request Body[Value]: msisdn", logVO.getFlow());
-		}
-	}
 	
 	
 	// NCAS 연동 결과 -> boku 응답 
@@ -101,14 +87,13 @@ public class AccountProfileService {
 			SQLException se = (SQLException) adcbExc.getRootCause();
 			logVO.setRsCode(Integer.toString(se.getErrorCode()));
 			logVO.setFlow("[ADCB] --> [DB]");
-			throw new CommonException("500", "4", "48000000", se.getMessage(), logVO.getFlow());
+			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_ERROR.mappingCode(), EnAdcbOmsCode.DB_ERROR.value(), se.getMessage(), logVO.getFlow());
 			
 		}catch(ConnectException adcbExc) {
-			logVO.setFlow("[ADCB] <-- [DB]");
-			throw new CommonException("500", "4", "48000000", adcbExc.getMessage(), logVO.getFlow());
-			
+			logVO.setFlow("[ADCB] --> [DB]");
+			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_CONNECT_ERROR.mappingCode(), EnAdcbOmsCode.DB_CONNECT_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
 		}catch (Exception adcbExc) {
-			throw new CommonException("500", "4", "59999999", adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_INVALID_ERROR.mappingCode(), EnAdcbOmsCode.DB_INVALID_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
 		}
 		
 		

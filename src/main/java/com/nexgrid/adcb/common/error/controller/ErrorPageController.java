@@ -71,7 +71,7 @@ public class ErrorPageController {
 		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		
-		paramMap.put("sCode", url);
+		paramMap.put("sCode", Integer.parseInt(url));
 		paramMap.put("eCode", EnAdcbOmsCode.INVALID_URL_KEY.value());
 		paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_URL_KEY.mappingCode());
 		

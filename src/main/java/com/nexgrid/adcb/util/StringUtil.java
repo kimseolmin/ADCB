@@ -150,57 +150,7 @@ public class StringUtil {
 		log.debug(sb.toString());
 	}
 
-	/**
-	 * @Method Name : encryptString 암호화할 데이터를 입력받고 암호화한 문자열을 반환
-	 * @param myKey
-	 *            암호키
-	 * @param data
-	 *            암호화할 데이터
-	 * @return
-	 */
-	static public String encryptString(String myKey, String data) throws CommonException {
-		byte[] encrypted;
-		try {
-			String iv = myKey + myKey;
-			iv = iv.substring(0, 16);
-			byte[] keyData = iv.getBytes();
-			SecretKeySpec KS = new SecretKeySpec(keyData, "AES");
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			cipher.init(Cipher.ENCRYPT_MODE, KS, new IvParameterSpec(keyData));
-			encrypted = cipher.doFinal(data.getBytes());
-		} catch (Exception e) {
-			String flow = "[IPS]";
-			throw new CommonException("500", "500", "49999999", e.getMessage(), flow);
-		}
-		return bytesToHex(encrypted);
-	}
 
-	/**
-	 * @Method Name : decryptString 인코딩된 문자열을 입력받고 복호화해서 원 문자열을 반환
-	 * @param myKey
-	 *            암호키
-	 * @param decStr
-	 *            디코딩할 데이터
-	 * @return
-	 */
-	static public String decryptString(String myKey, String decStr) throws CommonException {
-		byte[] decrypted = null;
-		try {
-			byte[] decData = hexToBytes(decStr);
-			String iv = myKey + myKey;
-			iv = iv.substring(0, 16);
-			byte[] keyData = iv.getBytes();
-			SecretKeySpec KS = new SecretKeySpec(keyData, "AES");
-			Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-			cipher.init(Cipher.DECRYPT_MODE, KS, new IvParameterSpec(keyData));
-			decrypted = cipher.doFinal(decData);
-		} catch (Exception e) {
-			String flow = "[SVC] --> [IPS]";
-			// ip로 복호화가 안됐기 때문에 30400001
-			throw new CommonException("401", "413", "30400001", e.getMessage(), flow);
-		}
-		return new String(decrypted);
-	}
 
 	/**
 	 * @Method Name : hexToBytes 문자열의 각 글자들의 ascii 값으로 byte 배열로

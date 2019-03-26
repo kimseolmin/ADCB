@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.api.accountProfile.controller;
+package com.nexgrid.adcb.api.charge.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,6 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nexgrid.adcb.api.accountProfile.service.AccountProfileService;
+import com.nexgrid.adcb.api.charge.service.ChargeService;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
@@ -24,29 +23,26 @@ import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.LogUtil;
 
 @RestController
-public class AccountProfileController {
-	
+public class ChargeController {
+
 	@Autowired
 	private CommonService commonService;
 	
 	@Autowired
-	private AccountProfileService accountProfileService;
+	private ChargeService chargeService;
 	
-	private Logger logger = LoggerFactory.getLogger(AccountProfileController.class);
-
+	private Logger logger = LoggerFactory.getLogger(ChargeController.class);
 	
-	@RequestMapping(value="/profile", produces = "application/json; charset=utf8",  method = RequestMethod.POST)
-	public Map<String, Object> getAccountProfile(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
+	
+	@RequestMapping(value="/charge", method = RequestMethod.POST)
+	public Map<String ,Object> charge(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
 		
 		//For OMS, ServiceLog
-		LogVO logVO = new LogVO("AccountProfile");
+		LogVO logVO = new LogVO("Charge");
 		
 		//Service Start Log Print
 		LogUtil.startServiceLog(logVO, request, paramMap);
 		
-		//Usage Data in Source
-		//Map<String, Object> paramMap = new HashMap<String, Object>();
-				
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		
@@ -56,14 +52,15 @@ public class AccountProfileController {
 		try {
 			
 			// reqBody check
-			commonService.reqBodyCheck(paramMap, logVO);
+			chargeService.reqBodyCheck(paramMap, logVO);
 			
 			// NCAS 연동
 			commonService.getNcasGetMethod(paramMap, logVO);
 			
-			// NCAS 연동 값 -> boku 결과 값
-			dataMap = accountProfileService.getAccountProfile(paramMap, logVO);
-			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
+			// NCAS 연동 값 -> 청구자격 체크
+			commonService.userEligibilityCheck(paramMap, logVO);
+			
+			
 			
 		}
 		catch(CommonException commonEx) {

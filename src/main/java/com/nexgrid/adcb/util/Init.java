@@ -65,6 +65,11 @@ public class Init{
 		    	readConfig.setRbp_interface_version(props.getProperty("RBP_INTERFACE_VERSION"));
 		    	
 		    	
+		    	//ESB 연동
+		    	readConfig.setEsb_mps208_url(props.getProperty("ESB_MPS208_URL"));
+		    	readConfig.setEsb_time_out(props.getProperty("ESB_TIME_OUT"));
+		    	
+		    	
 		    	readConfig.setTime_out(props.getProperty("time_out"));
 		    	
 		    	

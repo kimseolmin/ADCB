@@ -36,6 +36,11 @@
 	<entry key="RBP_SVC_CTG">GGSTO</entry> <!-- 서비스 구분 -->
 	<entry key="RBP_INTERFACE_VERSION">V01</entry> <!-- 연동 버전 정의 -->
 	
+	
+	<!-- ESB 연동 -->
+	<entry key="ESB_MPS208_URL">http://172.22.14.79:15011/CSSI/MPS/UpdateLmtStlmUseDenyYn</entry>
+	<entry key="ESB_TIME_OUT">5000</entry>
+	
 	<!-- das,ags timeout -->
 	<entry key="time_out">15</entry>
 	

@@ -26,4 +26,6 @@ public interface CommonService {
 	
 	boolean userEligibilityCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
+	void reqBodyCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception;
+	
 }

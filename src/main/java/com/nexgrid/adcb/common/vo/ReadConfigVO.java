@@ -37,6 +37,11 @@ public class ReadConfigVO {
 	private String rbp_msg_gbn_return = "2"; // 서버로부터 연결 상태 확인 시 응답에 대한 응답 메세지
 	private String rbp_interface_version = ""; // 연동 버전 정의
 	
+	
+	// ESB 연동
+	private String esb_mps208_url = "";
+	private String esb_time_out = "";
+	
 	private String time_out = "";
 	
 
@@ -208,6 +213,29 @@ public class ReadConfigVO {
 	}
 	public void setRbp_interface_version(String rbp_interface_version) {
 		this.rbp_interface_version = rbp_interface_version;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	public String getEsb_mps208_url() {
+		return esb_mps208_url;
+	}
+	public void setEsb_mps208_url(String esb_mps208_url) {
+		this.esb_mps208_url = esb_mps208_url;
+	}
+	public String getEsb_time_out() {
+		return esb_time_out;
+	}
+	public void setEsb_time_out(String esb_time_out) {
+		this.esb_time_out = esb_time_out;
 	}
 	public String getTime_out() {
 		return time_out;

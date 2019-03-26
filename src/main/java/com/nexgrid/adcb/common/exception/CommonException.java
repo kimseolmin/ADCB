@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.InvalidPropertiesFormatException;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
@@ -156,7 +155,7 @@ public class CommonException extends Exception{
 		// TODO Auto-generated method stub
 		Map<String, Object> excMap = new HashMap<String, Object>();
 		
-		CommonException adcbEx = new CommonException((int)paramMap.get("sCode"), paramMap.get("apiResultCode").toString(), paramMap.get("eCode").toString(), flow);
+		CommonException adcbEx = new CommonException((Integer)paramMap.get("sCode"), paramMap.get("apiResultCode").toString(), paramMap.get("eCode").toString(), flow);
 		
 		excMap.put("reasonCode", Integer.parseInt(adcbEx.resReasonCode));
 		excMap.put("message", adcbEx.resMsg);

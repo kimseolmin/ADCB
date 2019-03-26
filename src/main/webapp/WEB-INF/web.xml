@@ -80,7 +80,7 @@
         <location>/error/406</location>
     </error-page>
     
-     <error-page>
+   <error-page>
         <error-code>415</error-code>
         <location>/error/415</location>
     </error-page>
