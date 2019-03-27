@@ -1,9 +1,9 @@
-package com.nexgrid.adcb.interworking.rbp.message;
+package com.nexgrid.adcb.interworking.rcsg.message;
 
 import com.nexgrid.adcb.util.Init;
 
-public enum EnRbpHeader {
-
+public enum EnRcsgHeader {
+	
 	PROTOCOL_GBN(3, "OCS")
 	, INTERFACE_VERSION(3, Init.readConfig.getRbp_interface_version()) // 프로토콜 구분자
 	, SOURCE_SYSTEM_ID(6, Init.readConfig.getRbp_system_id()) // 연동버전 정의
@@ -15,15 +15,15 @@ public enum EnRbpHeader {
 	private int tagLength = 0;
 	private String defaultValue = null;
 	
-	EnRbpHeader(int tagLength) {
+	EnRcsgHeader(int tagLength) {
 		this.tagLength = tagLength;
 	}
 	
-	EnRbpHeader(int tagLength, String defaultValue) {
+	EnRcsgHeader(int tagLength, String defaultValue) {
 		this.tagLength = tagLength;
 		this.defaultValue = defaultValue;
 	}
-
+	
 	public int getTagLength() {
 		return tagLength;
 	}
@@ -31,8 +31,5 @@ public enum EnRbpHeader {
 	public String getDefaultValue() {
 		return defaultValue;
 	}
-	
-	
-	
-	
+
 }

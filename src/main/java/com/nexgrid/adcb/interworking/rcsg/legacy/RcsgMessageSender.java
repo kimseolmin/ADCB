@@ -1,28 +1,26 @@
-package com.nexgrid.adcb.interworking.rbp.legacy;
+package com.nexgrid.adcb.interworking.rcsg.legacy;
 
 import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nexgrid.adcb.common.vo.LogVO;
-import com.nexgrid.adcb.interworking.rbp.util.RbpMessageConverter;
+import com.nexgrid.adcb.interworking.rcsg.util.RcsgMessageConverter;
 import com.nexgrid.adcb.interworking.util.MessageQueue;
 import com.nexgrid.adcb.util.Init;
 
-
-public class RbpMessageSender extends Thread{
+public class RcsgMessageSender extends Thread{
 	
-	private static final Logger logger = LoggerFactory.getLogger(RbpMessageSender.class);
+	private static final Logger logger = LoggerFactory.getLogger(RcsgMessageSender.class);
 	
 	private boolean isRun = true;
-	private RbpConnector rbpConnector = null;
-	private RbpMessageConverter msgConverter = null;
+	private RcsgConnector rcsgConnector = null;
+	private RcsgMessageConverter msgConverter = null;
 	private MessageQueue msgQueue = null;
-	
-	public RbpMessageSender(RbpConnector rbpConnector) {
-		this.rbpConnector = rbpConnector;
-		this.msgConverter = new RbpMessageConverter();
+
+	public RcsgMessageSender(RcsgConnector rcsgConnector) {
+		this.rcsgConnector = rcsgConnector;
+		this.msgConverter = new RcsgMessageConverter();
 		this.msgQueue = new MessageQueue();
 	}
 	
@@ -34,7 +32,7 @@ public class RbpMessageSender extends Thread{
 	 */
 	public void putMessage(Map<String, String> reqMap) {
 		this.msgQueue.put(reqMap);
-		logger.debug("[RBP msg put] : [" + reqMap.toString() + "]" );	
+		logger.debug("[RCSG msg put] : [" + reqMap.toString() + "]" );	
 	}
 
 
@@ -59,10 +57,9 @@ public class RbpMessageSender extends Thread{
 				}
 			}
 		}
-	
 	}
-
-
+	
+	
 	
 	@Override
 	public void destroy() {
@@ -72,7 +69,7 @@ public class RbpMessageSender extends Thread{
 	
 	
 	/**
-	 * RBP에 message 전송 (map으로 된 요청데이터를 String으로 변환 후 전송)
+	 * RCSG에 message 전송 (map으로 된 요청데이터를 String으로 변환 후 전송)
 	 * @param reqMap
 	 * @throws Exception
 	 */
@@ -83,19 +80,18 @@ public class RbpMessageSender extends Thread{
 		int seqNo = Integer.parseInt(reqMap.get("SEQUENCE_NO"));
 		
 		// health check 구분
-		String logSeq = "[" + rbpConnector.getLogVO().getSeqId() + "] ";
+		String logSeq = "[" + rcsgConnector.getLogVO().getSeqId() + "] ";
 		String reqLog = "";
-		if(Init.readConfig.getRbp_opcode_con_qry().equals(opCode)) {
-			if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
-				reqLog = "RBP Health Check(invoke) Request";
+		if(Init.readConfig.getRcsg_opcode_con_qry().equals(opCode)) {
+			if(Init.readConfig.getRcsg_msg_gbn_invoke().equals(msgGbn)) {
+				reqLog = "RCSG Health Check(invoke) Request";
 			}else {
-				reqLog = "RBP Health Check(return) Request";
+				reqLog = "RCSG Health Check(return) Request";
 			}
 			
 		}else {
-			reqLog = "RBP Request";
+			reqLog = "RCSG Request";
 		}
-		
 		
 		String invokeMsg = msgConverter.getInvokeMessage(msgGbn, opCode, reqMap);
 		
@@ -106,33 +102,25 @@ public class RbpMessageSender extends Thread{
 		
 		byte[] reqByte = invokeMsg.getBytes();
 		
-		synchronized (rbpConnector.getSocket().getOutputStream()) {
+		synchronized (rcsgConnector.getSocket().getOutputStream()) {
 			
-			if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
-				logger.info(logSeq + reqLog + " IP: " + rbpConnector.getServerIp());
-				logger.info(logSeq + reqLog + " PORT: " + rbpConnector.getServerPort());
+			if(Init.readConfig.getRcsg_msg_gbn_invoke().equals(msgGbn)) {
+				logger.info(logSeq + reqLog + " IP: " + rcsgConnector.getServerIp());
+				logger.info(logSeq + reqLog + " PORT: " + rcsgConnector.getServerPort());
 			}
 			
 			reqLog = reqLog + " Data: ";
 			logger.info(logSeq + reqLog + reqMap);
 			logger.info(logSeq + new String(new char[reqLog.length()]).replace("\0", " ") + invokeMsg);
-			rbpConnector.getLogVO().setRbpReqTime();
+			rcsgConnector.getLogVO().setRcsgReqTime();
 			
-			rbpConnector.getSocket().getOutputStream().write(reqByte);
-			rbpConnector.getSocket().getOutputStream().flush();
+			rcsgConnector.getSocket().getOutputStream().write(reqByte);
+			rcsgConnector.getSocket().getOutputStream().flush();
 			
 		}
-		
-		
 	}
 	
 	
 	
 	
-	
-	
-	
-	
-	
-
 }

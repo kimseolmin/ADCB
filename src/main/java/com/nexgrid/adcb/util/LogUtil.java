@@ -19,7 +19,11 @@ public class LogUtil {
 	
 	private static org.slf4j.Logger serviceLog = LoggerFactory.getLogger(LogUtil.class);
 
-	//Service Start Log Print
+	/**
+	 * Service Start Log Print
+	 * @param logVO
+	 * @param request
+	 */
 	public static void startServiceLog(LogVO logVO, HttpServletRequest request) {
 
 		try {
@@ -75,7 +79,12 @@ public class LogUtil {
 		}
 	}
 	
-	//reqBody가 있는 경우 추가
+	/**
+	 * reqBody가 있는 경우 추가
+	 * @param logVO
+	 * @param request
+	 * @param paramMap
+	 */
 	public static void startServiceLog(LogVO logVO, HttpServletRequest request, Map<String,Object> paramMap) {
 
 		try {
@@ -93,7 +102,12 @@ public class LogUtil {
 		}
 	}
 	
-	//Service Stop Log Print
+	
+	/**
+	 * Service Stop Log Print
+	 * @param dataMap
+	 * @param logVO
+	 */
 	public static void EndServiceLog(Map<String, Object> dataMap, LogVO logVO) {
 		
 		try {
@@ -107,7 +121,12 @@ public class LogUtil {
 		}
 	}
 	
-	//Print Reference Parameters
+	
+	/**
+	 * Print Reference Parameters
+	 * @param logVO
+	 * @param logMap
+	 */
 	public static void printParamLog(LogVO logVO, Map<String, Object> logMap) {
 		// TODO Auto-generated method stub
 		String seq = "[" + logVO.getSeqId() + "] ";
@@ -120,44 +139,55 @@ public class LogUtil {
 		}
 	}
 	
-	//Print Connect API Request Data 
-		public static void printAPIReqData(HttpMethod httpMethod, HttpHeaders headers, String reqData, String url, String conAPI, LogVO logVO) {
-			
-			try {
-				
-				String seq = "[" + logVO.getSeqId() + "] ";
-				
-				serviceLog.info(seq + conAPI + " RequestUrl : " + url);
-				
-				serviceLog.info(seq + conAPI + " RequestMethod : " + httpMethod);
 
-				int count = 0;
+	
+	/**
+	 * Print Connect API(HTTP API) Request Data 
+	 * @param httpMethod API 요청 HttpMethod
+	 * @param headers API 요청 header
+	 * @param reqData API 요청 데이터
+	 * @param url API 요청 url
+	 * @param conAPI 요청하는 API 구분
+	 * @param logVO
+	 */
+	public static void printAPIReqData(HttpMethod httpMethod, HttpHeaders headers, String reqData, String url, String conAPI, LogVO logVO) {
+		
+		try {
+			
+			String seq = "[" + logVO.getSeqId() + "] ";
+			
+			serviceLog.info(seq + conAPI + " RequestUrl : " + url);
+			
+			serviceLog.info(seq + conAPI + " RequestMethod : " + httpMethod);
+
+			int count = 0;
+			
+			for(String key : headers.keySet()) {
 				
-				for(String key : headers.keySet()) {
-					
-					if(count == 0) {
-						serviceLog.info(seq + conAPI + " Request Header : " + key + " : " + headers.get(key));
-					} else {
-						serviceLog.info(seq + new String(new char[conAPI.length()]).replace("\0", " ") + "                 " + key + " : " + headers.get(key));
-					}
-					
-					count++;
+				if(count == 0) {
+					serviceLog.info(seq + conAPI + " Request Header : " + key + " : " + headers.get(key));
+				} else {
+					serviceLog.info(seq + new String(new char[conAPI.length()]).replace("\0", " ") + "                 " + key + " : " + headers.get(key));
 				}
 				
-				if(reqData != null) {
-					String data =  reqData.replace("\\\"", "\""); 
-					serviceLog.info(seq + conAPI + " Request Data = " + data);
-				}
-				
-				
-			} catch (Exception ex) {
-				ex.printStackTrace();
+				count++;
 			}
 			
+			if(reqData != null) {
+				String data =  reqData.replace("\\\"", "\""); 
+				serviceLog.info(seq + conAPI + " Request Data = " + data);
+			}
+			
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
+		
+	}
 	
-	//Print Connect API Response Data 
-	public static void printAPIResData(LogVO logVO, String conAPI, String resData) {
+	
+
+	/*public static void printAPIResData(LogVO logVO, String conAPI, String resData) {
 		
 		try {
 			
@@ -169,10 +199,15 @@ public class LogUtil {
 			ex.printStackTrace();
 		}
 		
-	}
+	}*/
 	
 	
-	//Print Connect API Response Data 
+	/**
+	 * Print Connect API Response Data
+	 * @param logVO
+	 * @param conAPI 요청하는 API 구분
+	 * @param responseEntity API 응답 Entity
+	 */
 	public static void printAPIResData(LogVO logVO, String conAPI, ResponseEntity<String> responseEntity) {
 		
 		try {
@@ -196,7 +231,7 @@ public class LogUtil {
 		
 	}
 	
-	//Print Error Data 
+	/*//Print Error Data 
 	public static void printErrorData(LogVO logVO, String msg, Map<String, Object> dataMap) {
 		
 		try {
@@ -209,9 +244,11 @@ public class LogUtil {
 			ex.printStackTrace();
 		}
 		
-	}
+	}*/
 	
-	//print Request Body Log
+	
+	
+	/*//print Request Body Log
 	public static void printBodyLog(LogVO logVO, StringBuilder body) {
 		
 		try {
@@ -223,7 +260,7 @@ public class LogUtil {
 			ex.printStackTrace();
 		}
 		
-	}
+	}*/
 	
 	
 	public static void setOmsLog(LogVO logVO) {

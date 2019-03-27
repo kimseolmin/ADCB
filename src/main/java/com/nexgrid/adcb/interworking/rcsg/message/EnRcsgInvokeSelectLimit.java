@@ -1,7 +1,6 @@
-package com.nexgrid.adcb.interworking.rbp.message;
+package com.nexgrid.adcb.interworking.rcsg.message;
 
-public enum EnRbpInvokeSelectLimit {
-
+public enum EnRcsgInvokeSelectLimit {
 	CTN
 	, SOC_CODE
 	, CDRDATA
@@ -24,23 +23,19 @@ public enum EnRbpInvokeSelectLimit {
 	, PID
 	, SUBPID
 	, DBID
-	, SVC_CTG
-	, UNLIMIT("0")
-	, PAY_METHOD
-	, CARD_CMPY
 	;
 	
 	private int tagLength = 3;
 	private String defaultValue = null;
 	
-	EnRbpInvokeSelectLimit() {
+	EnRcsgInvokeSelectLimit(){
 		
 	}
 	
-	EnRbpInvokeSelectLimit(String defaultValue){
+	EnRcsgInvokeSelectLimit(String defaultValue){
 		this.defaultValue = defaultValue;
 	}
-
+	
 	public int getTagLength() {
 		return tagLength;
 	}
@@ -48,5 +43,4 @@ public enum EnRbpInvokeSelectLimit {
 	public String getDefaultValue() {
 		return defaultValue;
 	}
-	
 }

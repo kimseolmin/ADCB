@@ -22,8 +22,11 @@ public class MessageQueue extends Vector{
 		this.maxSize = maxSize;
 	}
 	
-	// queue에 메시지 담는다.
-	// queue의 용량을 초과하여 메시지를 못 넣는다면 false.
+	/**
+	 * queue에 메시지 담는다.
+	 * @param message
+	 * @return queue의 용량을 초과하여 메시지를 못 넣는다면 false.
+	 */
 	public synchronized boolean put(Object message) {
 		if(this.size() <= maxSize) {
 			return super.add(message);
@@ -34,8 +37,11 @@ public class MessageQueue extends Vector{
 	
 	
 	
-	// queue에서 메시지를 꺼내온다.
-	// 비어있으면 null을 반환.
+
+	/**
+	 * queue에서 메시지를 꺼내온다.
+	 * @return 비어있으면 null을 반환.
+	 */
 	public synchronized Object pop() {
 		if(this.isEmpty()) {
 			return null;

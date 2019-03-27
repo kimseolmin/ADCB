@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.interworking.rbp.util;
+package com.nexgrid.adcb.interworking.rcsg.util;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,19 +8,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.nexgrid.adcb.interworking.rbp.message.EnRbpHeader;
-import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeCancel;
-import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeCharge;
-import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeConQry;
-import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeSelectLimit;
-import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnConQry;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgHeader;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgInvokeCharge;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgInvokeConQry;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgInvokeSelectLimit;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgReturnConQry;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.StringUtil;
 
 @Component
-public class RbpMessageConverter {
+public class RcsgMessageConverter {
 
-public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.class);
+	public static final Logger logger = LoggerFactory.getLogger(RcsgMessageConverter.class);
 	
 	private static Map<String, String> tagMap;
 	private static Map<String, String> tagValMap;
@@ -37,6 +36,7 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 		tagMap.put("CALL_REFERENCE", "15");
 		tagMap.put("CALLED_NETWORK", "16");
 		tagMap.put("CDRDATA", "17");
+		tagMap.put("CONTENTS_UNIT", "51");
 		tagMap.put("CHANNEL_CD", "18");
 		tagMap.put("CID", "19");
 		tagMap.put("CON_ID", "20");
@@ -65,9 +65,6 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 		tagMap.put("FSMS_BASE", "114");
 		tagMap.put("FSMS_AVAIL", "115");
 		tagMap.put("INFO_CHARGE", "116");
-		tagMap.put("REASON_QUOTA", "117");
-		tagMap.put("SVC_CTG_LIMIT", "118");
-		tagMap.put("SVC_CTG_AVAIL", "119");
 		tagMap.put("RESULT", "200");
 		tagMap.put("REMAIN_REQ", "45");
 		tagMap.put("SERVICE_TYPE", "46");
@@ -79,19 +76,7 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 		tagMap.put("TERM_OS", "120");
 		tagMap.put("BUY_SRC", "121");
 		tagMap.put("NET_CODE", "122");
-		tagMap.put("SVC_CTG", "123");
-		tagMap.put("UNLIMIT", "124");
-		tagMap.put("PAY_METHOD", "125");
-		tagMap.put("CARD_CMPY", "126");
-		tagMap.put("MSG_ID", "127");
-		tagMap.put("ETC_LIMIT", "128");
-		tagMap.put("ETC_AVAIL", "129");
-		tagMap.put("REFUNDINFO", "130");
-		tagMap.put("LMT_USE_DENY_YN", "131");
-		tagMap.put("SMLS_USE_DENY_YN", "132");
-		tagMap.put("DRGT_ISOL_CD", "133");
-		tagMap.put("CUST_KD_CD", "134");
-		tagMap.put("CUST_GRD_CD", "135");
+
 		
 		String tagKey = null;
 		Iterator<String> it = tagMap.keySet().iterator();
@@ -102,17 +87,17 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 		}
 	}
 	
-	
-	public RbpMessageConverter() {
+	public RcsgMessageConverter() {
 		
 	}
 	
 	
+	
 	/**
-	 * opCode별로 RBP 요청 message를 생성 
+	 * opCode별로 RCSG 요청 message를 생성 
 	 * @param msgGbn 1:invoke, 2:return
-	 * @param opCode 001:연결상태확인, 111:한도조회, 114:한도즉시차감, 116:결제취소
-	 * @param reqMap RBP 요청Map
+	 * @param opCode 001:연결상태확인, 111:한도조회, 114:한도즉시차감
+	 * @param reqMap RCSG 요청데이터
 	 * @return
 	 */
 	public synchronized String getInvokeMessage(String msgGbn, String opCode, Map<String, String> reqMap) {
@@ -120,45 +105,41 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 		String body = "";
 		
 		// 파라미터 구성부 설정
-		if(Init.readConfig.getRbp_opcode_con_qry().equals(opCode)) { // 연결 상태 확인
-			if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) { // 상태 확인 invoke
-				for(EnRbpInvokeConQry e : EnRbpInvokeConQry.values()) {
+		if(Init.readConfig.getRcsg_opcode_con_qry().equals(opCode)) { // 연결 상태 확인
+			if(Init.readConfig.getRcsg_msg_gbn_invoke().equals(msgGbn)) { // 상태 확인 invoke
+				for(EnRcsgInvokeConQry e : EnRcsgInvokeConQry.values()) {
 					body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), null);
 				}
 			}else { // 상태 확인 응답에 대한 invoke
-				for(EnRbpReturnConQry e : EnRbpReturnConQry.values()) {
-					body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), null); 
+				for(EnRcsgReturnConQry e : EnRcsgReturnConQry.values()) {
+					body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), null);
 				}
 			}
-		}else if(Init.readConfig.getRbp_opcode_select().equals(opCode)) { // 한도 조회
-			for(EnRbpInvokeSelectLimit e : EnRbpInvokeSelectLimit.values()) {
+		}else if(Init.readConfig.getRcsg_opcode_select().equals(opCode)) { // 한도 조회
+			for(EnRcsgInvokeSelectLimit e : EnRcsgInvokeSelectLimit.values()) {
 				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
 			}
-		}else if(Init.readConfig.getRbp_opcode_charge().equals(opCode)) { // 한도 즉시 차감
-			for(EnRbpInvokeCharge e : EnRbpInvokeCharge.values()) {
-				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
-			}
-		}else if(Init.readConfig.getRbp_opcode_cancel().equals(opCode)) { // 결제 취소
-			for(EnRbpInvokeCancel e : EnRbpInvokeCancel.values()) {
+		}else if(Init.readConfig.getRcsg_opcode_charge().equals(opCode)) { // 한도 즉시 차감
+			for(EnRcsgInvokeCharge e : EnRcsgInvokeCharge.values()) {
 				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
 			}
 		}
 		
-		
 		//header 설정
 		reqMap.put("BODY_LENGTH", body.length()+"");
-		for(EnRbpHeader e : EnRbpHeader.values()) {
+		for(EnRcsgHeader e : EnRcsgHeader.values()) {
 			String defaultValue = e.getDefaultValue();
 			header += StringUtil.lPad(defaultValue == null ? reqMap.get(e.toString()) : defaultValue, e.getTagLength());
 		}
 		
+		
 		return header + body;
+		
 	}
 	
 	
-	
 	/**
-	 * RBP 요청 데이터의 파라미터 구성부(TAG+LENGTH+VALUE)를 String 형태로 만듦
+	 * RCSG 요청 데이터의 파라미터 구성부(TAG+LENGTH+VALUE)를 String 형태로 만듦
 	 * @param tag 파마리터 구성부: TAG 구분값
 	 * @param val 파라미터 구성부: VALUE
 	 * @param defaultVal default값 없는 경우 null로 넘어옴
@@ -184,8 +165,8 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 	
 	
 	/**
-	 * RBP 응답 메시지를  Map으로 변환
-	 * @param returnMessage RBP 응답 메시지
+	 * RCSG 응답 메시지를  Map으로 변환
+	 * @param returnMessage RCSG 응답 메시지
 	 * @return
 	 * @throws Exception
 	 */
@@ -220,8 +201,8 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 	/**
 	 * header message를 분석하여 map으로 전환
 	 * @param resMap header message가 저장될 맵
-	 * @param returnMessage RBP 응답 메시지
-	 * @return RBP 응답 메시지의 header length
+	 * @param returnMessage RCSG 응답 메시지
+	 * @return RCSG 응답 메시지의 header length
 	 */
 	private int parseHeaderParameter(Map<String, String> resMap, String returnMessage) {
 		
@@ -229,7 +210,7 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 		String val = null;
 		int amount = 0;
 		
-		for(EnRbpHeader e : EnRbpHeader.values()) {
+		for(EnRcsgHeader e : EnRcsgHeader.values()) {
 			valLength = e.getTagLength();
 			val = returnMessage.substring(amount, amount + valLength).trim();
 			amount += valLength;
@@ -243,9 +224,9 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 	
 	/**
 	 * body message를 tag로 분석하여 map으로 전환
-	 * @param offset RBP 응답 메시지의 header length
+	 * @param offset RCSG 응답 메시지의 header length
 	 * @param resMap body message가 저장될 맵
-	 * @param returnMessage RBP 응답 메시지
+	 * @param returnMessage RCSG 응답 메시지
 	 */
 	private void parseBodyParamter(int offset, Map<String, String> resMap, String returnMessage) {
 		String tag = null;
@@ -269,5 +250,4 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 			resMap.put(tagValMap.get(tag), val);
 		}
 	}
-	
 }

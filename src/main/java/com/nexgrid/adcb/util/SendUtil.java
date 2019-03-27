@@ -18,6 +18,20 @@ import com.nexgrid.adcb.common.vo.LogVO;
 
 public class SendUtil {
 	
+	
+	/**
+	 * HTTP 연동 API 요청
+	 * @param httpMethod
+	 * @param headers
+	 * @param reqBody
+	 * @param url
+	 * @param division HTTP 연동 API 구분
+	 * @param connTimeout
+	 * @param readTimeout
+	 * @param logVO
+	 * @return
+	 * @throws Exception
+	 */
 	public static ResponseEntity<String> requestUrl(HttpMethod httpMethod, HttpHeaders headers, String reqBody, String url, String division, int connTimeout, int readTimeout, LogVO logVO)
 			throws Exception{
 		// TODO Auto-generated method stub
@@ -47,14 +61,21 @@ public class SendUtil {
 	}
 
 	
+	
+	/**
+	 * 타임아웃 설정
+	 * @param connTimeout
+	 * @param readTimeout
+	 * @return
+	 */
 	static public RestTemplate getRestTemplate(int connTimeout, int readTimeout) {
 		
 		
 		RestTemplate restTemplate = new RestTemplate();
 		restTemplate.setRequestFactory(new SimpleClientHttpRequestFactory());
 		SimpleClientHttpRequestFactory rf = (SimpleClientHttpRequestFactory) restTemplate.getRequestFactory();
-		rf.setConnectTimeout(connTimeout * 1000);
-        rf.setReadTimeout(readTimeout * 1000);
+		rf.setConnectTimeout(connTimeout);
+        rf.setReadTimeout(readTimeout);
         
         return restTemplate;
 	}

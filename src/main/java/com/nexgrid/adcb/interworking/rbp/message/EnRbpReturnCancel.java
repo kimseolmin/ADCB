@@ -1,7 +1,6 @@
 package com.nexgrid.adcb.interworking.rbp.message;
 
-public enum EnRbpReturnSelectLimit {
-
+public enum EnRbpReturnCancel {
 	CTN
 	, SOC_CODE
 	, BR_ID

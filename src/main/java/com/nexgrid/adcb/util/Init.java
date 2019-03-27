@@ -65,6 +65,23 @@ public class Init{
 		    	readConfig.setRbp_interface_version(props.getProperty("RBP_INTERFACE_VERSION"));
 		    	
 		    	
+		    	//RCSG 연동
+		    	readConfig.setRcsg_primary_ip(props.getProperty("RCSG_PRIMARY_IP"));
+		    	readConfig.setRcsg_primary_port(props.getProperty("RCSG_PRIMARY_PORT"));
+		    	readConfig.setRcsg_secondary_ip(props.getProperty("RCSG_SECONDARY_IP"));
+		    	readConfig.setRcsg_secondary_port(props.getProperty("RCSG_SECONDARY_PORT"));
+		    	readConfig.setRcsg_connect_time_out(props.getProperty("RCSG_CONNECT_TIME_OUT"));
+		    	readConfig.setRcsg_receive_time_out(props.getProperty("RCSG_RECEIVE_TIME_OUT"));
+		    	readConfig.setRcsg_reconnect_sleep_time(props.getProperty("RCSG_RECONNECT_SLEEP_TIME"));
+		    	readConfig.setRcsg_system_id(props.getProperty("RCSG_SYSTEM_ID"));
+		    	readConfig.setRcsg_cdrdata(props.getProperty("RCSG_CDRDATA"));
+		    	readConfig.setRcsg_called_network(props.getProperty("RCSG_CALLED_NETWORK"));
+		    	readConfig.setRcsg_pid(props.getProperty("RCSG_PID"));
+		    	readConfig.setRcsg_dbid(props.getProperty("RCSG_DBID"));
+		    	readConfig.setRcsg_svc_ctg(props.getProperty("RCSG_SVC_CTG"));
+		    	readConfig.setRcsg_interface_version(props.getProperty("RCSG_INTERFACE_VERSION"));
+		    	
+		    	
 		    	//ESB 연동
 		    	readConfig.setEsb_mps208_url(props.getProperty("ESB_MPS208_URL"));
 		    	readConfig.setEsb_time_out(props.getProperty("ESB_TIME_OUT"));

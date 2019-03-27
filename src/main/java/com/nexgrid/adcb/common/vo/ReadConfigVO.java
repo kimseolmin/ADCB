@@ -38,6 +38,29 @@ public class ReadConfigVO {
 	private String rbp_interface_version = ""; // 연동 버전 정의
 	
 	
+	//RCSG 연동
+	private String rcsg_primary_ip = "";
+	private String rcsg_primary_port = "";
+	private String rcsg_secondary_ip = "";
+	private String rcsg_secondary_port = "";
+	private String rcsg_connect_time_out = "";
+	private String rcsg_receive_time_out = "";
+	private String rcsg_reconnect_sleep_time = "";
+	private String rcsg_system_id ="";
+	private String rcsg_cdrdata = "";
+	private String rcsg_called_network = "";
+	private String rcsg_pid = "";
+	private String rcsg_dbid = "";
+	private String rcsg_svc_ctg = "";
+	private String rcsg_opcode_con_qry = "001"; // 연결 상태 확인
+	private String rcsg_opcode_select = "111"; // 한도 조회
+	private String rcsg_opcode_charge = "114"; // 한도 즉시 차감
+	private String rcsg_opcode_cancel= "116"; // 결제 취소
+	private String rcsg_msg_gbn_invoke = "1"; // 연결 상태 확인 시 메세지
+	private String rcsg_msg_gbn_return = "2"; // 서버로부터 연결 상태 확인 시 응답에 대한 응답 메세지
+	private String rcsg_interface_version = ""; // 연동 버전 정의
+	
+	
 	// ESB 연동
 	private String esb_mps208_url = "";
 	private String esb_time_out = "";
@@ -219,9 +242,126 @@ public class ReadConfigVO {
 	
 	
 	
-	
-	
-	
+	public String getRcsg_primary_ip() {
+		return rcsg_primary_ip;
+	}
+	public void setRcsg_primary_ip(String rcsg_primary_ip) {
+		this.rcsg_primary_ip = rcsg_primary_ip;
+	}
+	public String getRcsg_primary_port() {
+		return rcsg_primary_port;
+	}
+	public void setRcsg_primary_port(String rcsg_primary_port) {
+		this.rcsg_primary_port = rcsg_primary_port;
+	}
+	public String getRcsg_secondary_ip() {
+		return rcsg_secondary_ip;
+	}
+	public void setRcsg_secondary_ip(String rcsg_secondary_ip) {
+		this.rcsg_secondary_ip = rcsg_secondary_ip;
+	}
+	public String getRcsg_secondary_port() {
+		return rcsg_secondary_port;
+	}
+	public void setRcsg_secondary_port(String rcsg_secondary_port) {
+		this.rcsg_secondary_port = rcsg_secondary_port;
+	}
+	public String getRcsg_connect_time_out() {
+		return rcsg_connect_time_out;
+	}
+	public void setRcsg_connect_time_out(String rcsg_connect_time_out) {
+		this.rcsg_connect_time_out = rcsg_connect_time_out;
+	}
+	public String getRcsg_receive_time_out() {
+		return rcsg_receive_time_out;
+	}
+	public void setRcsg_receive_time_out(String rcsg_receive_time_out) {
+		this.rcsg_receive_time_out = rcsg_receive_time_out;
+	}
+	public String getRcsg_reconnect_sleep_time() {
+		return rcsg_reconnect_sleep_time;
+	}
+	public void setRcsg_reconnect_sleep_time(String rcsg_reconnect_sleep_time) {
+		this.rcsg_reconnect_sleep_time = rcsg_reconnect_sleep_time;
+	}
+	public String getRcsg_system_id() {
+		return rcsg_system_id;
+	}
+	public void setRcsg_system_id(String rcsg_system_id) {
+		this.rcsg_system_id = rcsg_system_id;
+	}
+	public String getRcsg_cdrdata() {
+		return rcsg_cdrdata;
+	}
+	public void setRcsg_cdrdata(String rcsg_cdrdata) {
+		this.rcsg_cdrdata = rcsg_cdrdata;
+	}
+	public String getRcsg_called_network() {
+		return rcsg_called_network;
+	}
+	public void setRcsg_called_network(String rcsg_called_network) {
+		this.rcsg_called_network = rcsg_called_network;
+	}
+	public String getRcsg_pid() {
+		return rcsg_pid;
+	}
+	public void setRcsg_pid(String rcsg_pid) {
+		this.rcsg_pid = rcsg_pid;
+	}
+	public String getRcsg_dbid() {
+		return rcsg_dbid;
+	}
+	public void setRcsg_dbid(String rcsg_dbid) {
+		this.rcsg_dbid = rcsg_dbid;
+	}
+	public String getRcsg_svc_ctg() {
+		return rcsg_svc_ctg;
+	}
+	public void setRcsg_svc_ctg(String rcsg_svc_ctg) {
+		this.rcsg_svc_ctg = rcsg_svc_ctg;
+	}
+	public String getRcsg_opcode_con_qry() {
+		return rcsg_opcode_con_qry;
+	}
+	public void setRcsg_opcode_con_qry(String rcsg_opcode_con_qry) {
+		this.rcsg_opcode_con_qry = rcsg_opcode_con_qry;
+	}
+	public String getRcsg_opcode_select() {
+		return rcsg_opcode_select;
+	}
+	public void setRcsg_opcode_select(String rcsg_opcode_select) {
+		this.rcsg_opcode_select = rcsg_opcode_select;
+	}
+	public String getRcsg_opcode_charge() {
+		return rcsg_opcode_charge;
+	}
+	public void setRcsg_opcode_charge(String rcsg_opcode_charge) {
+		this.rcsg_opcode_charge = rcsg_opcode_charge;
+	}
+	public String getRcsg_opcode_cancel() {
+		return rcsg_opcode_cancel;
+	}
+	public void setRcsg_opcode_cancel(String rcsg_opcode_cancel) {
+		this.rcsg_opcode_cancel = rcsg_opcode_cancel;
+	}
+	public String getRcsg_msg_gbn_invoke() {
+		return rcsg_msg_gbn_invoke;
+	}
+	public void setRcsg_msg_gbn_invoke(String rcsg_msg_gbn_invoke) {
+		this.rcsg_msg_gbn_invoke = rcsg_msg_gbn_invoke;
+	}
+	public String getRcsg_msg_gbn_return() {
+		return rcsg_msg_gbn_return;
+	}
+	public void setRcsg_msg_gbn_return(String rcsg_msg_gbn_return) {
+		this.rcsg_msg_gbn_return = rcsg_msg_gbn_return;
+	}
+	public String getRcsg_interface_version() {
+		return rcsg_interface_version;
+	}
+	public void setRcsg_interface_version(String rcsg_interface_version) {
+		this.rcsg_interface_version = rcsg_interface_version;
+	}
 	
 	
 	

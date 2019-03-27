@@ -7,6 +7,9 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 
 
+/**
+ * RBP, RCSG 요청 Header의 일련번호 관리 클래스
+ */
 public class SequenceNoManager {
 	
 	private String				filePath	= null;

@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,14 +71,13 @@ public class ErrorPageController {
 		LogUtil.startServiceLog(logVO, request);
 		
 		Map<String, Object> paramMap = new HashMap<String, Object>();
-		
 		paramMap.put("sCode", Integer.parseInt(url));
 		paramMap.put("eCode", EnAdcbOmsCode.INVALID_URL_KEY.value());
 		paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_URL_KEY.mappingCode());
 		
 		Map<String, Object> errMap = new LinkedHashMap<String, Object>();
 		
-		Map<String, Object> result = CommonException.checkException(paramMap, logVO.getSeqId(), logVO.getFlow());
+		Map<String, Object> result = CommonException.checkException(paramMap);
 		errMap.put("result", result);
 		
 		response.setStatus(Integer.parseInt(url));

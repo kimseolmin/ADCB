@@ -6,13 +6,14 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.interworking.rbp.legacy.RbpConnector;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpResultCode;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnCancel;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnCharge;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnSelectLimit;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.Init;
@@ -30,7 +31,9 @@ public class RbpClientService {
 	}
 	
 	
-	// primary, secondary connector 생성
+	/**
+	 * primary, secondary connector 생성
+	 */
 	public void init() {
 		connList = new ArrayList<>();
 		
@@ -65,7 +68,14 @@ public class RbpClientService {
 	}
 	
 	
-	// rbp에 message 전송
+	/**
+	 * RBP에 message 전송
+	 * @param logVO logVO의 seqId로 요청 thread의 응답이 제대로 왔는지 확인 가능
+	 * @param opCode 001:연결상태확인, 111:한도조회, 114:한도즉시차감, 116:결제취소
+	 * @param reqMap RBP 요청 데이터
+	 * @return RBP 응답 데이터
+	 * @throws Exception
+	 */
 	public Map<String, String> doRequest(LogVO logVO, String opCode, Map<String, String> reqMap) throws Exception{
 		
 		Map<String, String> resMap = null;
@@ -80,7 +90,7 @@ public class RbpClientService {
 				}
 				catch(Exception e) {
 					logVO.setFlow("[ADCB] --> [RBP]");
-					throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.RBP_INVALID_ERROR.mappingCode(), EnAdcbOmsCode.RBP_INVALID_ERROR.value(), e.getMessage(), logVO.getFlow());
+					throw new CommonException(EnAdcbOmsCode.RBP_INVALID_ERROR, e.getMessage());
 				}
 			}
 			
@@ -90,11 +100,23 @@ public class RbpClientService {
 				logVO.setFlow("[ADCB] <-- [RBP]");
 				logVO.setRbpResTime();
 				
-				// 응답 형식 정상여부 체크
+				// 응답 형식 정상여부 체크 (필수 응답값 없으면 exception)
 				if(Init.readConfig.getRbp_opcode_select().equals(opCode)) {
 					for(EnRbpReturnSelectLimit e: EnRbpReturnSelectLimit.values()) {
 						if(!resMap.containsKey(e.toString())) {
-							throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.RBP_RES_BODY_KEY.mappingCode(), EnAdcbOmsCode.RBP_RES_BODY_KEY.value(), EnAdcbOmsCode.RBP_RES_BODY_KEY.logMsg(), logVO.getFlow());
+							throw new CommonException(EnAdcbOmsCode.RBP_RES_BODY_KEY);
+						}
+					}
+				}else if(Init.readConfig.getRbp_opcode_charge().equals(opCode)) {
+					for(EnRbpReturnCharge e: EnRbpReturnCharge.values()) {
+						if(!resMap.containsKey(e.toString())) {
+							throw new CommonException(EnAdcbOmsCode.RBP_RES_BODY_KEY);
+						}
+					}
+				}else if(Init.readConfig.getRbp_opcode_cancel().equals(opCode)) {
+					for(EnRbpReturnCancel e : EnRbpReturnCancel.values()) {
+						if(!resMap.containsKey(e.toString())) {
+							throw new CommonException(EnAdcbOmsCode.RBP_RES_BODY_KEY);
 						}
 					}
 				}
@@ -109,17 +131,17 @@ public class RbpClientService {
 						// 에러코드를 찾아서 매핑한다.
 						if(e.getDefaultValue().equals(result)) {
 							if("".equals(e.getOpCode())) { 
-								throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg(), logVO.getFlow());
+								throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
 							}else { // RBP의 결과를 boku의 Reason코드로 매핑 시 opCode에 따라 다른 reasonCode를 줘야 하는 경우
 								if(e.getOpCode().equals(opCode)) {
-									throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg(), logVO.getFlow());
+									throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
 								}
 							}
 						}
 					}
 					
 					// 정의되지 않은 RESULT가 왔을 경우
-					throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnRbpResultCode.RS_INVALID.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + result, EnRbpResultCode.RS_INVALID.getResMsg(), logVO.getFlow());
+					throw new CommonException(EnRbpResultCode.RS_INVALID.getStatus(), EnRbpResultCode.RS_INVALID.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + result, EnRbpResultCode.RS_INVALID.getResMsg());
 				}
 				
 				break;
@@ -128,7 +150,7 @@ public class RbpClientService {
 		
 		if(resMap == null) {
 			logVO.setFlow("[ADCB] --> [RBP]");
-			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.RBP_RES_TIMEOUT.mappingCode(), EnAdcbOmsCode.RBP_RES_TIMEOUT.value(), EnAdcbOmsCode.RBP_RES_TIMEOUT.logMsg(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.RBP_RES_TIMEOUT);
 		}
 		
 		

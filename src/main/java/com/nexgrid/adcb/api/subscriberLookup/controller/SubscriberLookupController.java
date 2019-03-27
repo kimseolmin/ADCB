@@ -30,6 +30,13 @@ public class SubscriberLookupController {
 	private Logger logger = LoggerFactory.getLogger(SubscriberLookupController.class);
 	
 	
+	/**
+	 * SubscriberLookup API
+	 * @param request
+	 * @param response
+	 * @param paramMap
+	 * @return
+	 */
 	@RequestMapping(value="/subscriberLookup", method = RequestMethod.POST)
 	public Map<String, Object> getSubscriberLookup(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
 		//For OMS, ServiceLog
@@ -65,14 +72,14 @@ public class SubscriberLookupController {
 			dataMap.put("result", commonEx.sendException());
 			response.setStatus(commonEx.getStatusCode());
 			
-			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + commonEx.getFlow());
+			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
 			logger.error("[" + logVO.getSeqId() + "] Error Message : " + commonEx.getLogMsg());
 			logger.error("[" + logVO.getSeqId() + "]", commonEx);
 			
 		}
 		catch(Exception ex){
 			
-			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
 			
@@ -81,7 +88,7 @@ public class SubscriberLookupController {
 			
 			dataMap.put("msisdn", paramMap.get("msisdn"));
 			
-			Map<String, Object> result = CommonException.checkException(paramMap, logVO.getSeqId(), logVO.getFlow());
+			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
 			
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());

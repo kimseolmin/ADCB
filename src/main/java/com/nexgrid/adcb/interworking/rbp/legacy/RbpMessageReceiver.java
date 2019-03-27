@@ -55,7 +55,10 @@ public class RbpMessageReceiver extends Thread{
 	
 	
 	
-	// message 수신
+	/**
+	 * message 수신 (RBP에서 받은 String 형태의 message를 map형태로 변환 -> 해당 응답을 기다리는 쓰레드를 찾아 map전달 후 notify()) 
+	 * @param resMsg RBP에서 받은 String 형태의 message
+	 */
 	public void receiveMsg(String resMsg){
 		String seqId = null;
 		String seqNo = null;

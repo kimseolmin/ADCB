@@ -34,6 +34,13 @@ public class ChargeController {
 	private Logger logger = LoggerFactory.getLogger(ChargeController.class);
 	
 	
+	/**
+	 * Charge API
+	 * @param request
+	 * @param response
+	 * @param paramMap
+	 * @return
+	 */
 	@RequestMapping(value="/charge", method = RequestMethod.POST)
 	public Map<String ,Object> charge(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
 		
@@ -60,6 +67,9 @@ public class ChargeController {
 			// NCAS 연동 값 -> 청구자격 체크
 			commonService.userEligibilityCheck(paramMap, logVO);
 			
+			// charge
+			chargeService.charge(paramMap, logVO);
+			
 			
 			
 		}
@@ -72,14 +82,14 @@ public class ChargeController {
 			dataMap.put("result", commonEx.sendException());
 			response.setStatus(commonEx.getStatusCode());
 			
-			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + commonEx.getFlow());
+			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
 			logger.error("[" + logVO.getSeqId() + "] Error Message : " + commonEx.getLogMsg());
 			logger.error("[" + logVO.getSeqId() + "]", commonEx);
 			
 		}
 		catch(Exception ex){
 			
-			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
+			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
 			
@@ -88,7 +98,7 @@ public class ChargeController {
 			
 			dataMap.put("msisdn", paramMap.get("msisdn"));
 			
-			Map<String, Object> result = CommonException.checkException(paramMap, logVO.getSeqId(), logVO.getFlow());
+			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
 			
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());

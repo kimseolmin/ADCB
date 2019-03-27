@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.interworking.rbp.util;
+package com.nexgrid.adcb.interworking.rcsg.util;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -7,9 +7,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
-public class RbpKeyGenerator {
+
+
+public class RcsgKeyGenerator {
 	
-	private static RbpKeyGenerator generator;
+	private static RcsgKeyGenerator generator;
 	private DateFormat df = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 	private long currTimeMillis;
 	private long currSeq;
@@ -18,7 +20,7 @@ public class RbpKeyGenerator {
 	private String SystemSeq;
 	
 	
-	private RbpKeyGenerator(String systemId) {
+	private RcsgKeyGenerator(String systemId) {
 		
 		this.systemId = systemId;
 		this.randomSeq = new Random();
@@ -33,21 +35,23 @@ public class RbpKeyGenerator {
 	}
 	
 	
+	
 	/**
 	 * multi-thread로 동시접근되는 것을 막고
 	 * @param systemId
 	 * @return
 	 */
-	public static synchronized RbpKeyGenerator getInstance(String systemId) {
+	public static synchronized RcsgKeyGenerator getInstance(String systemId) {
 		if(generator == null) {
-			generator = new RbpKeyGenerator(systemId);
+			generator = new RcsgKeyGenerator(systemId);
 		}
 		return generator;
 	}
 	
 	
+	
 	/**
-	 * multi-thread로 동시접근되는 것을 막고 RBP의 BR_ID 생성
+	 * multi-thread로 동시접근되는 것을 막고 RCSG의 BR_ID 생성
 	 * @return
 	 */
 	public String generateKey() {
@@ -75,4 +79,5 @@ public class RbpKeyGenerator {
 		
 		return str;
 	}
+
 }

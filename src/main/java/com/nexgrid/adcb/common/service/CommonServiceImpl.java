@@ -88,7 +88,7 @@ public class CommonServiceImpl implements CommonService{
 	}
 	
 	
-
+	
 	@Override
 	public void contentTypeCheck(HttpServletRequest request, LogVO logVO) throws CommonException{
 		// TODO Auto-generated method stub
@@ -96,17 +96,17 @@ public class CommonServiceImpl implements CommonService{
 		String content_type = request.getHeader("Content-Type");
 		
 		if(content_type == null) {
-			throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.INVALID_HEADER_KEY.mappingCode(), EnAdcbOmsCode.INVALID_HEADER_KEY.value(), EnAdcbOmsCode.INVALID_HEADER_KEY.logMsg(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.INVALID_HEADER_KEY);
 		}
 		
 		if(!(content_type.equals("application/json"))){
-			throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.INVALID_HEADER_VALUE.mappingCode(), EnAdcbOmsCode.INVALID_BODY_VALUE.value(), EnAdcbOmsCode.INVALID_BODY_VALUE.logMsg(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
 		
 	}
 	
 	
-	// ncas연동
+	
 	@Override
 	public void getNcasGetMethod(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		
@@ -167,22 +167,22 @@ public class CommonServiceImpl implements CommonService{
 	    	//고객정보가 없거나 번호 이동된  사용자 차단 - 해지된 사용자는 고객정보 없음으로 나옴
 	    	//70 : 고객정보 없음  
 			if("70".equals(respcode) ) {
-				throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_70.mappingCode(), EnAdcbOmsCode.NCAS_70.value(), res_msg, logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.NCAS_70, res_msg);
 			}
 			
 
 			// 71 : SKT로 번호이동  
 			if("71".equals(respcode)) {
-				throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_71.mappingCode(), EnAdcbOmsCode.NCAS_71.value(), res_msg, logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.NCAS_71, res_msg);
 			}
 			
 			// 76 : KTF로 번호이동
 			if("76".equals(respcode)) {
-				throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_76.mappingCode(),  EnAdcbOmsCode.NCAS_76.value(), res_msg, logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.NCAS_76, res_msg);
 			}
 			
 			if(!"00".equals(respcode)) {
-				throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.NCAS_API.mappingCode(),  EnAdcbOmsCode.NCAS_API.value() + respcode, res_msg, logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.NCAS_API.status(), EnAdcbOmsCode.NCAS_API.mappingCode(),  EnAdcbOmsCode.NCAS_API.value() + respcode, res_msg);
 			}
 			
 			try {
@@ -195,7 +195,7 @@ public class CommonServiceImpl implements CommonService{
 		    	}
 		    	if(blockctn != 0 ) {
 		    		logVO.setFlow("[ADCB] <-- [DB]");
-		    		throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_CTN.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_CTN.value(), EnAdcbOmsCode.NCAS_BLOCK_CTN.logMsg(), logVO.getFlow());
+		    		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CTN);
 		    	}
 		    	
 		    	//정상 요금제가 아니면 차단
@@ -207,19 +207,19 @@ public class CommonServiceImpl implements CommonService{
 		    	}
 		    	if(blockfeetype != 0) {
 		    		logVO.setFlow("[ADCB] <-- [DB]");
-		    		throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_FEETYPE.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_FEETYPE.value(), EnAdcbOmsCode.NCAS_BLOCK_FEETYPE.logMsg(), logVO.getFlow());
+		    		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_FEETYPE);
 		    	}
 			}catch(DataAccessException adcbExc){
 				SQLException se = (SQLException) adcbExc.getRootCause();
 				logVO.setRsCode(Integer.toString(se.getErrorCode()));
 				logVO.setFlow("[ADCB] --> [DB]");
-				throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_ERROR.mappingCode(), EnAdcbOmsCode.DB_ERROR.value(), se.getMessage(), logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
 				
 			}catch(ConnectException adcbExc) {
 				logVO.setFlow("[ADCB] --> [DB]");
-				throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_CONNECT_ERROR.mappingCode(), EnAdcbOmsCode.DB_CONNECT_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
 			}catch (Exception adcbExc) {
-				throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_INVALID_ERROR.mappingCode(), EnAdcbOmsCode.DB_INVALID_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 			}
 			
 	    	// paramMap에 NCAS 결과값 저장
@@ -229,25 +229,25 @@ public class CommonServiceImpl implements CommonService{
 		}catch(HttpClientErrorException adcbExc){
 			
 			logVO.setFlow("[ADCB] <-- [NCAS]");
-			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.NCAS_INVALID_ERROR.mappingCode(), EnAdcbOmsCode.NCAS_INVALID_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.NCAS_INVALID_ERROR, adcbExc.getMessage());
 		
 		}catch(HttpServerErrorException adcbExc) {
 			
 			logVO.setFlow("[ADCB] <-- [NCAS]");
-			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.NCAS_INVALID_ERROR.mappingCode(), EnAdcbOmsCode.NCAS_INVALID_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.NCAS_INVALID_ERROR, adcbExc.getMessage());
 			
 		}catch(UnknownHttpStatusCodeException adcbExc) {
 			
 			logVO.setFlow("[ADCB] <-- [NCAS]");
-			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.NCAS_INVALID_ERROR.mappingCode(), EnAdcbOmsCode.NCAS_INVALID_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.NCAS_INVALID_ERROR, adcbExc.getMessage());
 			
 		}catch (ResourceAccessException adcbExc) {
 			
 			// connect, read time out
 			if(adcbExc.getMessage().indexOf("Read") > 0) {
-				throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.NCAS_READ_TIMEOUT.mappingCode(), EnAdcbOmsCode.NCAS_READ_TIMEOUT.value(), adcbExc.getMessage(), logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.NCAS_READ_TIMEOUT, adcbExc.getMessage());
 			}else {
-				throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.NCAS_CONNECT_TIMEOUT.mappingCode(), EnAdcbOmsCode.NCAS_CONNECT_TIMEOUT.value(), adcbExc.getMessage(), logVO.getFlow());
+				throw new CommonException(EnAdcbOmsCode.NCAS_CONNECT_TIMEOUT, adcbExc.getMessage());
 			}
 		
 		}catch(CommonException adcbExc) {
@@ -256,7 +256,7 @@ public class CommonServiceImpl implements CommonService{
 			
 		}catch (Exception adcbExc) {
 			
-			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.NCAS_INVALID_ERROR.mappingCode(), EnAdcbOmsCode.NCAS_INVALID_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.NCAS_INVALID_ERROR, adcbExc.getMessage());
 		}
 		
 		
@@ -264,7 +264,6 @@ public class CommonServiceImpl implements CommonService{
 
 
 
-	// ncas 헤더 응답값 map으로 반환.
 	@Override
 	public Map<String,String> getNcasResHeader(ResponseEntity<String> responseEntity) throws Exception {
 		
@@ -327,7 +326,6 @@ public class CommonServiceImpl implements CommonService{
 			
 
 			sb.append("API_TYPE=").append(logVO.getApiType()).append("|");
-			sb.append("CONN_FLOW=").append(logVO.getConnectionFlow() == null ? "" : logVO.getConnectionFlow()).append("|");
 			sb.append("API_RST_CODE=").append(logVO.getApiResultCode() == null ? "" : logVO.getApiResultCode()).append("|");
 			sb.append("RS_CODE=").append(logVO.getRsCode() == null ? "" : logVO.getRsCode());
 			
@@ -341,8 +339,9 @@ public class CommonServiceImpl implements CommonService{
 			sb.append("RBP_RES_TIME=").append(logVO.getRbpResTime() == null ? "" : logVO.getRbpResTime()).append("|");
 			sb.append("RBP_RESULT_CODE=").append(logVO.getRbpResultCode() == null ? "" : logVO.getRbpResultCode()).append("|");
 				
-			
-			
+			sb.append("RCSG_REQ_TIME=").append(logVO.getRcsgReqTime() == null ? "" : logVO.getRcsgReqTime()).append("|");
+			sb.append("RCSG_RES_TIME=").append(logVO.getRcsgResTime() == null ? "" : logVO.getRcsgResTime()).append("|");
+			sb.append("RCSG_RESULT_CODE=").append(logVO.getRcsgResultCode() == null ? "" : logVO.getRcsgResultCode());
 			
 			
 			Logger log = LogManager.getLogger("oms");
@@ -371,7 +370,6 @@ public class CommonServiceImpl implements CommonService{
 	};
 	
 	
-	// 사용자 청구 자격 체크
 	@Override
 	public boolean userEligibilityCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		
@@ -397,29 +395,29 @@ public class CommonServiceImpl implements CommonService{
  
     	// CUST_TYPE_CODE : 개인,법인구분(I : 개인 / G : 법인) - 법인폰 차단
     	if(!"I".equals(cust_type_code)) {
-    		throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_CORP.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_CORP.value(), EnAdcbOmsCode.NCAS_BLOCK_CORP.logMsg(), logVO.getFlow());
+    		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CORP);
     	}
     	
     	// CTN_STUS_CODE : CTN 상태 코드 (A : 정상 / S : 일시 중지) - 일시중지폰 차단
     	  if(!"A".equals(ctn_stus_code)){
-    		  throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_PAUSE.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_PAUSE.value(), EnAdcbOmsCode.NCAS_BLOCK_PAUSE.logMsg(), logVO.getFlow());
+    		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PAUSE);
     	  }
     	  
     	  // UNIT_LOSS_YN_CODE : 분실여부(Y,N) - 분실등록폰 차단
     	  if(!"N".equals(unit_loss_yn_code)) {
-    		  throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_LOSS.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_LOSS.value(), EnAdcbOmsCode.NCAS_BLOCK_LOSS.logMsg(), logVO.getFlow());
+    		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_LOSS);
     	  }
     	  
     	  
     	  // PRE_PAY_CODE : NULL이 아닌 경우 선불가입자이며, NULL인 경우 선불가입자 아님. - 선불가입자 차단
     	  if(!"".equals(pre_pay_code)) {
-    		  throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_PREPAY.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_PREPAY.value(), EnAdcbOmsCode.NCAS_BLOCK_PREPAY.logMsg(), logVO.getFlow());
+    		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PREPAY);
     	  }
     	  
     	  
     	  // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
     	  if(!"0".equals(svc_auth)) {
-    		  throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_IRREG.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_IRREG.value(), EnAdcbOmsCode.NCAS_BLOCK_IRREG.logMsg(), logVO.getFlow());
+    		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_IRREG);
     	  }
     	  
     	  
@@ -442,7 +440,7 @@ public class CommonServiceImpl implements CommonService{
 		}
 		// 만 14세 미만 차단
 		if(age < 14 ) {
-			throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_14.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_14.value(), EnAdcbOmsCode.NCAS_BLOCK_14.logMsg(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_14);
 		}else {
 			// 14세 이상 중에 청소년요금제가 아닌 경우
 			if("N".equals(young_fee_yn)){
@@ -457,46 +455,15 @@ public class CommonServiceImpl implements CommonService{
 	
 	
 	
-	// 통합한도 연동: 한도조회 -> 사용자 등급 체크 (7등급이면 차단)
+	@Override
 	public boolean userGradeCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		
 		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
 		String ctn = ncasRes.get("CTN");
-    	String respcode = ncasRes.get("RESPCODE"); // RESPCODE
-    	String res_msg = ncasRes.get("RESPMSG"); // 처리 결과 내용
-    	String sub_no = ncasRes.get("SUB_NO");	// 고객의 가입번호
-    	String pers_name = ncasRes.get("PERS_NAME"); // 실사용자명
     	String fee_type = ncasRes.get("FEE_TYPE"); //요금제 타입    	
-    	String ban_unpaid_yn_code = ncasRes.get("BAN_UNPAID_YN_CODE"); // 연체여부
-    	String unit_loss_yn_code = ncasRes.get("UNIT_LOSS_YN_CODE"); // 분실여부
-    	String cust_type_code = ncasRes.get("CUST_TYPE_CODE"); // 개인,법인 구분 (I : 개인 / G : 법인)
-    	String ctn_stus_code = ncasRes.get("CTN_STUS_CODE"); // CTN 상태코드 (A:정상 / S:일시 중지)
-    	String pre_pay_code = StringUtils.defaultIfEmpty(ncasRes.get("PRE_PAY_CODE"), ""); // 선불가입코드(P:국제전화차단 / C:국제전화허용) 
-    																					//-> NULL이 아닌 경우 선불가입자, NULL인 경우 선불가입자 아님.
-    	String unit_mdl = ncasRes.get("UNIT_MDL"); // 단말기명
-    	String aceno = ncasRes.get("ACENO"); // 가입자 계약번호(기기변경, 번호변경 시에는 유지되나, 명의변경 시 변경됨.)
-    	String ban = ncasRes.get("BAN"); // 청구선 번호
-    	String svc_auth = ncasRes.get("SVC_AUTH"); // 요금제, 부가서비스, 월정액 가입여부
-    											// 입력정보: LRZ1111111|LRZ1111112|LRZ1111113
-    											// 출력정보: 0|0|1 (가입은 '1', 미가입은 '0')
-    	String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
-    													// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
-    	String frst_entr_dttm = ncasRes.get("FRST_ENTR_DTTM"); // 최초 개통일자
-    	String sub_birth_pers_id = ncasRes.get("SUB_BIRTH_PERS_ID"); // 명의자 생년월일
-    	String sub_sex_pers_id = ncasRes.get("SUB_SEX_PERS_ID"); // 명의자 성별
-    	String cust_flag = ncasRes.get("CUST_FLAG"); //고객정보 구분값 (ex: YL00000000)
-    											// 1번째 byte: 결제차단여부 ('Y':결제차단->결제이용동의 필요, 'N':결제가능->결제이용동의 완료)
-    											// 2번째 byte: PIN번호 설정여부 ('Y':PIN번호사용, 'N':PIN번호사용안함, '0'(숫자):PIN번호미설정, 'L':5회실패로 잠금상태)
-    	String law1HomeTelno = StringUtil.checkTrim(ncasRes.get("LAW1_HOME_TELNO")); //법정 대리인 전화번호
-    	String law1PersName = ncasRes.get("LAW1_PERS_NAME"); //법정 대리인 이름
-		
-		
-		
-    	
     	
 		Map<String, String> rbpReqMap = new HashMap<String, String>();	// RBP 요청
 		Map<String, String> rbpResMap = null;	// RBP 응답
-		
 		
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 		long tempTimeMillis = System.currentTimeMillis();
@@ -516,7 +483,7 @@ public class CommonServiceImpl implements CommonService{
 		rbpReqMap.put("CALLED_NETWORK", Init.readConfig.getRbp_called_network()); // 착신 사업자 코드
 		rbpReqMap.put("PID", Init.readConfig.getRbp_pid()); // Product ID
 		rbpReqMap.put("DBID", Init.readConfig.getRbp_dbid()); // DETAIL BILLING ID
-		rbpReqMap.put("RBP_SVC_CTG", Init.readConfig.getRbp_svc_ctg());
+		rbpReqMap.put("SVC_CTG", Init.readConfig.getRbp_svc_ctg());
 		
 		
 		logVO.setFlow("[ADCB] --> [RBP]");
@@ -527,22 +494,23 @@ public class CommonServiceImpl implements CommonService{
 		if(!rbpResMap.get("CUST_GRD_CD").equals("7")) {
 			return true;
 		}else { // 7등급 차단
-			throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.NCAS_BLOCK_GRADE.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_GRADE.value(), EnAdcbOmsCode.NCAS_BLOCK_GRADE.logMsg(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_GRADE);
 		}
 		
 	}
 	
 	
-	// body에 msisdn만 오는 경우 필수값 체크
+	@Override
 	public void reqBodyCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception {
 		// body key 체크
 		if( paramMap==null || paramMap.size() == 0 || !paramMap.containsKey("msisdn") ) {
-			throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.INVALID_BODY_KEY.mappingCode(), EnAdcbOmsCode.INVALID_BODY_KEY.value(), EnAdcbOmsCode.INVALID_BODY_KEY.logMsg(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_KEY);
 		}
 		
 		// body value 체크
-		if( paramMap.get("msisdn") == null || paramMap.get("msisdn").equals("")  ) {
-			throw new CommonException(HttpStatus.BAD_REQUEST.value(), EnAdcbOmsCode.INVALID_BODY_VALUE.mappingCode(), EnAdcbOmsCode.INVALID_BODY_VALUE.value(), EnAdcbOmsCode.INVALID_BODY_VALUE.logMsg(), logVO.getFlow());
+		String msisdn = paramMap.get("msisdn") == null ? "" : paramMap.get("msisdn").toString();
+		if( "".equals(msisdn) || StringUtil.hasSpecialCharacter(msisdn) || StringUtil.spaceCheck(msisdn) || StringUtil.maxCheck(msisdn, 15) ) {
+			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
 	}
 }

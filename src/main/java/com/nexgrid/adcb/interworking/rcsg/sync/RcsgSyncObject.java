@@ -1,14 +1,14 @@
-package com.nexgrid.adcb.interworking.rbp.sync;
+package com.nexgrid.adcb.interworking.rcsg.sync;
 
 import java.util.Map;
 
-public class RbpSyncObject {
+public class RcsgSyncObject {
 	
 	private Map<String, String> resMap = null;
 	private String seqId = null;
 	private long createTime = 0L;
 	
-	public RbpSyncObject(String seqId) {
+	public RcsgSyncObject(String seqId) {
 		this.seqId = seqId;
 		this.createTime = System.currentTimeMillis();
 	}
@@ -16,7 +16,6 @@ public class RbpSyncObject {
 	public String getSeqId() {
 		return seqId;
 	}
-	
 	
 	
 	/**
@@ -44,10 +43,10 @@ public class RbpSyncObject {
 		}
 	}
 	
-	
+
 	
 	/**
-	 * RBP 응답 데이터 할당
+	 * RCSG 응답 데이터 할당
 	 * @param resMap
 	 */
 	public void setResponseMap(Map<String, String> resMap) {
@@ -74,12 +73,4 @@ public class RbpSyncObject {
 	public void setCreateTime(long createTime) {
 		this.createTime = createTime;
 	}
-	
-	
-	
-	
-	
-	
-	
-
- }
+}

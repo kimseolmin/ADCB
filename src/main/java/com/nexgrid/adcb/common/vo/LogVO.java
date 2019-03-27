@@ -41,6 +41,11 @@ public class LogVO {
 	private String rbpResultCode = "";				// RBP 결과 코드
 	
 	
+	private String rcsgReqTime = "";					// RCSG 접속 요청 발생 시간
+	private String rcsgResTime = "";					// RCSG 접속 요청 발생 시간
+	private String rcsgResultCode = "";					// RCSG 결과 코드
+	
+	
 	
 	/*****************service log********************/
 	private String flow;							//Error Occurrence Flow
@@ -276,6 +281,35 @@ public class LogVO {
 
 	public void setRbpResultCode(String rbpResultCode) {
 		this.rbpResultCode = rbpResultCode;
+	}
+
+	public String getRcsgReqTime() {
+		return rcsgReqTime;
+	}
+
+
+	public void setRcsgReqTime() {
+		this.rcsgReqTime = StringUtil.getCurrentTimeMilli();
+	}
+
+
+	public String getRcsgResTime() {
+		return rcsgResTime;
+	}
+
+
+	public void setRcsgResTime() {
+		this.rcsgResTime = StringUtil.getCurrentTimeMilli();
+	}
+
+
+	public String getRcsgResultCode() {
+		return rcsgResultCode;
+	}
+
+
+	public void setRcsgResultCode(String rcsgResultCode) {
+		this.rcsgResultCode = rcsgResultCode;
 	}
 
 

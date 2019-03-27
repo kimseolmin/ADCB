@@ -5,7 +5,7 @@
 <comment>config_properties</comment>
 
 	<!-- ADCB -->
-	<entry key="ADCB_CONFIG_PATH">C:/Project/02.ADCB/workspace/adcb.bokuAPI/src/main/webapp/WEB-INF/config</entry>
+	<entry key="ADCB_CONFIG_PATH">C:/Project/03.ADCB/workspace/ADCB.BokuAPI/src/main/webapp/WEB-INF/config</entry>
 
 	<!-- OMS 서버번호 -->
 	<entry key="SERVER_NUM">001</entry>
@@ -14,8 +14,8 @@
 	<!-- <entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_netflix&amp;CPPWD=05WbD6MQR6lVtq57V2o/HA==&amp;CPTYPE=I&amp;CASECODE=TF1306&amp;SUB_NO=</entry> -->
 	<entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_lgudcb&amp;CPPWD=lgudcb!01&amp;CPTYPE=I&amp;CASECODE=TF1226&amp;CTN=</entry> 
 	<entry key="NCAS_CHARSET">UTF-8</entry>
-	<entry key="NCAS_CONNECT_TIME_OUT">5</entry>
-	<entry key="NCAS_READ_TIME_OUT">15</entry>
+	<entry key="NCAS_CONNECT_TIME_OUT">5000</entry>
+	<entry key="NCAS_READ_TIME_OUT">15000</entry>
 	<entry key="NCAS_HEADER_NAME">RESP</entry>
 	
 
@@ -35,6 +35,23 @@
 	<entry key="RBP_DBID">LICQ504403</entry> <!-- DETAIL BILLING ID -->
 	<entry key="RBP_SVC_CTG">GGSTO</entry> <!-- 서비스 구분 -->
 	<entry key="RBP_INTERFACE_VERSION">V01</entry> <!-- 연동 버전 정의 -->
+	
+	
+	<!-- RCSG 연동 -->
+	<entry key="RCSG_PRIMARY_IP">127.0.0.1</entry>
+	<entry key="RCSG_PRIMARY_PORT">7000</entry>
+	<entry key="RCSG_SECONDARY_IP">127.0.0.1</entry>
+	<entry key="RCSG_SECONDARY_PORT">8000</entry>
+	<entry key="RCSG_CONNECT_TIME_OUT">5000</entry>
+	<entry key="RCSG_RECEIVE_TIME_OUT">600000</entry>
+	<entry key="RCSG_RECONNECT_SLEEP_TIME">1000</entry>
+	<entry key="RCSG_SYSTEM_ID">GDCB02</entry>
+	<entry key="RCSG_CDRDATA">1000</entry> <!-- VERSION(10) + TYPE(00) (TYPE: CMS-00, SMS-01, MMS-02, WAP-03)  -->
+	<entry key="RCSG_CALLED_NETWORK">102200</entry> <!-- 착신 사업자 코드 -->
+	<entry key="RCSG_PID">QDA011254407</entry> <!-- Product ID -->
+	<entry key="RCSG_DBID">LICQ504403</entry> <!-- DETAIL BILLING ID -->
+	<entry key="RCSG_SVC_CTG">GGSTO</entry> <!-- 서비스 구분 -->
+	<entry key="RCSG_INTERFACE_VERSION">V01</entry> <!-- 연동 버전 정의 -->
 	
 	
 	<!-- ESB 연동 -->

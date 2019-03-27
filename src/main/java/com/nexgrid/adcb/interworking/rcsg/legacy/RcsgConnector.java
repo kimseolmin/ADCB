@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.interworking.rbp.legacy;
+package com.nexgrid.adcb.interworking.rcsg.legacy;
 
 import java.io.FileDescriptor;
 import java.io.FileInputStream;
@@ -15,16 +15,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.nexgrid.adcb.common.vo.LogVO;
-import com.nexgrid.adcb.interworking.rbp.sync.RbpSyncManager;
-import com.nexgrid.adcb.interworking.rbp.sync.RbpSyncObject;
+import com.nexgrid.adcb.interworking.rcsg.sync.RcsgSyncManager;
+import com.nexgrid.adcb.interworking.rcsg.sync.RcsgSyncObject;
 import com.nexgrid.adcb.interworking.util.SequenceNoManager;
 import com.nexgrid.adcb.util.Init;
 
-public class RbpConnector implements Runnable{
+public class RcsgConnector implements Runnable{
 	
-	public static final Logger logger = LoggerFactory.getLogger(RbpConnector.class);
-	
-	private static SequenceNoManager seqNoManager;
+	public static final Logger logger = LoggerFactory.getLogger(RcsgConnector.class);
+
+private static SequenceNoManager seqNoManager;
 	
 	private String name = null;
 	private String serverIp = null;
@@ -40,21 +40,21 @@ public class RbpConnector implements Runnable{
 	
 	private Object sendTimelock = new Object();
 	
-	private RbpMessageSender msgSender;
-	private RbpMessageReceiver msgReceiver;
+	private RcsgMessageSender msgSender;
+	private RcsgMessageReceiver msgReceiver;
 	private Timer healthCheckTimer;
 	
 	static {
 		seqNoManager = new SequenceNoManager();
 		
 		try {
-			seqNoManager.open(Init.readConfig.getAdcb_config_path(), Init.readConfig.getRbp_system_id() + ".ser");
+			seqNoManager.open(Init.readConfig.getAdcb_config_path(), Init.readConfig.getRcsg_system_id() + ".ser");
 		}catch(Exception e) {
-			logger.error("RBP Sequence File Open Error : Error_Msg=" + e.getMessage(), e);
+			logger.error("RCSG Sequence File Open Error : Error_Msg=" + e.getMessage(), e);
 		}
 	}
 	
-	public RbpConnector(String ip, int port) {
+	public RcsgConnector(String ip, int port) {
 		this.serverIp = ip;
 		this.serverPort = port;
 		this.logVO = new LogVO("healthCheck");
@@ -95,7 +95,9 @@ public class RbpConnector implements Runnable{
 	public int getServerPort() {
 		return serverPort;
 	}
-
+	
+	
+	
 	/**
 	 * health check timer 설정
 	 */
@@ -104,6 +106,7 @@ public class RbpConnector implements Runnable{
 		// 10초 후부터 1초 간격으로 실행
 		healthCheckTimer.scheduleAtFixedRate(new HealthChecker(), 10000, 1000);
 	}
+	
 	
 	
 	/**
@@ -116,7 +119,7 @@ public class RbpConnector implements Runnable{
 		}
 	}
 	
-
+	
 	
 	/**
 	 * 서버로부터 healthcheck 응답
@@ -126,7 +129,7 @@ public class RbpConnector implements Runnable{
 		try {
 			// 정상으로 보냄.
 			reqMap.put("CON_STS", "1");
-			sendMsg(Init.readConfig.getRbp_msg_gbn_return(), Init.readConfig.getRbp_opcode_con_qry(), reqMap);
+			sendMsg(Init.readConfig.getRcsg_msg_gbn_return(), Init.readConfig.getRcsg_opcode_con_qry(), reqMap);
 		}catch (Exception e) {
 			logger.error("[Health Check Error" + e.getMessage());
 		}
@@ -134,7 +137,6 @@ public class RbpConnector implements Runnable{
 	
 	
 	
-
 	/**
 	 * health check를 위한 TimerTask 클래스
 	 */
@@ -166,14 +168,14 @@ public class RbpConnector implements Runnable{
 				this.logVO = new LogVO("healthCheck");
 				Map<String, String> reqMap = new HashMap<String, String>();
 				reqMap.put("CON_ID", conId + "");
-				Map<String, String> resMap = sendMsg(Init.readConfig.getRbp_msg_gbn_invoke(), Init.readConfig.getRbp_opcode_con_qry(), reqMap);
+				Map<String, String> resMap = sendMsg(Init.readConfig.getRcsg_msg_gbn_invoke(), Init.readConfig.getRcsg_opcode_con_qry(), reqMap);
 				
 				if(resMap == null || !"1".equals(resMap.get("CON_STS"))) {
 					isConnected = false;
 				}
 			}
 		}catch (Exception e) {
-			logger.error("[Health Check " + getName() + "] RBP Error : " + e.getMessage(), e);
+			logger.error("[Health Check " + getName() + "] RCSG Error : " + e.getMessage(), e);
 		}
 		
 	}
@@ -181,21 +183,20 @@ public class RbpConnector implements Runnable{
 	
 	
 	/**
-	 * RBP에 메시지 전송
+	 * RCSG에 메시지 전송
 	 * @param msgGbn 1:invoke, 2:return
 	 * @param opCode 001:연결상태확인, 111:한도조회, 114:한도즉시차감, 116:결제취소
-	 * @param reqMap RBP 요청값
+	 * @param reqMap RCSG 요청값
 	 * @return
 	 * @throws Exception
 	 */
 	public Map<String, String> sendMsg(String msgGbn, String opCode, Map<String, String> reqMap) throws Exception{
 		updateLastSendTime();
 		
-		
 		reqMap.put("OP_CODE", opCode);
 		
 		String sequenceNo = "";
-		if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
+		if(Init.readConfig.getRcsg_msg_gbn_invoke().equals(msgGbn)) {
 			sequenceNo = seqNoManager.getNext() + "";
 			reqMap.put("SEQUENCE_NO", sequenceNo);
 			reqMap.put("MESSAGE_GBN", "1");
@@ -204,30 +205,28 @@ public class RbpConnector implements Runnable{
 		}
 		
 		String logSeq = "[" + logVO.getSeqId() + "] ";
-		logger.debug(logSeq + "RBP Message Put at sender = " + reqMap);
+		logger.debug(logSeq + "RCSG Message Put at sender = " + reqMap);
 		
 		msgSender.putMessage(reqMap);
 		
-		
-		if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) { // 서버의 health check에 대한 응답이 아닐 경우에만
+		if(Init.readConfig.getRcsg_msg_gbn_invoke().equals(msgGbn)) { // 서버의 health check에 대한 응답이 아닐 경우에만
 			// 메시지를 수신받을 때까지 기다린다.
-			RbpSyncObject syncObj = new RbpSyncObject(logVO.getSeqId());
-			RbpSyncManager.getInstance().put(sequenceNo, syncObj);
+			RcsgSyncObject syncObj = new RcsgSyncObject(logVO.getSeqId());
+			RcsgSyncManager.getInstance().put(sequenceNo, syncObj);
 			
-			syncObj.setWait(Long.parseLong(Init.readConfig.getRbp_receive_time_out()));
+			syncObj.setWait(Long.parseLong(Init.readConfig.getRcsg_receive_time_out()));
 			
 			//timeout시간 안에 메시지 응답을 받지 못하면 null을 반환
 			return syncObj.getResMap();
 		}else {
 			return reqMap;
 		}
-		
-		
 	}
 	
 	
+	
 	/**
-	 * RBP에 message를 보낸 시간 재설정
+	 * RCSG에 message를 보낸 시간 재설정
 	 */
 	private void updateLastSendTime() {
 		synchronized (sendTimelock) {
@@ -236,7 +235,7 @@ public class RbpConnector implements Runnable{
 	}
 	
 	
-
+	
 	/**
 	 * message sender & receiver 해제
 	 */
@@ -251,7 +250,6 @@ public class RbpConnector implements Runnable{
 			msgReceiver = null;
 		}
 	}
-
 	
 	
 	
@@ -261,11 +259,11 @@ public class RbpConnector implements Runnable{
 			if(!isConnected) {
 				try{
 					reconnect();
-					logger.info("RBP Connected!!! [serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
+					logger.info("RCSG Connected!!! [serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
 				}catch(Exception e) {
-					logger.error("RBP not Connected...... Sleep for " + Init.readConfig.getRbp_reconnect_sleep_time() + " [serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
+					logger.error("RCSG not Connected...... Sleep for " + Init.readConfig.getRcsg_reconnect_sleep_time() + " [serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
 					try {
-						Thread.sleep(Long.parseLong(Init.readConfig.getRbp_reconnect_sleep_time()));
+						Thread.sleep(Long.parseLong(Init.readConfig.getRcsg_reconnect_sleep_time()));
 					}catch (Exception e1) {
 						e1.printStackTrace();
 					}
@@ -287,9 +285,11 @@ public class RbpConnector implements Runnable{
 	}
 	
 	
+	
 	public void destory() {
 		this.isRun = false;
 	}
+	
 	
 	
 	/**
@@ -300,7 +300,7 @@ public class RbpConnector implements Runnable{
 		disconnect();
 		
 		socket = new Socket();
-		socket.setSoTimeout(Integer.parseInt(Init.readConfig.getRbp_connect_time_out()));
+		socket.setSoTimeout(Integer.parseInt(Init.readConfig.getRcsg_connect_time_out()));
 		socket.connect(new InetSocketAddress(serverIp, serverPort));
 		isConnected = true;
 		
@@ -315,15 +315,15 @@ public class RbpConnector implements Runnable{
 		}
 		
 		// sender & receiver 생성
-		msgSender = new RbpMessageSender(this);
-		msgReceiver = new RbpMessageReceiver(this);
+		msgSender = new RcsgMessageSender(this);
+		msgReceiver = new RcsgMessageReceiver(this);
 		msgSender.start();
 		msgReceiver.start();
 		
 		// healthCheck timer 설정
 		initHealthChecker();
 		
-		logger.info("RBP Connected [" + getName() + "] ============================================");
+		logger.info("RCSG Connected [" + getName() + "] ============================================");
 		
 	}
 	
@@ -346,7 +346,7 @@ public class RbpConnector implements Runnable{
 		}
 		
 		if(isConnected) {
-			logger.error("RBP Disconnected [" + getName() + "]--------------------------------------");
+			logger.error("RCSG Disconnected [" + getName() + "]--------------------------------------");
 		}
 		
 		isConnected = false;
@@ -354,7 +354,8 @@ public class RbpConnector implements Runnable{
 	}
 	
 	
-
 	
+	
+
 	
 }

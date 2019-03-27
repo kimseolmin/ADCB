@@ -32,7 +32,13 @@ public class AccountProfileService {
 
 	
 	
-	// NCAS 연동 결과 -> boku 응답 
+	/**
+	 * NCAS 연동 결과를 AccountProfile API 응답값으로 매핑 
+	 * @param paramMap
+	 * @param logVO
+	 * @return
+	 * @throws Exception
+	 */
 	public Map<String, Object> getAccountProfile(Map<String, Object> paramMap, LogVO logVO) throws Exception {
 		
 		Map<String, String> ncasRes = (Map<String, String>) paramMap.get("ncasRes");
@@ -87,13 +93,13 @@ public class AccountProfileService {
 			SQLException se = (SQLException) adcbExc.getRootCause();
 			logVO.setRsCode(Integer.toString(se.getErrorCode()));
 			logVO.setFlow("[ADCB] --> [DB]");
-			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_ERROR.mappingCode(), EnAdcbOmsCode.DB_ERROR.value(), se.getMessage(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
 			
 		}catch(ConnectException adcbExc) {
 			logVO.setFlow("[ADCB] --> [DB]");
-			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_CONNECT_ERROR.mappingCode(), EnAdcbOmsCode.DB_CONNECT_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
 		}catch (Exception adcbExc) {
-			throw new CommonException(HttpStatus.INTERNAL_SERVER_ERROR.value(), EnAdcbOmsCode.DB_INVALID_ERROR.mappingCode(), EnAdcbOmsCode.DB_INVALID_ERROR.value(), adcbExc.getMessage(), logVO.getFlow());
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 		}
 		
 		
