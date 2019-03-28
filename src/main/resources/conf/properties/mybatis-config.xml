@@ -4,5 +4,6 @@
 <configuration>
 	<settings>
 	  <setting name="defaultStatementTimeout" value="30"/>
+	  <setting name="jdbcTypeForNull" value="NULL" />
 	</settings>
 </configuration>

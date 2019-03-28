@@ -56,6 +56,7 @@
 	
 	<!-- ESB 연동 -->
 	<entry key="ESB_MPS208_URL">http://172.22.14.79:15011/CSSI/MPS/UpdateLmtStlmUseDenyYn</entry>
+	<entry key="ESB_CM181_URL">http://172.22.14.79:15011/CSSI/CM/RetrieveMobilePayArmPsblYn</entry>
 	<entry key="ESB_TIME_OUT">5000</entry>
 	
 	<!-- das,ags timeout -->

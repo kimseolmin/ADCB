@@ -56,7 +56,7 @@ public enum EnAdcbOmsCode {
 	, ESB_TIMEOUT("54888888", "4", "ESB Timeout", HttpStatus.INTERNAL_SERVER_ERROR)
 	, ESB_API("5410", "4", HttpStatus.INTERNAL_SERVER_ERROR)
 	, ESB_4004("54104004", "105", "존재하지 않는 고객", HttpStatus.BAD_REQUEST)
-	, ESG_INVALID_ERROR("54999999", "4", HttpStatus.INTERNAL_SERVER_ERROR);
+	, ESB_INVALID_ERROR("54999999", "4", HttpStatus.INTERNAL_SERVER_ERROR);
 	
 	
 	

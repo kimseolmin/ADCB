@@ -44,8 +44,8 @@ public class RcsgClientService {
 		serverIp[1] = Init.readConfig.getRcsg_secondary_ip();
 		serverPort[1] = Integer.parseInt(Init.readConfig.getRcsg_secondary_port());
 		
-		Thread[] threads = new Thread[serverIp.length];
-		//Thread[] threads = new Thread[1];
+		//Thread[] threads = new Thread[serverIp.length];
+		Thread[] threads = new Thread[1];
 		
 		for(int i=0; i<threads.length; i++) {
 			RcsgConnector rcsgConn = new RcsgConnector(serverIp[i], serverPort[i]);

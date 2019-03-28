@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.nexgrid.adcb.api.charge.dao.ChargeDAO">
+ 
+ 	<!-- BOKU의 청구 API 최초 요청 데이터 INSERT -->
+ 	<insert id="insertChargeReq">
+	 	INSERT INTO TB_CHARGE_INFO (
+	 		REQUEST_ID,
+	        CLIENT_TRANSACTIONID,
+	        AMOUNT,
+	        MSISDN,
+	        MERCHANT_ID,
+         	PRODUCT_DESCRIPTION
+         	)
+	     VALUES (
+	     	#{param.requestId},
+			#{param.clientTransactionId},
+			#{param.purchaseAmount.amount},
+			#{param.msisdn},
+			#{param.merchantId},
+			#{param.productDescription}
+			)
+ 	</insert>
+ </mapper>

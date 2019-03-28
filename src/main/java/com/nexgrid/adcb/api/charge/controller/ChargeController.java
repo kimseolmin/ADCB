@@ -61,6 +61,9 @@ public class ChargeController {
 			// reqBody check
 			chargeService.reqBodyCheck(paramMap, logVO);
 			
+			// 최초 요청 데이터 저장
+			chargeService.insertChargeReq(paramMap, logVO);
+			
 			// NCAS 연동
 			commonService.getNcasGetMethod(paramMap, logVO);
 			

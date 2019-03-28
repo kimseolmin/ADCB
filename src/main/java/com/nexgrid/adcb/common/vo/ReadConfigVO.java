@@ -63,6 +63,7 @@ public class ReadConfigVO {
 	
 	// ESB 연동
 	private String esb_mps208_url = "";
+	private String esb_cm181_url = "";
 	private String esb_time_out = "";
 	
 	private String time_out = "";
@@ -370,6 +371,12 @@ public class ReadConfigVO {
 	}
 	public void setEsb_mps208_url(String esb_mps208_url) {
 		this.esb_mps208_url = esb_mps208_url;
+	}
+	public String getEsb_cm181_url() {
+		return esb_cm181_url;
+	}
+	public void setEsb_cm181_url(String esb_cm181_url) {
+		this.esb_cm181_url = esb_cm181_url;
 	}
 	public String getEsb_time_out() {
 		return esb_time_out;

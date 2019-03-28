@@ -45,8 +45,8 @@ public class RbpClientService {
 		serverIp[1] = Init.readConfig.getRbp_secondary_ip();
 		serverPort[1] = Integer.parseInt(Init.readConfig.getRbp_secondary_port());
 		
-		Thread[] threads = new Thread[serverIp.length];
-		//Thread[] threads = new Thread[1];
+		//Thread[] threads = new Thread[serverIp.length];
+		Thread[] threads = new Thread[1];
 		
 		for(int i=0; i<threads.length; i++) {
 			RbpConnector rbpConn = new RbpConnector(serverIp[i], serverPort[i]);

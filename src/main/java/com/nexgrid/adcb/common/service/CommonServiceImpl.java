@@ -146,9 +146,9 @@ public class CommonServiceImpl implements CommonService{
 	    	String unit_mdl = ncasRes.get("UNIT_MDL"); // 단말기명
 	    	String aceno = ncasRes.get("ACENO"); // 가입자 계약번호(기기변경, 번호변경 시에는 유지되나, 명의변경 시 변경됨.)
 	    	String ban = ncasRes.get("BAN"); // 청구선 번호
-	    	String svc_auth = ncasRes.get("SVC_AUTH"); // 요금제, 부가서비스, 월정액 가입여부
-	    											// 입력정보: LRZ1111111|LRZ1111112|LRZ1111113
-	    											// 출력정보: 0|0|1 (가입은 '1', 미가입은 '0')
+	    	String svc_auth = ncasRes.get("SVC_AUTH"); // 부정사용자|장애인부가서비스|65세이상부가서비스
+	    											// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
+	    											// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
 	    	String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
 	    													// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
 	    	String frst_entr_dttm = ncasRes.get("FRST_ENTR_DTTM"); // 최초 개통일자
@@ -380,9 +380,9 @@ public class CommonServiceImpl implements CommonService{
     	String ctn_stus_code = ncasRes.get("CTN_STUS_CODE"); // CTN 상태코드 (A:정상 / S:일시 중지)
     	String pre_pay_code = StringUtils.defaultIfEmpty(ncasRes.get("PRE_PAY_CODE"), ""); // 선불가입코드(P:국제전화차단 / C:국제전화허용) 
     																					//-> NULL이 아닌 경우 선불가입자, NULL인 경우 선불가입자 아님.
-    	String svc_auth = ncasRes.get("SVC_AUTH"); // 요금제, 부가서비스, 월정액 가입여부
-    											// 입력정보: LRZ1111111|LRZ1111112|LRZ1111113
-    											// 출력정보: 0|0|1 (가입은 '1', 미가입은 '0')
+    	String svc_auth = ncasRes.get("SVC_AUTH"); // 부정사용자|장애인부가서비스|65세이상부가서비스
+												// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
+												// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
     	String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
     													// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
     	String sub_birth_pers_id = ncasRes.get("SUB_BIRTH_PERS_ID"); // 명의자 생년월일
@@ -416,16 +416,10 @@ public class CommonServiceImpl implements CommonService{
     	  
     	  
     	  // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
+    	  svc_auth = svc_auth.substring(0, 1);
     	  if(!"0".equals(svc_auth)) {
     		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_IRREG);
     	  }
-    	  
-    	  
-    	  // 결제차단여부 ('Y':결제차단->결제이용동의 필요, 'N':결제가능->결제이용동의 완료)
-    	  cust_flag = cust_flag.substring(0, 1);
-    	  /*if(!"N".equals(cust_flag)) {
-    		  throw new CommonException("400", "4xx", "51000"+"XXX", "결제이용동의 필요", logVO.getFlow());
-    	  }*/
     	  
     	  
     	// 실사용자 만나이 구하기
@@ -485,12 +479,16 @@ public class CommonServiceImpl implements CommonService{
 		rbpReqMap.put("DBID", Init.readConfig.getRbp_dbid()); // DETAIL BILLING ID
 		rbpReqMap.put("SVC_CTG", Init.readConfig.getRbp_svc_ctg());
 		
+		// 한도조회 요청 paramMap에 저장
+		paramMap.put("RbpReq_111", rbpReqMap);
 		
+		// RBP 연동
 		logVO.setFlow("[ADCB] --> [RBP]");
 		rbpResMap = rbpClientService.doRequest(logVO, Init.readConfig.getRbp_opcode_select(), rbpReqMap);
 		
 		// 한도조회 결과 paramMap에 저장
 		paramMap.put("RbpRes_111", rbpResMap);
+		
 		if(!rbpResMap.get("CUST_GRD_CD").equals("7")) {
 			return true;
 		}else { // 7등급 차단

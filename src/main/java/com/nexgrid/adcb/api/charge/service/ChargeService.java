@@ -1,5 +1,7 @@
 package com.nexgrid.adcb.api.charge.service;
 
+import java.net.ConnectException;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -10,8 +12,10 @@ import java.util.Random;
 import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import com.nexgrid.adcb.api.charge.dao.ChargeDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.interworking.rbp.service.RbpClientService;
@@ -22,6 +26,10 @@ import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.StringUtil;
 
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsReqInVO;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RetrieveMobilePayArmPsblYn;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RetrieveMobilePayArmPsblYnResponse;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.BusinessHeader;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.DsInputInVO;
@@ -42,6 +50,9 @@ public class ChargeService {
 	
 	@Autowired
 	private RcsgClientService rcsgClientService;
+	
+	@Autowired
+	private ChargeDAO chargeDAO;
 
 	/**
 	 * Charge API body 필수값 체크
@@ -95,6 +106,9 @@ public class ChargeService {
 													// 2번째 byte: PIN번호 설정여부 ('Y':PIN번호사용, 'N':PIN번호사용안함, '0'(숫자):PIN번호미설정, 'L':5회실패로 잠금상태)
 		String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
 														// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
+		String svc_auth = ncasRes.get("SVC_AUTH"); // 부정사용자|장애인부가서비스|65세이상부가서비스
+												// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
+												// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
 		
 		// 결제이용동의 정보
 		String terms_deny_yn = "";
@@ -114,6 +128,14 @@ public class ChargeService {
     	if("N".equals(young_fee_yn)){ // 14세 이상 중에 청소년요금제가 아닌 경우
     		// RBP 연동
     		doRbpCharge(paramMap, logVO);
+    		
+    		// 일반요금제일 경우 취약계층을 확인해야 함.
+    		String handicapped = svc_auth.split("|")[1]; // 장애인부가서비스
+    		String old = svc_auth.split("|")[2]; // 65세이상부가서비스
+    		if("1".equals(handicapped) || "1".equals(old)) { // '1'일 경우 가입
+    			// ESB 연동 - 취약계층 대리인의 정보를 가져오기 위함.
+    			
+    		}
     	}else {
     		// RCSG 연동
     		doRcsgCharge(paramMap, logVO);
@@ -188,7 +210,7 @@ public class ChargeService {
 			if (e.getCause() instanceof ConnectTimeoutException) {
 				throw new CommonException(EnAdcbOmsCode.ESB_TIMEOUT);
 			}else {
-				throw new CommonException(EnAdcbOmsCode.ESG_INVALID_ERROR, e.getMessage());
+				throw new CommonException(EnAdcbOmsCode.ESB_INVALID_ERROR, e.getMessage());
 			}
 		}
 		
@@ -254,7 +276,10 @@ public class ChargeService {
 		
 		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
 		String ctn = ncasRes.get("CTN");
-    	String fee_type = ncasRes.get("FEE_TYPE"); //요금제 타입 
+    	String fee_type = ncasRes.get("FEE_TYPE"); //요금제 타입
+    	String svc_auth = ncasRes.get("SVC_AUTH"); // 장애인부가서비스|65세이상부가서비스
+		// 입력정보: LRZ0003849|LRZ0003850
+		// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
     	
     	Map<String, String> rbpReqMap = new HashMap<String, String>();	// RBP 요청
 		Map<String, String> rbpResMap = null;	// RBP 응답
@@ -282,10 +307,15 @@ public class ChargeService {
 		rbpReqMap.put("DBID", Init.readConfig.getRbp_dbid()); // DETAIL BILLING ID
 		rbpReqMap.put("SVC_CTG", Init.readConfig.getRbp_svc_ctg()); // 통합한도 적용 서비스 구분
 		
+		
+		// 즉시차감 요청 paramMap에 저장
+		paramMap.put("RbpReq_114", rbpReqMap);
+		
+		// RBP 연동
 		logVO.setFlow("[ADCB] --> [RBP]");
 		rbpResMap = rbpClientService.doRequest(logVO, Init.readConfig.getRbp_opcode_charge(), rbpReqMap);
 		
-		// 한도조회 결과 paramMap에 저장
+		// 즉시차감 결과 paramMap에 저장
 		paramMap.put("RbpRes_114", rbpResMap);
 	}
 	
@@ -327,11 +357,114 @@ public class ChargeService {
 		rcsgReqMap.put("PID", Init.readConfig.getRcsg_pid()); // Product ID
 		rcsgReqMap.put("DBID", Init.readConfig.getRcsg_dbid()); // DETAIL BILLING ID
 		
+		
+		// 즉시차감 요청 paramMap에 저장
+		paramMap.put("RcsgReq_114", rcsgReqMap);
+		
+		// RCSG 연동
 		logVO.setFlow("[ADCB] --> [RCSG]");
 		rcsgReqMap = rcsgClientService.doRequest(logVO, Init.readConfig.getRcsg_opcode_charge(), rcsgReqMap);
 		
 		// 한도조회 결과 paramMap에 저장
 		paramMap.put("RcsgRes_114", rcsgResMap);
+	}
+	
+	
+	/**
+	 * BOKU의 청구 API 최초 요청 데이터 INSERT
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	public void insertChargeReq(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+		
+		logVO.setFlow("[ADCB] --> [DB]");
+		try {
+			chargeDAO.insertChargeReq(paramMap);
+		}catch(DataAccessException adcbExc){
+			SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+		}catch(ConnectException adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+		}
+		logVO.setFlow("[ADCB] <-- [DB]");
+		
+	}
+	
+	
+	
+	/**
+	 * ESB 연동 - 취약계층 대리인의 정보를 가져오기 위함.
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	public void doEsbCm181(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+		logVO.setFlow("[ADCB] --> [ESB]");
+		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
+		
+		String sub_no = ncasRes.get("SUB_NO");	// 고객의 가입번호
+		String ctn = StringUtil.getNcas444(ncasRes.get("CTN")); // 12자리 CTN
+		
+		String mode = "";	// 1:장애인처리, 2:65세이상처리
+		String handicapped = ncasRes.get("SVC_AUTH").split("|")[1]; // 부정사용자|장애인부가서비스|65세이상부가서비스
+		if("1".equals(handicapped)) {
+			mode = "1";
+		}else {
+			mode = "2";
+		}
+		
+		String esbUrl = Init.readConfig.getEsb_cm181_url();
+		int esbTimeout = Integer.parseInt(Init.readConfig.getEsb_time_out());
+		lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ESBHeader header = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ESBHeader();
+		lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestRecord reqRecord = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestRecord();
+		lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestBody reqBody = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestBody();
+		lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseRecord resRecord = null;
+		
+		
+		// ESB header 
+		header.setServiceID("CM181");
+		header.setTransactionID(getEsbTransactionId());
+		header.setSystemID("ADCB001");
+		header.setErrCode("");
+		header.setErrMsg("");
+		header.setReserved("");
+		reqRecord.setESBHeader(header);
+		
+		// ESB Request
+		DsReqInVO reqVO = new DsReqInVO();
+		reqVO.setEntrNo(sub_no);
+		reqVO.setCtn(ctn);
+		reqVO.setMode(mode);
+		reqVO.setNextOperatorId("999999");
+		
+		RetrieveMobilePayArmPsblYn reqIn = new RetrieveMobilePayArmPsblYn();
+		reqIn.setRequestRecord(reqRecord);
+		
+		try {
+			// ESB 호출
+			RetrieveMobilePayArmPsblYnServiceStub stub = new RetrieveMobilePayArmPsblYnServiceStub(esbUrl);
+			
+			// ESB Timeout 셋팅
+			ServiceClient serviceClient = stub._getServiceClient();
+			serviceClient.getOptions().setTimeOutInMilliSeconds(esbTimeout);
+			stub._setServiceClient(serviceClient);
+			
+			// ESB 호출 응답
+			//RetrieveMobilePayArmPsblYnResponse esbRes = stub.re
+			
+		}catch(Exception e) {
+			if (e.getCause() instanceof ConnectTimeoutException) {
+				throw new CommonException(EnAdcbOmsCode.ESB_TIMEOUT);
+			}else {
+				throw new CommonException(EnAdcbOmsCode.ESB_INVALID_ERROR, e.getMessage());
+			}
+		}
+		
 	}
 	
 	
