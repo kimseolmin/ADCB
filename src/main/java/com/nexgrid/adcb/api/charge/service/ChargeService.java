@@ -28,6 +28,7 @@ import com.nexgrid.adcb.util.StringUtil;
 
 import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub;
 import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsReqInVO;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsResOutVO;
 import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RetrieveMobilePayArmPsblYn;
 import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RetrieveMobilePayArmPsblYnResponse;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub;
@@ -110,6 +111,7 @@ public class ChargeService {
 												// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
 												// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
 		
+		
 		// 결제이용동의 정보
 		String terms_deny_yn = "";
     	if(!StringUtil.nullCheck(cust_flag)) {
@@ -134,7 +136,7 @@ public class ChargeService {
     		String old = svc_auth.split("|")[2]; // 65세이상부가서비스
     		if("1".equals(handicapped) || "1".equals(old)) { // '1'일 경우 가입
     			// ESB 연동 - 취약계층 대리인의 정보를 가져오기 위함.
-    			
+    			doEsbCm181(paramMap, logVO);
     		}
     	}else {
     		// RCSG 연동
@@ -455,7 +457,12 @@ public class ChargeService {
 			stub._setServiceClient(serviceClient);
 			
 			// ESB 호출 응답
-			//RetrieveMobilePayArmPsblYnResponse esbRes = stub.re
+			RetrieveMobilePayArmPsblYnResponse esbRes = stub.retrieveMobilePayArmPsblYn(reqIn);
+			logVO.setFlow("[ADCB] <-- [ESB]");
+			
+			resRecord = esbRes.getResponseRecord();
+			header = resRecord.getESBHeader();
+			
 			
 		}catch(Exception e) {
 			if (e.getCause() instanceof ConnectTimeoutException) {
@@ -463,6 +470,18 @@ public class ChargeService {
 			}else {
 				throw new CommonException(EnAdcbOmsCode.ESB_INVALID_ERROR, e.getMessage());
 			}
+		}
+		
+		
+		if("".equals(header.getErrCode())) {
+			lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseBody resBody = resRecord.getResponseBody();
+			if(resBody != null) {
+				DsResOutVO resVO = resBody.getDsResOutVO();
+				// ESB 결과 저장
+				paramMap.put("esbCm181Res", resVO);
+			}
+		}else{
+			throw new CommonException(EnAdcbOmsCode.ESB_HEADER, header.getErrMsg());
 		}
 		
 	}
