@@ -116,7 +116,7 @@ public class OmsFileAppender extends AbstractAppender{
 						
 						props.loadFromXML(isU);
 						
-						Init.readConfig.setServer_num(props.getProperty("server_num"));
+						Init.readConfig.setServer_num(props.getProperty("SERVER_NUM"));
 					}
 					
 					scheduledFilename = path + prefix + "." + Init.readConfig.getServer_num() + sDateFormat.format(rolling.getCurrentCheck(now)) + suffix;

@@ -172,7 +172,7 @@ public class ChargeService {
 		// ESB 헤더 셋팅
 		header.setServiceID("MPS208");
 		header.setTransactionID(getEsbTransactionId());
-		header.setSystemID("ADCB001");
+		header.setSystemID("ADCB");
 		header.setErrCode("");
 		header.setErrMsg("");
 		header.setReserved("");
@@ -184,7 +184,7 @@ public class ChargeService {
 		reqVO.setLmtStlmUseDenyYn("N"); // 한도결제이용거부여부
 		reqVO.setChngRsnCd("LCR1011");	// 변경사유코드(LCR1011:고객요청)
 		reqVO.setLendDvVlue("400"); // 인입구분값(400:PG사이용동의)
-		reqVO.setNextOperatorId("999999");	//처리자ID
+		reqVO.setNextOperatorId("1100000284");	//처리자ID
 		reqBody.addDsInputInVO(reqVO);
 		reqRecord.setRequestBody(reqBody);
 		
@@ -431,7 +431,7 @@ public class ChargeService {
 		// ESB header 
 		header.setServiceID("CM181");
 		header.setTransactionID(getEsbTransactionId());
-		header.setSystemID("ADCB001");
+		header.setSystemID("ADCB");
 		header.setErrCode("");
 		header.setErrMsg("");
 		header.setReserved("");
@@ -442,7 +442,7 @@ public class ChargeService {
 		reqVO.setEntrNo(sub_no);
 		reqVO.setCtn(ctn);
 		reqVO.setMode(mode);
-		reqVO.setNextOperatorId("999999");
+		reqVO.setNextOperatorId("1100000284");
 		
 		RetrieveMobilePayArmPsblYn reqIn = new RetrieveMobilePayArmPsblYn();
 		reqIn.setRequestRecord(reqRecord);

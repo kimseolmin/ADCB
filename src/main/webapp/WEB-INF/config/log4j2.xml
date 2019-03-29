@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="com.nexgrid.adcb">
+	
+	<Appenders>	
+	
+	
+		 <!--
+		=====================================================================
+	       					OMS Logs Contents Type (한줄로그)
+	   	=====================================================================
+		-->
+	  	<OmsFileAppender name="oms-log" directory="/logs/adcb/oms/" prefix="ADCB_API" rollingTerms="5"
+	  							datePattern="'.'yyyyMMddHHmm" folderPattern="yyyyMMdd">
+	  		<PatternLayout pattern="%m%n" />
+	  	</OmsFileAppender>
+	  	<!-- <appender name="oms-log" class="com.nexgrid.ips.util.RollingFileAppender">  
+	    	
+		    
+	    	<param name="Directory" value="/logs/ips/oms/"/>
+	    	<param name="Prefix" value="IPS_API"/>
+	    	<param name="RollingTerms" value="5"/>
+	    	<param name="Append" value="true" />
+	    	<param name="encoding" value="UTF-8" />
+	    	<param name="DatePattern" value="'.'yyyyMMddHHmm"/>
+	    	<param name="FolderPattern" value="yyyyMMdd"/>
+	    	
+	    	<layout class="org.apache.log4j.PatternLayout">
+	      		<param name="ConversionPattern" value="%m%n"/>
+	    	</layout>
+	  	</appender> -->
+	  	
+	  	
+		<!--
+		=====================================================================
+	       console appender which appends logs into standard output
+	   	=====================================================================
+		-->
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %-5p [%t] (%C{2}:%L) - %m%n" />
+		</Console>
+	<!-- <appender name="console" class="org.apache.log4j.ConsoleAppender">
+	 		<layout class="org.apache.log4j.PatternLayout">
+	 			<param name="ConversionPattern" value="%X{SeqId} %d %-5p [%t] (%C{2}:%L) - %m%n"/>
+	 			<param name="ConversionPattern" value="%d %-5p [%t] (%C{2}:%L) - %m%n"/>
+	   		</layout>
+	   		<filter class="org.apache.log4j.varia.StringMatchFilter"> 
+	       		<param name="StringToMatch" value="Result" /> 
+	       		<param name="AcceptOnMatch" value="false" /> 
+	   		</filter>     
+	 	</appender> -->
+	 	
+	 	
+	 	
+	
+	  	
+	  	
+  		<!--
+		=====================================================================
+	       					Service Logs Contents Type (디테일)
+	   	=====================================================================
+		--> 
+	  	<RollingFile name="service-log" fileName="/logs/adcb/service/service.log" filePattern="/logs/adcb/service/service_%d{yyyy-MM-dd}.log" append="true">
+		   <PatternLayout pattern="%d %-5p - %m%n" />
+		   <Policies>
+		   	<TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+		   </Policies>
+		</RollingFile>
+		<!-- <appender name="service-log" class="org.apache.log4j.DailyRollingFileAppender">
+	  		    
+	    	<param name="File" value="/logs/ips/service/service.log"/>
+	    	<param name="Append" value="true"/>
+	    	<param name="DatePattern" value="'.'yyyy-MM-dd"/>
+	    	<layout class="org.apache.log4j.PatternLayout">
+	      		<param name="ConversionPattern" value="%d %-5p - %m%n"/>
+	    	</layout>
+	    	
+	  	</appender> -->
+
+
+	 	
+	</Appenders>
+
+
+	<Loggers>
+	
+		<Logger name="oms" additivity="false" level="info">
+			<AppenderRef ref="oms-log"/>
+	  		<AppenderRef ref="console" />
+		</Logger>
+		<!-- <logger name="oms" additivity="false">
+			<level value="info" />
+	  		<appender-ref ref="oms-log"/>
+	  		<appender-ref ref="console" />  
+	  	</logger> -->
+	  	
+	  	
+	  	<Logger name="com.nexgrid.adcb" additivity="false" level="info">
+			<AppenderRef ref="service-log"/>
+	  		<AppenderRef ref="console" />
+		</Logger>
+	  	<!-- <category name="com.nexgrid.ips" additivity="false">            
+			<priority value="info" />
+			<appender-ref ref="service-log"/>
+			<appender-ref ref="console" />
+		</category> -->
+		
+		
+		<Logger name="com.nexgrid.adcb.util.Init" additivity="false" level="info">
+			<AppenderRef ref="service-log"/>
+	  		<AppenderRef ref="console" />
+		</Logger>
+		<!-- <logger name="com.nexgrid.ips.util.Init" additivity="false">
+			<level value="info" />
+			<appender-ref ref="service-log"/>
+			<appender-ref ref="console" /> 
+		</logger> -->
+		
+		
+		<Logger name="jdbc.sqlonly" additivity="false" level="info"> 
+	         <AppenderRef ref="console" />
+	    </Logger>
+		
+		
+		
+		<!-- 
+		=====================================================================
+								Server Start Log
+		=====================================================================
+		-->
+		<Root level="debug">
+			<!-- <appender-ref ref="console" /> -->
+		</Root>
+	  	<!-- <root>
+			<priority value="off" />
+	    	<appender-ref ref="console" />
+	    	<appender-ref ref="service-log"/>
+	    	<appender-ref ref="oms-log"/>
+	  	</root> -->
+			
+		
+	</Loggers>
+    
+   
+	
+	
+	
+<!-- 	<logger name="jdbc.sqlonly" additivity="false"> 
+        <level value="WARN"/> 
+        <appender-ref ref="console"/> 
+    </logger>
+     
+    <logger name="jdbc.resultsettable" additivity="false"> 
+        <level value="WARN"/> 
+        <appender-ref ref="console"/> 
+    </logger> -->
+
+
+
+	<!-- 
+	<logger name="org.springframework.core" additivity="false">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>
+	
+	<logger name="org.mybatis.spring.transaction.SpringManagedTransaction" additivity="false">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>
+	
+	<logger name="org.mybatis.spring.SqlSessionUtils" additivity="false">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>
+	
+	<logger name="org.springframework.jdbc.datasource.DataSourceTransactionManager" additivity="false">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>
+	
+	<logger name="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping" additivity="false">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>
+	
+	<logger name="org.springframework.beans.factory.support.DefaultListableBeanFactory" additivity="false">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>
+	
+    <logger name="org.enhydra.jdbc.xapool" additivity="false">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>
+	
+	<logger name="org.springframework.jdbc.datasource.DataSourceUtils" additivity="false">
+		<level value="info" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>
+	
+	<logger name="org.springframework.jdbc">
+        <level value="info"/>
+        <appender-ref ref="console"/>
+        <appender-ref ref="service-log" />
+    </logger> 
+ 	
+	
+	<logger name="org.apache.tomat.dbcp">
+        <level value="info"/>
+        <appender-ref ref="console"/>
+        <appender-ref ref="service-log" />
+    </logger> 
+    
+	<logger name="org.apache.commons.dbcp.BasicDataSource">
+        <level value="info"/>
+        <appender-ref ref="console"/>
+        <appender-ref ref="service-log" />
+    </logger> 
+	
+	<logger name="org.apache.commons" additivity="false">
+		<level value="ERROR" />
+		<appender-ref ref="console" />
+		<appender-ref ref="rolling" />
+	</logger>	
+
+	<logger name="jdbc.sqlonly" additivity="false"> 
+        <level value="INFO"/> 
+        <appender-ref ref="console-infolog"/> 
+    </logger>
+     
+    <logger name="jdbc.resultsettable" additivity="false"> 
+        <level value="INFO"/> 
+        <appender-ref ref="console"/> 
+    </logger> 
+	-->
+
+  	 	
+  	
+
+	
+</Configuration>
