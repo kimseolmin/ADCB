@@ -285,7 +285,7 @@
                 Namespace Prefix = ns1
                 */
             
-
+        
         private static java.lang.String generatePrefix(java.lang.String namespace) {
             if(namespace.equals("java:lguplus.u3.esb.common")){
                 return "ns1";
@@ -295,7 +295,16 @@
 
         
 
-                        /**
+        @Override
+		public String toString() {
+			return "ESBHeader [localServiceID=" + localServiceID + ", localTransactionID=" + localTransactionID
+					+ ", localSystemID=" + localSystemID + ", localErrCode=" + localErrCode + ", localErrMsg="
+					+ localErrMsg + ", localReserved=" + localReserved + "]";
+		}
+
+
+
+						/**
                         * field for ServiceID
                         */
 
@@ -2327,7 +2336,7 @@
                 Namespace Prefix = ns14
                 */
             
-
+        	
         private static java.lang.String generatePrefix(java.lang.String namespace) {
             if(namespace.equals("java:lguplus.u3.esb.cm181")){
                 return "ns14";
@@ -2337,7 +2346,15 @@
 
         
 
-                        /**
+        @Override
+		public String toString() {
+			return "DsReqInVO [localEntrNo=" + localEntrNo + ", localCtn=" + localCtn + ", localMode=" + localMode
+					+ ", localNextOperatorId=" + localNextOperatorId + "]";
+		}
+
+
+
+						/**
                         * field for EntrNo
                         */
 
@@ -3071,7 +3088,7 @@
                 Namespace Prefix = ns14
                 */
             
-
+        
         private static java.lang.String generatePrefix(java.lang.String namespace) {
             if(namespace.equals("java:lguplus.u3.esb.cm181")){
                 return "ns14";
@@ -3081,7 +3098,17 @@
 
         
 
-                        /**
+        @Override
+		public String toString() {
+			return "DsResOutVO [localAgntRegYn=" + localAgntRegYn + ", localRsltDesc=" + localRsltDesc
+					+ ", localRsltDescTracker=" + localRsltDescTracker + ", localHpno=" + localHpno
+					+ ", localHpnoTracker=" + localHpnoTracker + ", localPsblYn=" + localPsblYn
+					+ ", localPsblYnTracker=" + localPsblYnTracker + "]";
+		}
+
+
+
+						/**
                         * field for AgntRegYn
                         */
 

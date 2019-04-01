@@ -284,7 +284,7 @@
                 Namespace URI = java:lguplus.u3.esb.common
                 Namespace Prefix = ns1
                 */
-            
+        
 
         private static java.lang.String generatePrefix(java.lang.String namespace) {
             if(namespace.equals("java:lguplus.u3.esb.common")){
@@ -295,7 +295,16 @@
 
         
 
-                        /**
+        @Override
+		public String toString() {
+			return "ESBHeader [localServiceID=" + localServiceID + ", localTransactionID=" + localTransactionID
+					+ ", localSystemID=" + localSystemID + ", localErrCode=" + localErrCode + ", localErrMsg="
+					+ localErrMsg + ", localReserved=" + localReserved + "]";
+		}
+
+
+
+						/**
                         * field for ServiceID
                         */
 
@@ -1232,6 +1241,7 @@
                 */
             
 
+        
         private static java.lang.String generatePrefix(java.lang.String namespace) {
             if(namespace.equals("java:lguplus.u3.esb.mps208")){
                 return "ns31";
@@ -1241,7 +1251,14 @@
 
         
 
-                        /**
+        @Override
+		public String toString() {
+			return "DsOutputOutVO [localResultCode=" + localResultCode + ", localResultMsg=" + localResultMsg + "]";
+		}
+
+
+
+						/**
                         * field for ResultCode
                         */
 
@@ -1790,7 +1807,7 @@
                 Namespace URI = java:lguplus.u3.esb.mps208
                 Namespace Prefix = ns31
                 */
-            
+        
 
         private static java.lang.String generatePrefix(java.lang.String namespace) {
             if(namespace.equals("java:lguplus.u3.esb.mps208")){
@@ -1801,7 +1818,16 @@
 
         
 
-                        /**
+        @Override
+		public String toString() {
+			return "DsInputInVO [localEntrNo=" + localEntrNo + ", localLmtStlmUseDenyYn=" + localLmtStlmUseDenyYn
+					+ ", localChngRsnCd=" + localChngRsnCd + ", localLendDvVlue=" + localLendDvVlue
+					+ ", localNextOperatorId=" + localNextOperatorId + "]";
+		}
+
+
+
+						/**
                         * field for EntrNo
                         */
 
@@ -2718,7 +2744,7 @@
                 Namespace URI = java:lguplus.u3.esb.common
                 Namespace Prefix = ns1
                 */
-            
+       
 
         private static java.lang.String generatePrefix(java.lang.String namespace) {
             if(namespace.equals("java:lguplus.u3.esb.common")){
@@ -2729,7 +2755,15 @@
 
         
 
-                        /**
+        @Override
+		public String toString() {
+			return "BusinessHeader [localResultCode=" + localResultCode + ", localResultMessage=" + localResultMessage
+					+ "]";
+		}
+
+
+
+						/**
                         * field for ResultCode
                         */
 

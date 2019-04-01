@@ -233,6 +233,9 @@ public class StringUtil {
 
 	// CTN을 12자리로 만들어 준다.
 	public static String getNcas444(String ctn) {
+		
+		// boku가 국가코드를 넣어서 주는 경우
+		ctn = ctn.substring(0, 2).equals("82") ? ctn.replaceFirst("82", "0") : ctn;
 		int leng = ctn.length();
 		switch (leng) {
 		case 10:

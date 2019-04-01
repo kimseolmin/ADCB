@@ -126,23 +126,28 @@ public class RbpClientService {
 				// RESULT값 정상 아닐 경우
 				String result = resMap.get("RESULT");
 				logVO.setRbpResultCode(result);
-				if(!"0000".equals(resMap.get("RESULT"))) {
-					for(EnRbpResultCode e : EnRbpResultCode.values()) {
-						// 에러코드를 찾아서 매핑한다.
-						if(e.getDefaultValue().equals(result)) {
-							if("".equals(e.getOpCode())) { 
-								throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
-							}else { // RBP의 결과를 boku의 Reason코드로 매핑 시 opCode에 따라 다른 reasonCode를 줘야 하는 경우
-								if(e.getOpCode().equals(opCode)) {
+				
+				// 한도차감이나 취소 같은 경우 result를 판단하여 실패이면 msg전송 해야 하기 때문에 exception은 나중에 함.
+				if(Init.readConfig.getRbp_opcode_select().equals(opCode) || Init.readConfig.getRbp_opcode_con_qry().equals(opCode)) {
+					if(!"0000".equals(resMap.get("RESULT"))) {
+						for(EnRbpResultCode e : EnRbpResultCode.values()) {
+							// 에러코드를 찾아서 매핑한다.
+							if(e.getDefaultValue().equals(result)) {
+								if("".equals(e.getOpCode())) { 
 									throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
+								}else { // RBP의 결과를 boku의 Reason코드로 매핑 시 opCode에 따라 다른 reasonCode를 줘야 하는 경우
+									if(e.getOpCode().equals(opCode)) {
+										throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
+									}
 								}
 							}
 						}
+						
+						// 정의되지 않은 RESULT가 왔을 경우
+						throw new CommonException(EnRbpResultCode.RS_INVALID.getStatus(), EnRbpResultCode.RS_INVALID.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + result, EnRbpResultCode.RS_INVALID.getResMsg());
 					}
-					
-					// 정의되지 않은 RESULT가 왔을 경우
-					throw new CommonException(EnRbpResultCode.RS_INVALID.getStatus(), EnRbpResultCode.RS_INVALID.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + result, EnRbpResultCode.RS_INVALID.getResMsg());
 				}
+				
 				
 				break;
 			}

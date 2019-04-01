@@ -11,6 +11,8 @@ import java.util.Random;
 
 import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.httpclient.ConnectTimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,8 @@ public class ChargeService {
 	
 	@Autowired
 	private ChargeDAO chargeDAO;
+	
+	private static final Logger logger = LoggerFactory.getLogger(ChargeService.class);
 
 	/**
 	 * Charge API body 필수값 체크
@@ -190,8 +194,14 @@ public class ChargeService {
 		
 		UpdateLmtStlmUseDenyYn reqIn = new UpdateLmtStlmUseDenyYn();
 		reqIn.setRequestRecord(reqRecord);
+		String seq = "[" + logVO.getSeqId() + "] ";
 		
 		try {
+			
+			logger.info(seq + "ESB(MPS208) Request Url : " + esbUrl);
+			logger.info(seq + "ESB(MPS208) Request Header : " + header.toString());
+			logger.info(seq + "ESB(MPS208) Request Body : " + reqVO.toString());
+			
 			// ESB 호출
 			UpdateLmtStlmUseDenyYnServiceStub stub = new UpdateLmtStlmUseDenyYnServiceStub(esbUrl);
 			
@@ -207,6 +217,7 @@ public class ChargeService {
 			
 			resRecord = esbRes.getResponseRecord();
 			header = resRecord.getESBHeader();
+			logger.info(seq + "ESB(MPS208) Response Header : " + header.toString());
 			
 		}catch(Exception e) {
 			if (e.getCause() instanceof ConnectTimeoutException) {
@@ -220,6 +231,7 @@ public class ChargeService {
 		if("".equals(header.getErrCode())) { // 성공
 			ResponseBody resBody = resRecord.getResponseBody();
 			bizHeader = resRecord.getBusinessHeader();
+			logger.info(seq + "ESB(MPS208) Response BusinessHeader : " + bizHeader.toString());
 			
 			if (!"N0000".equals(bizHeader.getResultCode())) {
 				// 에러
@@ -228,6 +240,7 @@ public class ChargeService {
 			
 			if(resBody != null) {
 				DsOutputOutVO resVO = resBody.getDsOutputOutVO();
+				logger.info(seq + "ESB(MPS208) Response Body : " + resVO.toString());
 				
 				if("0000".equals(resVO.getResultCode())) {
 					// 한도결제이용거부여부가 정상적으로 변경된 경우
@@ -443,11 +456,19 @@ public class ChargeService {
 		reqVO.setCtn(ctn);
 		reqVO.setMode(mode);
 		reqVO.setNextOperatorId("1100000284");
+		reqBody.setDsReqInVO(reqVO);
+		reqRecord.setRequestBody(reqBody);
 		
 		RetrieveMobilePayArmPsblYn reqIn = new RetrieveMobilePayArmPsblYn();
 		reqIn.setRequestRecord(reqRecord);
 		
+		String seq = "[" + logVO.getSeqId() + "] ";
 		try {
+			
+			logger.info(seq + "ESB(CM181) Request Url : " + esbUrl);
+			logger.info(seq + "ESB(CM181) Request Header : " + header.toString());
+			logger.info(seq + "ESB(CM181) Request Body : " + reqVO.toString());
+			
 			// ESB 호출
 			RetrieveMobilePayArmPsblYnServiceStub stub = new RetrieveMobilePayArmPsblYnServiceStub(esbUrl);
 			
@@ -463,6 +484,8 @@ public class ChargeService {
 			resRecord = esbRes.getResponseRecord();
 			header = resRecord.getESBHeader();
 			
+			logger.info(seq + "ESB(CM181) Response Header : " + header.toString());
+			
 			
 		}catch(Exception e) {
 			if (e.getCause() instanceof ConnectTimeoutException) {
@@ -477,6 +500,7 @@ public class ChargeService {
 			lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseBody resBody = resRecord.getResponseBody();
 			if(resBody != null) {
 				DsResOutVO resVO = resBody.getDsResOutVO();
+				logger.info(seq + "ESB(CM181) Response Body : " + resVO.toString());
 				// ESB 결과 저장
 				paramMap.put("esbCm181Res", resVO);
 			}
