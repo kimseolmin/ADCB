@@ -104,7 +104,7 @@ public class LogUtil {
 	
 	
 	/**
-	 * Service Stop Log Print
+	 * Service Stop Log Print (client에게 응답을 주는 것과 동시에 서비스 로그가 끝날 때)
 	 * @param dataMap
 	 * @param logVO
 	 */
@@ -114,6 +114,22 @@ public class LogUtil {
 			
 			String seq = "[" + logVO.getSeqId() + "] ";
 			serviceLog.info(seq + "Response Data : " + dataMap);
+			serviceLog.info(seq + "/********************** ADCB API "+ logVO.getApiType() +" END **********************/");
+			
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Service Stop Log Print (client에게 먼저 응답을 주고 서비스로그는 나중에 끝날 때)
+	 * @param logVO
+	 */
+	public static void EndServiceLog(LogVO logVO) {
+		
+		try {
+			
+			String seq = "[" + logVO.getSeqId() + "] ";
 			serviceLog.info(seq + "/********************** ADCB API "+ logVO.getApiType() +" END **********************/");
 			
 		} catch (Exception ex) {

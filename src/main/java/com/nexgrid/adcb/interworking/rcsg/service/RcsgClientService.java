@@ -44,8 +44,8 @@ public class RcsgClientService {
 		serverIp[1] = Init.readConfig.getRcsg_secondary_ip();
 		serverPort[1] = Integer.parseInt(Init.readConfig.getRcsg_secondary_port());
 		
-		Thread[] threads = new Thread[serverIp.length];
-		//Thread[] threads = new Thread[1];
+		//Thread[] threads = new Thread[serverIp.length];
+		Thread[] threads = new Thread[1];
 		
 		for(int i=0; i<threads.length; i++) {
 			RcsgConnector rcsgConn = new RcsgConnector(serverIp[i], serverPort[i]);
@@ -76,8 +76,9 @@ public class RcsgClientService {
 	 * @return RCSG 응답 데이터
 	 * @throws Exception
 	 */
-	public Map<String, String> doRequest(LogVO logVO, String opCode, Map<String, String> reqMap) throws Exception{
+	public Map<String, String> doRequest(LogVO logVO, String opCode, Map<String, Object> paramMap) throws Exception{
 		
+		Map<String, String> reqMap = (Map<String, String>)paramMap.get("RcsgReq_"+opCode);
 		Map<String, String> resMap = null;
 		
 		for(RcsgConnector rcsgConn : connList) {
@@ -119,6 +120,8 @@ public class RcsgClientService {
 				String result = resMap.get("RESULT");
 				logVO.setRcsgResultCode(result);
 				if(!"0000".equals(resMap.get("RESULT"))) {
+					// RCSG 연동 결과 paramMap에 저장
+					paramMap.put("RcsgRes_" + opCode, resMap);
 					for(EnRcsgResultCode e : EnRcsgResultCode.values()) {
 						// 에러코드를 찾아서 매핑한다.
 						if(e.getDefaultValue().equals(result)) {
@@ -145,7 +148,7 @@ public class RcsgClientService {
 			throw new CommonException(EnAdcbOmsCode.RCSG_RES_TIMEOUT);
 		}
 		
-		return resMap;
+		return null;
 	}
 	
 }

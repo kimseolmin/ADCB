@@ -61,6 +61,9 @@ public class ChargeController {
 			// reqBody check
 			chargeService.reqBodyCheck(paramMap, logVO);
 			
+			// 요청 중복 확인 -> 이미 청구가 완료된 요청이 다시 들어왔을 경우 이미 줬던 응답을 그대로 줘야 함.
+			
+			
 			// 최초 요청 데이터 저장
 			chargeService.insertChargeReq(paramMap, logVO);
 			
@@ -112,15 +115,38 @@ public class ChargeController {
 						
 		}finally {
 			
-			logVO.setResTime();
-			commonService.omsLogWrite(logVO);
-			LogUtil.EndServiceLog(dataMap, logVO);
+			// BOKU에게 응답을 먼저 준 후 SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
+			try {
+				logVO.setResTime();
+				logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
+				
+				response.getWriter().print(dataMap);
+				response.getWriter().flush();
+				response.getWriter().close();
+				
+				// OMS Write
+				commonService.omsLogWrite(logVO);
+
+			}catch (Exception ex) {
+				logVO.setFlow("[ADCB] --> [SVC]");
+				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
+				logger.error("[" + logVO.getSeqId() + "]" + ex);
+			}
+			
+			
+			// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+			
+			// 청구 API가 성공일 경우에만 EAI
+			
+			// SLA
+			
+			LogUtil.EndServiceLog(logVO);
 			
 			
 		}
 		
 		
-		return dataMap;
+		return null;
 	}
 	
 }

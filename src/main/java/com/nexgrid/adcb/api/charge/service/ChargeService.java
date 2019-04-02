@@ -20,8 +20,10 @@ import org.springframework.stereotype.Service;
 import com.nexgrid.adcb.api.charge.dao.ChargeDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpResultCode;
 import com.nexgrid.adcb.interworking.rbp.service.RbpClientService;
 import com.nexgrid.adcb.interworking.rbp.util.RbpKeyGenerator;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgResultCode;
 import com.nexgrid.adcb.interworking.rcsg.service.RcsgClientService;
 import com.nexgrid.adcb.interworking.rcsg.util.RcsgKeyGenerator;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
@@ -89,7 +91,7 @@ public class ChargeService {
 				||  "".equals(requestId) || StringUtil.hasSpecialCharacter(requestId) || StringUtil.spaceCheck(requestId) || StringUtil.maxCheck(requestId, 50) 
 				||  "".equals(clientTransactionId) || StringUtil.hasSpecialCharacter(clientTransactionId) || StringUtil.spaceCheck(clientTransactionId) || StringUtil.maxCheck(clientTransactionId, 50)
 				||  amount == 0 || !"KRW".equals(currency)
-				||  "".equals(productDescription) || StringUtil.maxCheck(productDescription, 1255)) {
+				||  "".equals(productDescription) || StringUtil.maxCheck(productDescription, 255)) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
 	}
@@ -111,9 +113,6 @@ public class ChargeService {
 													// 2번째 byte: PIN번호 설정여부 ('Y':PIN번호사용, 'N':PIN번호사용안함, '0'(숫자):PIN번호미설정, 'L':5회실패로 잠금상태)
 		String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
 														// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
-		String svc_auth = ncasRes.get("SVC_AUTH"); // 부정사용자|장애인부가서비스|65세이상부가서비스
-												// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
-												// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
 		
 		
 		// 결제이용동의 정보
@@ -127,25 +126,23 @@ public class ChargeService {
     	// 약관동의가 필요한 경우 ESB 연동
     	if("Y".equals(terms_deny_yn)) {
     		// ESB 연동
-    		doEsbMps208(paramMap, logVO);
+    		//doEsbMps208(paramMap, logVO);
     	}
     	
     	//청소년요금제와 일반 구분
     	if("N".equals(young_fee_yn)){ // 14세 이상 중에 청소년요금제가 아닌 경우
+    		
+    		// 일반요금제일 경우 취약계층인지를 확인하여 취약계층이면 취약계층 대리인 정보를 가져옴.
+    		//doEsbCm181(paramMap, logVO);
+    		
     		// RBP 연동
     		doRbpCharge(paramMap, logVO);
-    		
-    		// 일반요금제일 경우 취약계층을 확인해야 함.
-    		String handicapped = svc_auth.split("|")[1]; // 장애인부가서비스
-    		String old = svc_auth.split("|")[2]; // 65세이상부가서비스
-    		if("1".equals(handicapped) || "1".equals(old)) { // '1'일 경우 가입
-    			// ESB 연동 - 취약계층 대리인의 정보를 가져오기 위함.
-    			doEsbCm181(paramMap, logVO);
-    		}
     	}else {
     		// RCSG 연동
     		doRcsgCharge(paramMap, logVO);
     	}
+    	
+    	// 결제 성공 SMS 전송 정보 paramMap에 저장.
     	
 	}
 	
@@ -324,14 +321,41 @@ public class ChargeService {
 		
 		
 		// 즉시차감 요청 paramMap에 저장
-		paramMap.put("RbpReq_114", rbpReqMap);
+		String opCode = Init.readConfig.getRbp_opcode_charge();
+		paramMap.put("RbpReq_" + opCode, rbpReqMap);
 		
 		// RBP 연동
 		logVO.setFlow("[ADCB] --> [RBP]");
-		rbpResMap = rbpClientService.doRequest(logVO, Init.readConfig.getRbp_opcode_charge(), rbpReqMap);
+		try {
+			rbpResMap = rbpClientService.doRequest(logVO, opCode, paramMap);
+		}catch (CommonException common) {
+			
+			String firstCode = common.getOmsErrCode().substring(0, 4);
+			String rbpRsCode = common.getOmsErrCode().substring(4);
+			
+			// RBP의 RESULT가 "0000"이 아니기 때문에 생겨난 exception일 경우에만
+			if(EnAdcbOmsCode.RBP_API.value().equals(firstCode)) {
+				if(EnRbpResultCode.RS_4008.getDefaultValue().equals(rbpRsCode)) { // 한도초과일 경우 
+					
+					// 일반요금제일 경우 취약계층인지를 확인하여 취약계층이면 취약계층 대리인 정보를 가져옴.
+		    		//doEsbCm181(paramMap, logVO);
+		    		
+		    		// 한도초과 SMS 정보 paramMap에 저장
+		    		
+		    		
+				}else { // 한도 초과가 아닌 다른 실패인 경우 
+					// 결제 실패 SMS paramMap에 저장
+					
+				}
+			}
+			
+			throw common;
+			
+		}
+		
 		
 		// 즉시차감 결과 paramMap에 저장
-		paramMap.put("RbpRes_114", rbpResMap);
+		paramMap.put("RbpRes_"+opCode, rbpResMap);
 	}
 	
 	
@@ -374,14 +398,34 @@ public class ChargeService {
 		
 		
 		// 즉시차감 요청 paramMap에 저장
-		paramMap.put("RcsgReq_114", rcsgReqMap);
+		String opCode = Init.readConfig.getRcsg_opcode_charge();
+		paramMap.put("RcsgReq_"+opCode, rcsgReqMap);
 		
 		// RCSG 연동
 		logVO.setFlow("[ADCB] --> [RCSG]");
-		rcsgReqMap = rcsgClientService.doRequest(logVO, Init.readConfig.getRcsg_opcode_charge(), rcsgReqMap);
+		try {
+			rcsgReqMap = rcsgClientService.doRequest(logVO, opCode, paramMap);
+		}catch (CommonException common) {
+			
+			String firstCode = common.getOmsErrCode().substring(0, 4);
+			String rcsgRsCode = common.getOmsErrCode().substring(4);
+			
+			// RCSG의 RESULT가 "0000"이 아니기 때문에 생겨난 exception일 경우에만
+			if(EnAdcbOmsCode.RCSG_API.value().equals(firstCode)) {
+				if(EnRcsgResultCode.RS_4008.getDefaultValue().equals(rcsgRsCode)) { // 한도초과일 경우 
+					//한도초과 SMS 전송정보 paramMap에 저장
+					
+				}else { // 한도 초과가 아닌 다른 실패인 경우 
+					// 결제 실패 SMS 전송 정보 paramMap에 저장
+					
+				}
+			}
+			throw common;
+		}
 		
-		// 한도조회 결과 paramMap에 저장
-		paramMap.put("RcsgRes_114", rcsgResMap);
+		
+		// 차감 결과 paramMap에 저장
+		paramMap.put("RcsgRes_"+opCode, rcsgResMap);
 	}
 	
 	
@@ -413,7 +457,7 @@ public class ChargeService {
 	
 	
 	/**
-	 * ESB 연동 - 취약계층 대리인의 정보를 가져오기 위함.
+	 * ESB 연동 - 취약계층인지를 판단하여 취약계층이면 ESB연동하여 연동결과를 esbCm181Res라는 이름으로 paramMap에 저장
 	 * @param paramMap
 	 * @param logVO
 	 * @throws Exception
@@ -422,91 +466,101 @@ public class ChargeService {
 		logVO.setFlow("[ADCB] --> [ESB]");
 		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
 		
-		String sub_no = ncasRes.get("SUB_NO");	// 고객의 가입번호
-		String ctn = StringUtil.getNcas444(ncasRes.get("CTN")); // 12자리 CTN
+		String svc_auth = ncasRes.get("SVC_AUTH"); // 부정사용자|장애인부가서비스|65세이상부가서비스
+		// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
+		// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
 		
-		String mode = "";	// 1:장애인처리, 2:65세이상처리
-		String handicapped = ncasRes.get("SVC_AUTH").split("|")[1]; // 부정사용자|장애인부가서비스|65세이상부가서비스
-		if("1".equals(handicapped)) {
-			mode = "1";
-		}else {
-			mode = "2";
-		}
-		
-		String esbUrl = Init.readConfig.getEsb_cm181_url();
-		int esbTimeout = Integer.parseInt(Init.readConfig.getEsb_time_out());
-		lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ESBHeader header = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ESBHeader();
-		lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestRecord reqRecord = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestRecord();
-		lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestBody reqBody = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestBody();
-		lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseRecord resRecord = null;
-		
-		
-		// ESB header 
-		header.setServiceID("CM181");
-		header.setTransactionID(getEsbTransactionId());
-		header.setSystemID("ADCB");
-		header.setErrCode("");
-		header.setErrMsg("");
-		header.setReserved("");
-		reqRecord.setESBHeader(header);
-		
-		// ESB Request
-		DsReqInVO reqVO = new DsReqInVO();
-		reqVO.setEntrNo(sub_no);
-		reqVO.setCtn(ctn);
-		reqVO.setMode(mode);
-		reqVO.setNextOperatorId("1100000284");
-		reqBody.setDsReqInVO(reqVO);
-		reqRecord.setRequestBody(reqBody);
-		
-		RetrieveMobilePayArmPsblYn reqIn = new RetrieveMobilePayArmPsblYn();
-		reqIn.setRequestRecord(reqRecord);
-		
-		String seq = "[" + logVO.getSeqId() + "] ";
-		try {
+		// 일반요금제일 경우 취약계층을 확인해야 함.
+		String handicapped = svc_auth.split("|")[1]; // 장애인부가서비스
+		String old = svc_auth.split("|")[2]; // 65세이상부가서비스
+		if("1".equals(handicapped) || "1".equals(old)) { // '1'일 경우 가입
+			String sub_no = ncasRes.get("SUB_NO");	// 고객의 가입번호
+			String ctn = StringUtil.getNcas444(ncasRes.get("CTN")); // 12자리 CTN
 			
-			logger.info(seq + "ESB(CM181) Request Url : " + esbUrl);
-			logger.info(seq + "ESB(CM181) Request Header : " + header.toString());
-			logger.info(seq + "ESB(CM181) Request Body : " + reqVO.toString());
-			
-			// ESB 호출
-			RetrieveMobilePayArmPsblYnServiceStub stub = new RetrieveMobilePayArmPsblYnServiceStub(esbUrl);
-			
-			// ESB Timeout 셋팅
-			ServiceClient serviceClient = stub._getServiceClient();
-			serviceClient.getOptions().setTimeOutInMilliSeconds(esbTimeout);
-			stub._setServiceClient(serviceClient);
-			
-			// ESB 호출 응답
-			RetrieveMobilePayArmPsblYnResponse esbRes = stub.retrieveMobilePayArmPsblYn(reqIn);
-			logVO.setFlow("[ADCB] <-- [ESB]");
-			
-			resRecord = esbRes.getResponseRecord();
-			header = resRecord.getESBHeader();
-			
-			logger.info(seq + "ESB(CM181) Response Header : " + header.toString());
-			
-			
-		}catch(Exception e) {
-			if (e.getCause() instanceof ConnectTimeoutException) {
-				throw new CommonException(EnAdcbOmsCode.ESB_TIMEOUT);
+			String mode = "";	// 1:장애인처리, 2:65세이상처리
+			if("1".equals(handicapped)) {
+				mode = "1";
 			}else {
-				throw new CommonException(EnAdcbOmsCode.ESB_INVALID_ERROR, e.getMessage());
+				mode = "2";
+			}
+			
+			String esbUrl = Init.readConfig.getEsb_cm181_url();
+			int esbTimeout = Integer.parseInt(Init.readConfig.getEsb_time_out());
+			lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ESBHeader header = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ESBHeader();
+			lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestRecord reqRecord = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestRecord();
+			lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestBody reqBody = new lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestBody();
+			lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseRecord resRecord = null;
+			
+			
+			// ESB header 
+			header.setServiceID("CM181");
+			header.setTransactionID(getEsbTransactionId());
+			header.setSystemID("ADCB");
+			header.setErrCode("");
+			header.setErrMsg("");
+			header.setReserved("");
+			reqRecord.setESBHeader(header);
+			
+			// ESB Request
+			DsReqInVO reqVO = new DsReqInVO();
+			reqVO.setEntrNo(sub_no);
+			reqVO.setCtn(ctn);
+			reqVO.setMode(mode);
+			reqVO.setNextOperatorId("1100000284");
+			reqBody.setDsReqInVO(reqVO);
+			reqRecord.setRequestBody(reqBody);
+			
+			RetrieveMobilePayArmPsblYn reqIn = new RetrieveMobilePayArmPsblYn();
+			reqIn.setRequestRecord(reqRecord);
+			
+			String seq = "[" + logVO.getSeqId() + "] ";
+			try {
+				
+				logger.info(seq + "ESB(CM181) Request Url : " + esbUrl);
+				logger.info(seq + "ESB(CM181) Request Header : " + header.toString());
+				logger.info(seq + "ESB(CM181) Request Body : " + reqVO.toString());
+				
+				// ESB 호출
+				RetrieveMobilePayArmPsblYnServiceStub stub = new RetrieveMobilePayArmPsblYnServiceStub(esbUrl);
+				
+				// ESB Timeout 셋팅
+				ServiceClient serviceClient = stub._getServiceClient();
+				serviceClient.getOptions().setTimeOutInMilliSeconds(esbTimeout);
+				stub._setServiceClient(serviceClient);
+				
+				// ESB 호출 응답
+				RetrieveMobilePayArmPsblYnResponse esbRes = stub.retrieveMobilePayArmPsblYn(reqIn);
+				logVO.setFlow("[ADCB] <-- [ESB]");
+				
+				resRecord = esbRes.getResponseRecord();
+				header = resRecord.getESBHeader();
+				
+				logger.info(seq + "ESB(CM181) Response Header : " + header.toString());
+				
+				
+			}catch(Exception e) {
+				if (e.getCause() instanceof ConnectTimeoutException) {
+					throw new CommonException(EnAdcbOmsCode.ESB_TIMEOUT);
+				}else {
+					throw new CommonException(EnAdcbOmsCode.ESB_INVALID_ERROR, e.getMessage());
+				}
+			}
+			
+			
+			if("".equals(header.getErrCode())) {
+				lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseBody resBody = resRecord.getResponseBody();
+				if(resBody != null) {
+					DsResOutVO resVO = resBody.getDsResOutVO();
+					logger.info(seq + "ESB(CM181) Response Body : " + resVO.toString());
+					// ESB 결과 저장
+					paramMap.put("esbCm181Res", resVO);
+				}
+			}else{
+				throw new CommonException(EnAdcbOmsCode.ESB_HEADER, header.getErrMsg());
 			}
 		}
 		
-		
-		if("".equals(header.getErrCode())) {
-			lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseBody resBody = resRecord.getResponseBody();
-			if(resBody != null) {
-				DsResOutVO resVO = resBody.getDsResOutVO();
-				logger.info(seq + "ESB(CM181) Response Body : " + resVO.toString());
-				// ESB 결과 저장
-				paramMap.put("esbCm181Res", resVO);
-			}
-		}else{
-			throw new CommonException(EnAdcbOmsCode.ESB_HEADER, header.getErrMsg());
-		}
+
 		
 	}
 	

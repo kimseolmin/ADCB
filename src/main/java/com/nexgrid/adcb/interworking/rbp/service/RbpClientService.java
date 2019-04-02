@@ -45,8 +45,8 @@ public class RbpClientService {
 		serverIp[1] = Init.readConfig.getRbp_secondary_ip();
 		serverPort[1] = Integer.parseInt(Init.readConfig.getRbp_secondary_port());
 		
-		Thread[] threads = new Thread[serverIp.length];
-		//Thread[] threads = new Thread[1];
+		//Thread[] threads = new Thread[serverIp.length];
+		Thread[] threads = new Thread[1];
 		
 		for(int i=0; i<threads.length; i++) {
 			RbpConnector rbpConn = new RbpConnector(serverIp[i], serverPort[i]);
@@ -76,8 +76,9 @@ public class RbpClientService {
 	 * @return RBP 응답 데이터
 	 * @throws Exception
 	 */
-	public Map<String, String> doRequest(LogVO logVO, String opCode, Map<String, String> reqMap) throws Exception{
+	public Map<String, String> doRequest(LogVO logVO, String opCode, Map<String, Object> paramMap) throws Exception{
 		
+		Map<String, String> reqMap = (Map<String, String>)paramMap.get("RbpReq_" + opCode);
 		Map<String, String> resMap = null;
 		
 		for(RbpConnector rbpConn : connList) {
@@ -127,26 +128,26 @@ public class RbpClientService {
 				String result = resMap.get("RESULT");
 				logVO.setRbpResultCode(result);
 				
-				// 한도차감이나 취소 같은 경우 result를 판단하여 실패이면 msg전송 해야 하기 때문에 exception은 나중에 함.
-				if(Init.readConfig.getRbp_opcode_select().equals(opCode) || Init.readConfig.getRbp_opcode_con_qry().equals(opCode)) {
-					if(!"0000".equals(resMap.get("RESULT"))) {
-						for(EnRbpResultCode e : EnRbpResultCode.values()) {
-							// 에러코드를 찾아서 매핑한다.
-							if(e.getDefaultValue().equals(result)) {
-								if("".equals(e.getOpCode())) { 
+				if(!"0000".equals(resMap.get("RESULT"))) {
+					// RBP 연동 결과 paramMap에 저장
+					paramMap.put("RbpRes_" + opCode, resMap);
+					for(EnRbpResultCode e : EnRbpResultCode.values()) {
+						// 에러코드를 찾아서 매핑한다.
+						if(e.getDefaultValue().equals(result)) {
+							if("".equals(e.getOpCode())) { 
+								throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
+							}else { // RBP의 결과를 boku의 Reason코드로 매핑 시 opCode에 따라 다른 reasonCode를 줘야 하는 경우
+								if(e.getOpCode().equals(opCode)) {
 									throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
-								}else { // RBP의 결과를 boku의 Reason코드로 매핑 시 opCode에 따라 다른 reasonCode를 줘야 하는 경우
-									if(e.getOpCode().equals(opCode)) {
-										throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
-									}
 								}
 							}
 						}
-						
-						// 정의되지 않은 RESULT가 왔을 경우
-						throw new CommonException(EnRbpResultCode.RS_INVALID.getStatus(), EnRbpResultCode.RS_INVALID.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + result, EnRbpResultCode.RS_INVALID.getResMsg());
 					}
+					
+					// 정의되지 않은 RESULT가 왔을 경우
+					throw new CommonException(EnRbpResultCode.RS_INVALID.getStatus(), EnRbpResultCode.RS_INVALID.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + result, EnRbpResultCode.RS_INVALID.getResMsg());
 				}
+				
 				
 				
 				break;

@@ -480,11 +480,12 @@ public class CommonServiceImpl implements CommonService{
 		rbpReqMap.put("SVC_CTG", Init.readConfig.getRbp_svc_ctg());
 		
 		// 한도조회 요청 paramMap에 저장
-		paramMap.put("RbpReq_111", rbpReqMap);
+		String opCode = Init.readConfig.getRbp_opcode_select();
+		paramMap.put("RbpReq_"+opCode, rbpReqMap);
 		
 		// RBP 연동
 		logVO.setFlow("[ADCB] --> [RBP]");
-		rbpResMap = rbpClientService.doRequest(logVO, Init.readConfig.getRbp_opcode_select(), rbpReqMap);
+		rbpResMap = rbpClientService.doRequest(logVO, opCode, paramMap);
 		
 		// 한도조회 결과 paramMap에 저장
 		paramMap.put("RbpRes_111", rbpResMap);
