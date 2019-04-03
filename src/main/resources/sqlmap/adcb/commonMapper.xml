@@ -26,6 +26,26 @@
  	</select>
  	
  	
+ 	<!-- SLA INSERT -->
+ 	<insert id="slaInsert" parameterType="com.nexgrid.adcb.common.vo.LogVO">
+ 		INSERT INTO TB_API_LOGS (
+	 		SEQ_ID,
+	        RESULT_CODE,
+	        REQ_TIME,
+	        RSP_TIME,
+	        API_TYPE,
+         	API_RESULT
+         	)
+	     VALUES (
+	     	#{seqId},
+			#{resultCode},
+			#{reqTime},
+			#{resTime},
+			#{apiType},
+			#{apiResultCode}
+			)
+ 	</insert> 	
+ 	
  
   
  </mapper>

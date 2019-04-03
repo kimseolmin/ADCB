@@ -1,5 +1,6 @@
 package com.nexgrid.adcb.api.charge.controller;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,7 +21,6 @@ import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
-import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.LogUtil;
 
 @RestController
@@ -67,6 +67,8 @@ public class ChargeController {
 			
 			if(duplicateYn) { //해당 요청 아이디에 대한 응답을 줬을 경우 같은 응답을 다시 준다.
 				dataMap = (Map<String, Object>)paramMap.get("duplicateRes");
+				Map<String, Object> result = (Map<String, Object>)dataMap.get("result");
+				logVO.setApiResultCode(result.get("reasonCode").toString());
 			}else {
 				// 최초 요청 데이터 저장
 				chargeService.insertChargeReq(paramMap, logVO);
@@ -81,7 +83,9 @@ public class ChargeController {
 				chargeService.charge(paramMap, logVO);
 				
 				// 예외없이 왔을 경우 BOKU에게 성공 msg 전송
+				paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
 				dataMap.put("result", commonService.getSuccessResult());
+				logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 			}
 			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			
@@ -95,6 +99,7 @@ public class ChargeController {
 			
 			dataMap.put("msisdn", paramMap.get("msisdn"));
 			dataMap.put("result", commonEx.sendException());
+			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -115,7 +120,8 @@ public class ChargeController {
 			
 			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
-			
+
+			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -134,6 +140,9 @@ public class ChargeController {
 				// BOKU에게 응답
 				logVO.setFlow("[ADCB] --> [SVC]");
 				if(paramMap.containsKey("duplicateRes") || EnAdcbOmsCode.CHARGE_DUPLICATE_REQ.value().equals(logVO.getResultCode())) { // 중복 요청일 경우
+					if(paramMap.containsKey("http_status")) {
+						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
+					}
 					LogUtil.EndServiceLog(logVO);
 					return dataMap;
 					
@@ -153,19 +162,22 @@ public class ChargeController {
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
 						
 					}
+					
+					// SLA Insert
+					commonService.slaInsert(logVO);
 				}
 				
 			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
 				logger.error("[" + logVO.getSeqId() + "]" + ex);
-			}finally {
-				
-				// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
-				
-				// SLA
-				
-				LogUtil.EndServiceLog(logVO);
 			}
+				
+			// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+			
+			
+			
+			LogUtil.EndServiceLog(logVO);
+			
 			
 			
 		}

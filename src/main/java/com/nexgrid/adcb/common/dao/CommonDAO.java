@@ -2,6 +2,8 @@ package com.nexgrid.adcb.common.dao;
 
 import org.springframework.stereotype.Repository;
 
+import com.nexgrid.adcb.common.vo.LogVO;
+
 @Repository
 public interface CommonDAO {
 	
@@ -23,5 +25,15 @@ public interface CommonDAO {
 	 * @throws Exception
 	 */
 	public int getBlockFeeType(String feetype) throws Exception;
+	
+	
+	
+	/**
+	 * SLA INSERT
+	 * @param logVO
+	 * @return
+	 * @throws Exception
+	 */
+	public int slaInsert(LogVO logVO) throws Exception;
 
 }

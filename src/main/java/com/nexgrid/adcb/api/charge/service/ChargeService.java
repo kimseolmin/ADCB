@@ -644,6 +644,7 @@ public class ChargeService {
 				resMap.put("result", result);
 				
 				paramMap.put("duplicateRes", resMap);
+				paramMap.put("http_status", chargeReq.get("HTTP_STATUS"));
 				
 				return true;
 			}else {

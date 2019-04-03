@@ -83,4 +83,14 @@ public interface CommonService {
 	 */
 	void reqBodyCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
+	
+	
+	/**
+	 * SLA INSERT
+	 * @param logVO
+	 * @return
+	 * @throws Exception
+	 */
+	void slaInsert(LogVO logVO) throws Exception;
+	
 }

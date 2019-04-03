@@ -511,4 +511,23 @@ public class CommonServiceImpl implements CommonService{
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
 	}
+	
+	
+	@Override
+	public void slaInsert(LogVO logVO) throws Exception{
+		try {
+			commonDAO.slaInsert(logVO);
+		}catch(DataAccessException adcbExc){
+			SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			logVO.setFlow("[ADCB] --> [DB]");
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			
+		}catch(ConnectException adcbExc) {
+			logVO.setFlow("[ADCB] --> [DB]");
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+		}
+	}
 }
