@@ -121,7 +121,7 @@ public class RcsgClientService {
 				logVO.setRcsgResultCode(result);
 				if(!"0000".equals(resMap.get("RESULT"))) {
 					// RCSG 연동 결과 paramMap에 저장
-					paramMap.put("RcsgRes_" + opCode, resMap);
+					paramMap.put("Res_" + opCode, resMap);
 					for(EnRcsgResultCode e : EnRcsgResultCode.values()) {
 						// 에러코드를 찾아서 매핑한다.
 						if(e.getDefaultValue().equals(result)) {

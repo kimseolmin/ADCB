@@ -130,7 +130,7 @@ public class RbpClientService {
 				
 				if(!"0000".equals(resMap.get("RESULT"))) {
 					// RBP 연동 결과 paramMap에 저장
-					paramMap.put("RbpRes_" + opCode, resMap);
+					paramMap.put("Res_" + opCode, resMap);
 					for(EnRbpResultCode e : EnRbpResultCode.values()) {
 						// 에러코드를 찾아서 매핑한다.
 						if(e.getDefaultValue().equals(result)) {

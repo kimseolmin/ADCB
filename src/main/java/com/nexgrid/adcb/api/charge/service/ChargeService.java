@@ -4,6 +4,7 @@ import java.net.ConnectException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -337,9 +338,6 @@ public class ChargeService {
 			if(EnAdcbOmsCode.RBP_API.value().equals(firstCode)) {
 				if(EnRbpResultCode.RS_4008.getDefaultValue().equals(rbpRsCode)) { // 한도초과일 경우 
 					
-					// 일반요금제일 경우 취약계층인지를 확인하여 취약계층이면 취약계층 대리인 정보를 가져옴.
-		    		//doEsbCm181(paramMap, logVO);
-		    		
 		    		// 한도초과 SMS 정보 paramMap에 저장
 		    		
 		    		
@@ -355,7 +353,8 @@ public class ChargeService {
 		
 		
 		// 즉시차감 결과 paramMap에 저장
-		paramMap.put("RbpRes_"+opCode, rbpResMap);
+		paramMap.put("Res_"+opCode, rbpResMap);
+		
 	}
 	
 	
@@ -425,7 +424,7 @@ public class ChargeService {
 		
 		
 		// 차감 결과 paramMap에 저장
-		paramMap.put("RcsgRes_"+opCode, rcsgResMap);
+		paramMap.put("Res_"+opCode, rcsgResMap);
 	}
 	
 	
@@ -564,5 +563,98 @@ public class ChargeService {
 		
 	}
 	
+	
+	
+	/**
+	 * 결제 완료 또는 실패 정보 UPDATE
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	public void updateChargeInfo(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		
+		// update를 위한 data
+		paramMap.put("TRANSACTION_TYPE", "B"); // BOKU 요청구분 (B:구매, C:취소)
+		paramMap.put("PAY_DT", new Date()); // 결제완료일시
+		Calendar cal = Calendar.getInstance();
+		paramMap.put("current_month", new SimpleDateFormat("yyyyMM").format(cal.getTime()));
+		cal.add(Calendar.MONTH, -1);
+		paramMap.put("last_month", new SimpleDateFormat("yyyyMM").format(cal.getTime()));
+		
+		logVO.setFlow("[ADCB] --> [DB]");
+		try {
+			chargeDAO.updateChargeInfo(paramMap);
+		}catch(DataAccessException adcbExc){
+			SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+		}catch(ConnectException adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+		}
+		logVO.setFlow("[ADCB] <-- [DB]");
+	}
+	
+	
+	
+	/**
+	 * 청구 API 요청 중복 체크
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	public boolean reqDuplicateCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		Calendar cal = Calendar.getInstance();
+		paramMap.put("current_month", new SimpleDateFormat("yyyyMM").format(cal.getTime()));
+		cal.add(Calendar.MONTH, -1);
+		paramMap.put("last_month", new SimpleDateFormat("yyyyMM").format(cal.getTime()));
+		Map<String, String> chargeReq = null;
+		
+		logVO.setFlow("[ADCB] --> [DB]");
+		
+		try {
+			chargeReq = chargeDAO.reqDuplicateCheck(paramMap);
+		}catch(DataAccessException adcbExc){
+			SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+		}catch(ConnectException adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+		}
+		logVO.setFlow("[ADCB] <-- [DB]");
+		
+		
+		// 중복이 아닐 경우 메소드 종료
+		if(chargeReq == null) {
+			return false;
+		}else {
+			if(chargeReq.get("ISSUER_PAYMENTID") != null) { // 요청에 대한 응답이 있었을 경우 
+				// 이미 줬던 응답을 다시 준다.
+				Map<String, Object> resMap = new HashMap<>();
+				resMap.put("issuerPaymentId", chargeReq.get("ISSUER_PAYMENTID"));
+				
+				Map<String, Object> result = new HashMap<>();
+				result.put("reasonCode", Integer.parseInt(chargeReq.get("RESULT")));
+				result.put("message", chargeReq.get("RESULT_MSG"));
+				resMap.put("result", result);
+				
+				paramMap.put("duplicateRes", resMap);
+				
+				return true;
+			}else {
+				throw new CommonException(EnAdcbOmsCode.CHARGE_DUPLICATE_REQ);
+			}
+			
+		}
+		
+		
+		
+		
+	}
 	
 }

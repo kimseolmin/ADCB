@@ -15,4 +15,24 @@ public interface ChargeDAO {
 	 * @throws Exception
 	 */
 	int insertChargeReq(@Param("param") Map<String, Object> paramMap) throws Exception;
+	
+	
+	
+	/**
+	 * 결제 완료 또는 실패 정보 UPDATE
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	int updateChargeInfo(@Param("param") Map<String, Object> paramMap) throws Exception;
+	
+	
+	
+	/**
+	 * 청구 API 요청 중복 체크
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	Map<String, String> reqDuplicateCheck(Map<String, Object> paramMap) throws Exception;
 }

@@ -357,7 +357,6 @@ public class CommonServiceImpl implements CommonService{
 	
 	
 	
-	// 성공일 경우 boku 응답 결과리턴
 	@Override
 	public Map<String,Object> getSuccessResult() throws Exception {
 		
@@ -488,7 +487,7 @@ public class CommonServiceImpl implements CommonService{
 		rbpResMap = rbpClientService.doRequest(logVO, opCode, paramMap);
 		
 		// 한도조회 결과 paramMap에 저장
-		paramMap.put("RbpRes_111", rbpResMap);
+		paramMap.put("Res_"+opCode, rbpResMap);
 		
 		if(!rbpResMap.get("CUST_GRD_CD").equals("7")) {
 			return true;

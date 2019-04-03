@@ -14,6 +14,7 @@ public enum EnAdcbOmsCode {
 	, INVALID_HEADER_VALUE("30200002", "2", "요청 HEADER 필수 파라미터 값 오류", HttpStatus.BAD_REQUEST)
 	, INVALID_BODY_KEY("30300001", "2", "요청 BODY 전문 형식 불일치", HttpStatus.BAD_REQUEST)
 	, INVALID_BODY_VALUE("30300002", "2", "요청 BODY 필수 파라미터 값 오류", HttpStatus.BAD_REQUEST)
+	, CHARGE_DUPLICATE_REQ("30000001", "123", "청구 API 중복 요청", HttpStatus.BAD_REQUEST)
 	, INVALID_ERROR("39999999", "4", HttpStatus.INTERNAL_SERVER_ERROR)
 	
 	

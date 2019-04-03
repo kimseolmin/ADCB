@@ -23,4 +23,46 @@
 			#{param.productDescription}
 			)
  	</insert>
+ 	
+ 	
+ 	<!-- 결제 완료 또는 실패 정보 UPDATE -->
+ 	<update id="updateChargeInfo">
+ 		UPDATE 
+ 			TB_CHARGE_INFO
+ 		SET 
+ 			BAN_UNPAID_YN_CODE = #{param.ncasRes.BAN_UNPAID_YN_CODE},
+	    	TRANSACTION_TYPE = #{param.TRANSACTION_TYPE},
+	    	YOUNG_FEE_YN = #{param.ncasRes.YOUNG_FEE_YN},
+	    	BILL_FLAG = #{param.Res_114.BILL_FLAG},
+	    	CUST_GRD_CD = #{param.Res_111.CUST_GRD_CD},
+	    	PAY_DT = #{param.PAY_DT},
+	    	RESULT = #{param.bokuRes.result.reasonCode},
+	    	CTN = #{param.ncasRes.CTN},
+	    	SUB_NO = #{param.ncasRes.SUB_NO},
+	    	FEE_TYPE = #{param.ncasRes.FEE_TYPE},
+	    	UNIT_MDL = #{param.ncasRes.UNIT_MDL},
+	    	ACE_NO = #{param.ncasRes.ACENO},
+	    	BAN = #{param.ncasRes.BAN},
+	    	BR_ID = #{param.Res_114.BR_ID},
+	    	ISSUER_PAYMENTID = #{param.bokuRes.issuerPaymentId},
+	    	RESULT_MSG = #{param.bokuRes.result.message}
+		WHERE 
+			TO_CHAR (REG_DT, 'yyyymm') IN (#{param.current_month}, #{param.last_month})
+	    	AND REQUEST_ID = #{param.requestId}
+ 	</update>
+ 	
+ 	
+ 	<!-- 청구 API 요청 중복 체크 -->
+ 	<select id="reqDuplicateCheck" parameterType="java.util.Map" resultType="java.util.Map">
+ 		SELECT
+ 			REQUEST_ID,
+ 			ISSUER_PAYMENTID, 
+ 			RESULT_MSG, 
+ 			RESULT
+		FROM 
+			TB_CHARGE_INFO
+		WHERE 
+			TO_CHAR (REG_DT, 'yyyymm') IN (#{current_month}, #{last_month}) 
+		    AND REQUEST_ID = #{requestId}
+ 	</select>
  </mapper>

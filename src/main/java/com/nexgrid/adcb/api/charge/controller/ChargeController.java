@@ -20,6 +20,7 @@ import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
+import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.LogUtil;
 
 @RestController
@@ -61,20 +62,28 @@ public class ChargeController {
 			// reqBody check
 			chargeService.reqBodyCheck(paramMap, logVO);
 			
-			// 요청 중복 확인 -> 이미 청구가 완료된 요청이 다시 들어왔을 경우 이미 줬던 응답을 그대로 줘야 함.
+			// 요청 중복 확인
+			boolean duplicateYn = chargeService.reqDuplicateCheck(paramMap, logVO);
 			
-			
-			// 최초 요청 데이터 저장
-			chargeService.insertChargeReq(paramMap, logVO);
-			
-			// NCAS 연동
-			commonService.getNcasGetMethod(paramMap, logVO);
-			
-			// NCAS 연동 값 -> 청구자격 체크
-			commonService.userEligibilityCheck(paramMap, logVO);
-			
-			// charge
-			chargeService.charge(paramMap, logVO);
+			if(duplicateYn) { //해당 요청 아이디에 대한 응답을 줬을 경우 같은 응답을 다시 준다.
+				dataMap = (Map<String, Object>)paramMap.get("duplicateRes");
+			}else {
+				// 최초 요청 데이터 저장
+				chargeService.insertChargeReq(paramMap, logVO);
+				
+				// NCAS 연동
+				commonService.getNcasGetMethod(paramMap, logVO);
+				
+				// NCAS 연동 값 -> 청구자격 체크
+				commonService.userEligibilityCheck(paramMap, logVO);
+				
+				// charge
+				chargeService.charge(paramMap, logVO);
+				
+				// 예외없이 왔을 경우 BOKU에게 성공 msg 전송
+				dataMap.put("result", commonService.getSuccessResult());
+			}
+			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			
 			
 			
@@ -115,32 +124,48 @@ public class ChargeController {
 						
 		}finally {
 			
-			// BOKU에게 응답을 먼저 준 후 SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
 			try {
 				logVO.setResTime();
 				logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
 				
-				response.getWriter().print(dataMap);
-				response.getWriter().flush();
-				response.getWriter().close();
-				
 				// OMS Write
 				commonService.omsLogWrite(logVO);
-
-			}catch (Exception ex) {
+				
+				// BOKU에게 응답
 				logVO.setFlow("[ADCB] --> [SVC]");
+				if(paramMap.containsKey("duplicateRes") || EnAdcbOmsCode.CHARGE_DUPLICATE_REQ.value().equals(logVO.getResultCode())) { // 중복 요청일 경우
+					LogUtil.EndServiceLog(logVO);
+					return dataMap;
+					
+				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
+					dataMap.put("issuerPaymentId", logVO.getSeqId());
+					response.getWriter().print(dataMap);
+					response.getWriter().flush();
+					response.getWriter().close();
+					
+					// paramMap에 BOKU에게 준 응답값 저장
+					paramMap.put("bokuRes", dataMap);
+					
+					// BOKU에게 응답준 결과 DB update
+					chargeService.updateChargeInfo(paramMap, logVO);
+					
+					// 청구 API가 성공일 경우에만 EAI
+					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
+						
+					}
+				}
+				
+			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
 				logger.error("[" + logVO.getSeqId() + "]" + ex);
+			}finally {
+				
+				// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+				
+				// SLA
+				
+				LogUtil.EndServiceLog(logVO);
 			}
-			
-			
-			// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
-			
-			// 청구 API가 성공일 경우에만 EAI
-			
-			// SLA
-			
-			LogUtil.EndServiceLog(logVO);
 			
 			
 		}
