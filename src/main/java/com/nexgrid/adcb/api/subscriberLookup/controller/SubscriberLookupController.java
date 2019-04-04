@@ -61,6 +61,7 @@ public class SubscriberLookupController {
 			
 			//NCAS 연동이 예외 없이 돌아왔을 경우
 			dataMap.put("result", commonService.getSuccessResult());
+			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			
 		}
 		catch(CommonException commonEx) {

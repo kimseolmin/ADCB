@@ -33,10 +33,11 @@
             </bean>
         </property>
     </bean>
- 
+ 	
  	<mybatis:scan base-package="com.nexgrid.adcb.common.dao" />
  	<mybatis:scan base-package="com.nexgrid.adcb.api.accountProfile.dao" />
  	<mybatis:scan base-package="com.nexgrid.adcb.api.charge.dao" />
+ 	<mybatis:scan base-package="com.nexgrid.adcb.api.refund.dao" />
 	<!-- <context:component-scan base-package="classpath:/sqlmap/*.xml"/> -->
 	
 	

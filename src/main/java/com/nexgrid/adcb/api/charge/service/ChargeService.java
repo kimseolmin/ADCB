@@ -63,7 +63,7 @@ public class ChargeService {
 	@Autowired
 	private RcsgClientService rcsgClientService;
 	
-	@Autowired
+	@Inject
 	private ChargeDAO chargeDAO;
 	
 	@Inject
@@ -617,6 +617,7 @@ public class ChargeService {
 	 * @throws Exception
 	 */
 	public boolean reqDuplicateCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		
 		Calendar cal = Calendar.getInstance();
 		paramMap.put("current_month", new SimpleDateFormat("yyyyMM").format(cal.getTime()));
 		cal.add(Calendar.MONTH, -1);

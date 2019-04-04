@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nexgrid.adcb.api.refund.service.RefundService;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
@@ -27,6 +28,9 @@ public class RefundController {
 	
 	@Autowired
 	private CommonService commonService;
+	
+	@Autowired
+	private RefundService refundService;
 	
 	private Logger logger = LoggerFactory.getLogger(RefundController.class);
 	
@@ -49,20 +53,42 @@ public class RefundController {
 		try {
 			
 			// reqBody check
-			//chargeService.reqBodyCheck(paramMap, logVO);
+			refundService.reqBodyCheck(paramMap, logVO);
 			
+			// 요청 중복 확인
+			boolean duplicateYn = refundService.reqDuplicateCheck(paramMap, logVO);
+			if(duplicateYn) { //해당 요청 아이디에 대한 응답을 줬을 경우 같은 응답을 다시 준다.
+				
+				dataMap = (Map<String, Object>)paramMap.get("duplicateRes");
+				Map<String, Object> result = (Map<String, Object>)dataMap.get("result");
+				logVO.setApiResultCode(result.get("reasonCode").toString());
+			}else {
+				// 최초 요청 데이터 저장
+				refundService.insertRefundReq(paramMap, logVO);
+				
+				// NCAS 연동
+				commonService.getNcasGetMethod(paramMap, logVO);
+				
+				// NCAS 연동 값 -> 자격 체크
+				commonService.userEligibilityCheck(paramMap, logVO);
+				
+				// refund
+				
+				
+				
+			}
 			
 			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			
 			
 			
 		}
-		/*catch(CommonException commonEx) {
+		catch(CommonException commonEx) {
 			
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
-			dataMap.put("msisdn", paramMap.get("msisdn"));
+			dataMap.put("issuerRefundId", logVO.getSeqId());
 			dataMap.put("result", commonEx.sendException());
 			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
@@ -71,7 +97,7 @@ public class RefundController {
 			logger.error("[" + logVO.getSeqId() + "] Error Message : " + commonEx.getLogMsg());
 			logger.error("[" + logVO.getSeqId() + "]", commonEx);
 			
-		}*/
+		}
 		catch(Exception ex){
 			
 			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -81,7 +107,7 @@ public class RefundController {
 			logVO.setResultCode(EnAdcbOmsCode.INVALID_ERROR.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.INVALID_ERROR.mappingCode());
 			
-			dataMap.put("msisdn", paramMap.get("msisdn"));
+			dataMap.put("issuerRefundId", logVO.getSeqId());
 			
 			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);

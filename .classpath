@@ -34,7 +34,7 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="C:/project/program/Java/jar/axiom-api-1.2.7.jar"/>
-	<classpathentry kind="lib" path="C:/project/program/Java/jar/axiom-impl-1.2.7.jar"/>
+	<classpathentry kind="lib" path="C:/Project/99.Program/Java/jar/axiom-api-1.2.7.jar"/>
+	<classpathentry kind="lib" path="C:/Project/99.Program/Java/jar/axiom-impl-1.2.7.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

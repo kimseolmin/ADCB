@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+ <mapper namespace="com.nexgrid.adcb.api.refund.dao.RefundDAO">
+ 	
+ 
+ 	<!-- 환불 API 요청 중복 체크-->
+ 	<select id="reqDuplicateCheck" parameterType="java.util.Map" resultType="java.util.Map">
+ 		SELECT
+ 			REQUEST_ID,
+ 			ISSUER_REFUNDID, 
+ 			RESULT_MSG, 
+ 			RESULT,
+ 			HTTP_STATUS
+		FROM 
+			TB_REFUND_INFO
+		WHERE 
+			TO_CHAR (REG_DT, 'yyyymm') IN (#{current_month}, #{last_month}) 
+		    AND REQUEST_ID = #{requestId}
+ 	</select>
+ 	
+ 	
+ 	
+ 	<!-- BOKU의 환불 API 최초 요청 데이터 INSERT -->
+ 	<insert id="insertRefundReq">
+ 		INSERT INTO TB_REFUND_INFO (
+	 		REQUEST_ID,
+	        CLIENT_REFUNDID,
+	        ISSUER_PAYMENTID,
+	        AMOUNT,
+	        REFUND_REASON,
+         	MERCHANT_ID
+         	)
+	     VALUES (
+	     	#{param.requestId},
+			#{param.clientRefundId},
+			#{param.issuerPaymentId},
+			#{param.refundAmount.amount},
+			#{param.refundReason},
+			#{param.merchantId}
+			)
+ 	</insert>
+ 	
+ </mapper>
