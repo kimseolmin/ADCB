@@ -1,5 +1,6 @@
-package com.nexgrid.adcb.api.checkEligibility.controller;
+package com.nexgrid.adcb.api.refund.controller;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,26 +23,19 @@ import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.LogUtil;
 
 @RestController
-public class CheckEligibilityController {
-
+public class RefundController {
+	
 	@Autowired
 	private CommonService commonService;
 	
-	private Logger logger = LoggerFactory.getLogger(CheckEligibilityController.class);
+	private Logger logger = LoggerFactory.getLogger(RefundController.class);
 	
 	
-	/**
-	 * CheckEligibility API
-	 * @param request
-	 * @param response
-	 * @param paramMap
-	 * @return
-	 */
-	@RequestMapping(value="/checkEligibility", method = RequestMethod.POST)
-	public Map<String ,Object> getCheckEligibility(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
+	@RequestMapping(value="/refund", method = RequestMethod.POST)
+	public Map<String ,Object> refund(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
 		
 		//For OMS, ServiceLog
-		LogVO logVO = new LogVO("CheckEligibility");
+		LogVO logVO = new LogVO("Refund");
 		
 		//Service Start Log Print
 		LogUtil.startServiceLog(logVO, request, paramMap);
@@ -55,33 +49,29 @@ public class CheckEligibilityController {
 		try {
 			
 			// reqBody check
-			commonService.reqBodyCheck(paramMap, logVO);
+			//chargeService.reqBodyCheck(paramMap, logVO);
 			
-			// NCAS 연동
-			commonService.getNcasGetMethod(paramMap, logVO);
 			
-			// NCAS 연동 값 -> 청구자격 체크
-			// 소비자가 통신사 청구서를 사용할 자격이 있는 경우 true
-			if(commonService.userEligibilityCheck(paramMap, logVO)) {
-				dataMap.put("result", commonService.getSuccessResult());
-				logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
-			}
+			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
+			
+			
 			
 		}
-		catch(CommonException commonEx) {
+		/*catch(CommonException commonEx) {
 			
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
 			dataMap.put("msisdn", paramMap.get("msisdn"));
 			dataMap.put("result", commonEx.sendException());
+			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
 			logger.error("[" + logVO.getSeqId() + "] Error Message : " + commonEx.getLogMsg());
 			logger.error("[" + logVO.getSeqId() + "]", commonEx);
 			
-		}
+		}*/
 		catch(Exception ex){
 			
 			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -95,7 +85,8 @@ public class CheckEligibilityController {
 			
 			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
-			
+
+			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -104,15 +95,68 @@ public class CheckEligibilityController {
 						
 		}finally {
 			
-			logVO.setResTime();
-			commonService.omsLogWrite(logVO);
-			LogUtil.EndServiceLog(dataMap, logVO);
+			try {
+				logVO.setResTime();
+				logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
+				
+				// OMS Write
+				commonService.omsLogWrite(logVO);
+				
+				// BOKU에게 응답
+				logVO.setFlow("[ADCB] --> [SVC]");
+				if(paramMap.containsKey("duplicateRes") || EnAdcbOmsCode.CHARGE_DUPLICATE_REQ.value().equals(logVO.getResultCode())) { // 중복 요청일 경우
+					if(paramMap.containsKey("http_status")) {
+						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
+					}
+					LogUtil.EndServiceLog(logVO);
+					//Test일때만
+					response.setStatus(200);
+					return dataMap;
+					
+				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
+					dataMap.put("issuerPaymentId", logVO.getSeqId());
+					//Test일때만
+					response.setStatus(200);
+					response.getWriter().print(dataMap);
+					response.getWriter().flush();
+					response.getWriter().close();
+					
+					// paramMap에 BOKU에게 준 응답값 저장
+					paramMap.put("bokuRes", dataMap);
+					
+					// BOKU에게 응답준 결과 DB update
+					//chargeService.updateChargeInfo(paramMap, logVO);
+					
+					// 청구 API가 성공일 경우에만 EAI
+					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
+						
+					}
+					
+					// SLA Insert
+					commonService.slaInsert(logVO);
+				}
+				
+			}catch (Exception ex) {
+				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
+				logger.error("[" + logVO.getSeqId() + "]" + ex);
+			}
+				
+			// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+			
+			
+			
+			LogUtil.EndServiceLog(logVO);
+			
 			
 			
 		}
 		
-		//Test일때만
-		response.setStatus(200);
-		return dataMap;
+		
+		return null;
+		
+		
+		
+		
 	}
+
 }

@@ -1,5 +1,7 @@
 package com.nexgrid.adcb.common.dao;
 
+import java.util.Map;
+
 import org.springframework.stereotype.Repository;
 
 import com.nexgrid.adcb.common.vo.LogVO;
@@ -35,5 +37,23 @@ public interface CommonDAO {
 	 * @throws Exception
 	 */
 	public int slaInsert(LogVO logVO) throws Exception;
+	
+	
+	/**
+	 * test phone 등록 여부 확인
+	 * @param ctn
+	 * @return
+	 * @throws Exception
+	 */
+	public int testPhoneCheck(String ctn) throws Exception;
+	
+	
+	/**
+	 * 청구 API 요청 중복 체크 & PaymentStatus 가져오기
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	Map<String, String> reqDuplicateCheck(Map<String, Object> paramMap) throws Exception;
 
 }

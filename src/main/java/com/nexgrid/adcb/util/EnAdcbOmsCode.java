@@ -15,6 +15,8 @@ public enum EnAdcbOmsCode {
 	, INVALID_BODY_KEY("30300001", "2", "요청 BODY 전문 형식 불일치", HttpStatus.BAD_REQUEST)
 	, INVALID_BODY_VALUE("30300002", "2", "요청 BODY 필수 파라미터 값 오류", HttpStatus.BAD_REQUEST)
 	, CHARGE_DUPLICATE_REQ("30000001", "123", "청구 API 중복 요청", HttpStatus.BAD_REQUEST)
+	, TRANSACTION_NOT_FOUND("30000002", "PaymentStatus: transaction not found", "107", HttpStatus.BAD_REQUEST)
+	, UNKNOWN_STATUS("30000002", "7", "PaymentStatus: unknown status", HttpStatus.BAD_REQUEST)
 	, INVALID_ERROR("39999999", "4", HttpStatus.INTERNAL_SERVER_ERROR)
 	
 	

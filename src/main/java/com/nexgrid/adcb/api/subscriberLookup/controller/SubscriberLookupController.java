@@ -106,7 +106,8 @@ public class SubscriberLookupController {
 			
 		}
 		
-		
+		//Test일때만
+		response.setStatus(200);
 		return dataMap;
 	}
 }

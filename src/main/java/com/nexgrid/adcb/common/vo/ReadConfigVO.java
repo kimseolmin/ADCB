@@ -66,6 +66,14 @@ public class ReadConfigVO {
 	private String esb_cm181_url = "";
 	private String esb_time_out = "";
 	
+	
+	// SMS format
+	private String charge_section_list = "";
+	private String limit_excess = "";
+	private String charge_complete = "";
+	private String section_excess = "";
+	
+	
 	private String time_out = "";
 	
 
@@ -383,6 +391,34 @@ public class ReadConfigVO {
 	}
 	public void setEsb_time_out(String esb_time_out) {
 		this.esb_time_out = esb_time_out;
+	}
+	
+	
+	
+	
+	public String getCharge_section_list() {
+		return charge_section_list;
+	}
+	public void setCharge_section_list(String charge_section_list) {
+		this.charge_section_list = charge_section_list;
+	}
+	public String getLimit_excess() {
+		return limit_excess;
+	}
+	public void setLimit_excess(String limit_excess) {
+		this.limit_excess = limit_excess;
+	}
+	public String getCharge_complete() {
+		return charge_complete;
+	}
+	public void setCharge_complete(String charge_complete) {
+		this.charge_complete = charge_complete;
+	}
+	public String getSection_excess() {
+		return section_excess;
+	}
+	public void setSection_excess(String section_excess) {
+		this.section_excess = section_excess;
 	}
 	public String getTime_out() {
 		return time_out;

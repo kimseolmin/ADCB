@@ -53,18 +53,5 @@
  	</update>
  	
  	
- 	<!-- 청구 API 요청 중복 체크 -->
- 	<select id="reqDuplicateCheck" parameterType="java.util.Map" resultType="java.util.Map">
- 		SELECT
- 			REQUEST_ID,
- 			ISSUER_PAYMENTID, 
- 			RESULT_MSG, 
- 			RESULT,
- 			HTTP_STATUS
-		FROM 
-			TB_CHARGE_INFO
-		WHERE 
-			TO_CHAR (REG_DT, 'yyyymm') IN (#{current_month}, #{last_month}) 
-		    AND REQUEST_ID = #{requestId}
- 	</select>
+ 	
  </mapper>

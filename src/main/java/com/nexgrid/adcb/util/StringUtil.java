@@ -2,6 +2,7 @@ package com.nexgrid.adcb.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -383,6 +384,18 @@ public class StringUtil {
 				return new String(bytes, len - fillSize, fillSize);
 			}
 		}
+	}
+	
+	
+	
+	/**
+	 * SMS 전송을 위한 price 포맷
+	 * @param price
+	 * @return
+	 */
+	public static String getMsgPrice(int price) {
+		DecimalFormat df = new DecimalFormat("###,##0");
+		return df.format(price).toString() + "원";
 	}
 
 }

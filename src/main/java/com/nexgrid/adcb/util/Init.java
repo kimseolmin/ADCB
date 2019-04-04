@@ -88,6 +88,12 @@ public class Init{
 		    	readConfig.setEsb_time_out(props.getProperty("ESB_TIME_OUT"));
 		    	
 		    	
+		    	//SMS format
+		    	readConfig.setCharge_section_list(props.getProperty("CHARGE_SECTION_LIST"));
+		    	readConfig.setLimit_excess(props.getProperty("LIMIT_EXCESS"));
+		    	readConfig.setCharge_complete(props.getProperty("CHARGE_COMPLETE"));
+		    	readConfig.setSection_excess(props.getProperty("SECTION_EXCESS"));
+		    	
 		    	readConfig.setTime_out(props.getProperty("time_out"));
 		    	
 		    	

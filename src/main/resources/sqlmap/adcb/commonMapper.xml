@@ -44,7 +44,32 @@
 			#{apiType},
 			#{apiResultCode}
 			)
- 	</insert> 	
+ 	</insert>
+ 	
+ 	<!-- test phone 등록 여부 확인 -->
+ 	<select id="testPhoneCheck" parameterType="java.lang.String" resultType="java.lang.Integer">
+	 	SELECT 
+	 		COUNT (*)
+	  	FROM 
+	  		TB_ENROLLMENT_PHONE
+	 	WHERE 
+	 		CTN = #{ctn}
+ 	</select>
+ 	
+ 	<!-- 청구 API 요청 중복 체크 & PaymentStatus 가져오기 -->
+ 	<select id="reqDuplicateCheck" parameterType="java.util.Map" resultType="java.util.Map">
+ 		SELECT
+ 			REQUEST_ID,
+ 			ISSUER_PAYMENTID, 
+ 			RESULT_MSG, 
+ 			RESULT,
+ 			HTTP_STATUS
+		FROM 
+			TB_CHARGE_INFO
+		WHERE 
+			TO_CHAR (REG_DT, 'yyyymm') IN (#{current_month}, #{last_month}) 
+		    AND REQUEST_ID = #{requestId}
+ 	</select>
  	
  
   

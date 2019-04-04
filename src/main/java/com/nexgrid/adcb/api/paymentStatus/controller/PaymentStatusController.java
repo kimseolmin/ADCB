@@ -1,4 +1,4 @@
-package com.nexgrid.adcb.api.checkEligibility.controller;
+package com.nexgrid.adcb.api.paymentStatus.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nexgrid.adcb.api.paymentStatus.service.PaymentStatusService;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
@@ -22,26 +23,21 @@ import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.LogUtil;
 
 @RestController
-public class CheckEligibilityController {
-
+public class PaymentStatusController {
+	
 	@Autowired
 	private CommonService commonService;
 	
-	private Logger logger = LoggerFactory.getLogger(CheckEligibilityController.class);
+	@Autowired
+	private PaymentStatusService paymentStatusService;
+	
+	private Logger logger = LoggerFactory.getLogger(PaymentStatusController.class);
 	
 	
-	/**
-	 * CheckEligibility API
-	 * @param request
-	 * @param response
-	 * @param paramMap
-	 * @return
-	 */
-	@RequestMapping(value="/checkEligibility", method = RequestMethod.POST)
-	public Map<String ,Object> getCheckEligibility(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
-		
+	@RequestMapping(value="/paymentStatus", produces = "application/json; charset=utf8",  method = RequestMethod.POST)
+	public Map<String ,Object> getPaymentStatus(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
 		//For OMS, ServiceLog
-		LogVO logVO = new LogVO("CheckEligibility");
+		LogVO logVO = new LogVO("PaymentStatus");
 		
 		//Service Start Log Print
 		LogUtil.startServiceLog(logVO, request, paramMap);
@@ -55,17 +51,16 @@ public class CheckEligibilityController {
 		try {
 			
 			// reqBody check
-			commonService.reqBodyCheck(paramMap, logVO);
+			paymentStatusService.reqBodyCheck(paramMap, logVO);
 			
-			// NCAS 연동
-			commonService.getNcasGetMethod(paramMap, logVO);
+			// paymentReq 조회
+			paymentStatusService.getPaymentStatus(paramMap, logVO);
 			
-			// NCAS 연동 값 -> 청구자격 체크
-			// 소비자가 통신사 청구서를 사용할 자격이 있는 경우 true
-			if(commonService.userEligibilityCheck(paramMap, logVO)) {
-				dataMap.put("result", commonService.getSuccessResult());
-				logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
-			}
+			// 응답
+			dataMap.put("paymentResponse", paramMap.get("paymentResponse"));
+			dataMap.put("result", commonService.getSuccessResult());
+			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
+			
 			
 		}
 		catch(CommonException commonEx) {
@@ -73,7 +68,6 @@ public class CheckEligibilityController {
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
-			dataMap.put("msisdn", paramMap.get("msisdn"));
 			dataMap.put("result", commonEx.sendException());
 			response.setStatus(commonEx.getStatusCode());
 			
@@ -90,8 +84,6 @@ public class CheckEligibilityController {
 			
 			logVO.setResultCode(EnAdcbOmsCode.INVALID_ERROR.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.INVALID_ERROR.mappingCode());
-			
-			dataMap.put("msisdn", paramMap.get("msisdn"));
 			
 			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
@@ -111,8 +103,10 @@ public class CheckEligibilityController {
 			
 		}
 		
+		
 		//Test일때만
 		response.setStatus(200);
 		return dataMap;
 	}
+
 }

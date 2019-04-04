@@ -97,7 +97,7 @@ public class ChargeController {
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
-			dataMap.put("msisdn", paramMap.get("msisdn"));
+			dataMap.put("issuerPaymentId", logVO.getSeqId());
 			dataMap.put("result", commonEx.sendException());
 			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
@@ -116,8 +116,7 @@ public class ChargeController {
 			logVO.setResultCode(EnAdcbOmsCode.INVALID_ERROR.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.INVALID_ERROR.mappingCode());
 			
-			dataMap.put("msisdn", paramMap.get("msisdn"));
-			
+			dataMap.put("issuerPaymentId", logVO.getSeqId());
 			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
 
@@ -144,10 +143,14 @@ public class ChargeController {
 						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
 					}
 					LogUtil.EndServiceLog(logVO);
+					//Test일때만
+					response.setStatus(200);
 					return dataMap;
 					
 				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
 					dataMap.put("issuerPaymentId", logVO.getSeqId());
+					//Test일때만
+					response.setStatus(200);
 					response.getWriter().print(dataMap);
 					response.getWriter().flush();
 					response.getWriter().close();

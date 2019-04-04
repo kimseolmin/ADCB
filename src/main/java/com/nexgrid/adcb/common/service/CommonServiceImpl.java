@@ -5,6 +5,7 @@ import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -391,58 +392,75 @@ public class CommonServiceImpl implements CommonService{
     											// 2번째 byte: PIN번호 설정여부 ('Y':PIN번호사용, 'N':PIN번호사용안함, '0'(숫자):PIN번호미설정, 'L':5회실패로 잠금상태)
 
     	
- 
-    	// CUST_TYPE_CODE : 개인,법인구분(I : 개인 / G : 법인) - 법인폰 차단
-    	if(!"I".equals(cust_type_code)) {
-    		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CORP);
+    	// test phone은 통과!
+    	int testPhoneCnt = 0;
+    	try {
+    		testPhoneCnt = commonDAO.testPhoneCheck(ncasRes.get("CTN"));
+		}catch(DataAccessException adcbExc){
+			SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			logVO.setFlow("[ADCB] --> [DB]");
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			
+		}catch(ConnectException adcbExc) {
+			logVO.setFlow("[ADCB] --> [DB]");
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+		}
+    	if(testPhoneCnt < 0) {
+    		// CUST_TYPE_CODE : 개인,법인구분(I : 개인 / G : 법인) - 법인폰 차단
+        	if(!"I".equals(cust_type_code)) {
+        		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CORP);
+        	}
+        	
+        	// CTN_STUS_CODE : CTN 상태 코드 (A : 정상 / S : 일시 중지) - 일시중지폰 차단
+        	  if(!"A".equals(ctn_stus_code)){
+        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PAUSE);
+        	  }
+        	  
+        	  // UNIT_LOSS_YN_CODE : 분실여부(Y,N) - 분실등록폰 차단
+        	  if(!"N".equals(unit_loss_yn_code)) {
+        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_LOSS);
+        	  }
+        	  
+        	  
+        	  // PRE_PAY_CODE : NULL이 아닌 경우 선불가입자이며, NULL인 경우 선불가입자 아님. - 선불가입자 차단
+        	  if(!"".equals(pre_pay_code)) {
+        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PREPAY);
+        	  }
+        	  
+        	  
+        	  // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
+        	  svc_auth = svc_auth.substring(0, 1);
+        	  if(!"0".equals(svc_auth)) {
+        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_IRREG);
+        	  }
+        	  
+        	  
+        	// 실사용자 만나이 구하기
+    		int age = 0;
+    		if(cust_type_code.equals("I")){
+    			try {
+    				age = StringUtil.calculateManAge(sub_birth_pers_id, sub_sex_pers_id);
+    			} catch (Exception e) {
+    				//에러가 날 경우 차단시킨다
+    				age = 0;
+    			}
+    		}
+    		// 만 14세 미만 차단
+    		if(age < 14 ) {
+    			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_14);
+    		}else {
+    			// 14세 이상 중에 청소년요금제가 아닌 경우
+    			if("N".equals(young_fee_yn)){
+    				//통합한도 연동
+    				return userGradeCheck(paramMap, logVO);
+    			}
+    			
+    		}
     	}
     	
-    	// CTN_STUS_CODE : CTN 상태 코드 (A : 정상 / S : 일시 중지) - 일시중지폰 차단
-    	  if(!"A".equals(ctn_stus_code)){
-    		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PAUSE);
-    	  }
-    	  
-    	  // UNIT_LOSS_YN_CODE : 분실여부(Y,N) - 분실등록폰 차단
-    	  if(!"N".equals(unit_loss_yn_code)) {
-    		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_LOSS);
-    	  }
-    	  
-    	  
-    	  // PRE_PAY_CODE : NULL이 아닌 경우 선불가입자이며, NULL인 경우 선불가입자 아님. - 선불가입자 차단
-    	  if(!"".equals(pre_pay_code)) {
-    		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PREPAY);
-    	  }
-    	  
-    	  
-    	  // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
-    	  svc_auth = svc_auth.substring(0, 1);
-    	  if(!"0".equals(svc_auth)) {
-    		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_IRREG);
-    	  }
-    	  
-    	  
-    	// 실사용자 만나이 구하기
-		int age = 0;
-		if(cust_type_code.equals("I")){
-			try {
-				age = StringUtil.calculateManAge(sub_birth_pers_id, sub_sex_pers_id);
-			} catch (Exception e) {
-				//에러가 날 경우 차단시킨다
-				age = 0;
-			}
-		}
-		// 만 14세 미만 차단
-		if(age < 14 ) {
-			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_14);
-		}else {
-			// 14세 이상 중에 청소년요금제가 아닌 경우
-			if("N".equals(young_fee_yn)){
-				//통합한도 연동
-				return userGradeCheck(paramMap, logVO);
-			}
-			
-		}
-    	  
     	return true;
 	};
 	
@@ -530,4 +548,5 @@ public class CommonServiceImpl implements CommonService{
 			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 		}
 	}
+	
 }

@@ -117,6 +117,8 @@ public class AccountProfileController {
 		}
 		
 		
+		//Test일때만
+		response.setStatus(200);
 		return dataMap;
 	}
 	

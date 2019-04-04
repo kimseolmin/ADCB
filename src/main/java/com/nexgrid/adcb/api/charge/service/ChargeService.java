@@ -4,11 +4,15 @@ import java.net.ConnectException;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import javax.inject.Inject;
 
 import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.httpclient.ConnectTimeoutException;
@@ -19,8 +23,10 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.nexgrid.adcb.api.charge.dao.ChargeDAO;
+import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.common.vo.SmsSendVO;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpResultCode;
 import com.nexgrid.adcb.interworking.rbp.service.RbpClientService;
 import com.nexgrid.adcb.interworking.rbp.util.RbpKeyGenerator;
@@ -59,6 +65,9 @@ public class ChargeService {
 	
 	@Autowired
 	private ChargeDAO chargeDAO;
+	
+	@Inject
+	private CommonDAO commonDAO;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ChargeService.class);
 
@@ -338,12 +347,11 @@ public class ChargeService {
 			if(EnAdcbOmsCode.RBP_API.value().equals(firstCode)) {
 				if(EnRbpResultCode.RS_4008.getDefaultValue().equals(rbpRsCode)) { // 한도초과일 경우 
 					
-		    		// 한도초과 SMS 정보 paramMap에 저장
-		    		
-		    		
-				}else { // 한도 초과가 아닌 다른 실패인 경우 
-					// 결제 실패 SMS paramMap에 저장
 					
+		    		// 한도초과 SMS 정보 paramMap에 저장
+
+		    		
+		    		
 				}
 			}
 			
@@ -354,6 +362,8 @@ public class ChargeService {
 		
 		// 즉시차감 결과 paramMap에 저장
 		paramMap.put("Res_"+opCode, rbpResMap);
+		
+		// 결제 성공 SMS 정보 paramMap에 저장
 		
 	}
 	
@@ -600,9 +610,10 @@ public class ChargeService {
 	
 	
 	/**
-	 * 청구 API 요청 중복 체크
+	 * CHARGE API 중복 요청 체크
 	 * @param paramMap
 	 * @param logVO
+	 * @return
 	 * @throws Exception
 	 */
 	public boolean reqDuplicateCheck(Map<String, Object> paramMap, LogVO logVO) throws Exception{
@@ -615,7 +626,7 @@ public class ChargeService {
 		logVO.setFlow("[ADCB] --> [DB]");
 		
 		try {
-			chargeReq = chargeDAO.reqDuplicateCheck(paramMap);
+			chargeReq = commonDAO.reqDuplicateCheck(paramMap);
 		}catch(DataAccessException adcbExc){
 			SQLException se = (SQLException) adcbExc.getRootCause();
 			logVO.setRsCode(Integer.toString(se.getErrorCode()));

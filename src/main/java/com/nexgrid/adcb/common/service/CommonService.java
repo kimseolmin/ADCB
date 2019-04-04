@@ -93,4 +93,8 @@ public interface CommonService {
 	 */
 	void slaInsert(LogVO logVO) throws Exception;
 	
+	
+	
+	
+	
 }
