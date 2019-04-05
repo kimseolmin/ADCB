@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,7 @@ public class ChargeController {
 		LogUtil.startServiceLog(logVO, request, paramMap);
 		
 		//Return Value
+		
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		
 		//set flow
@@ -149,9 +151,11 @@ public class ChargeController {
 					
 				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
 					dataMap.put("issuerPaymentId", logVO.getSeqId());
+					//ObjectMapper mapper = new ObjectMapper();
 					//Test일때만
 					response.setStatus(200);
-					response.getWriter().print(dataMap);
+					response.setContentType("application/json");
+					response.getWriter().print(new ObjectMapper().writeValueAsString(dataMap));
 					response.getWriter().flush();
 					response.getWriter().close();
 					

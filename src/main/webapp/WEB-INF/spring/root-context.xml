@@ -16,8 +16,7 @@
 	</bean> -->
 	<!-- <bean class="com.nexgrid.ips.util.Init" id="init" destroy-method="destroy" init-method="init"/> -->
 	<bean class="com.nexgrid.adcb.util.Init" id="init" destroy-method="destroy" init-method="init"/>
-	<bean id="jsonView"
-		class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
+	<bean id="jsonView" class="org.springframework.web.servlet.view.json.MappingJackson2JsonView" />
 	
 	
    

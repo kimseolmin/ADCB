@@ -85,7 +85,7 @@
 		=====================================================================
 		-->
 		<Root level="debug">
-			<!-- <appender-ref ref="console" /> -->
+			 <appender-ref ref="console" />
 		</Root>
 			
 		

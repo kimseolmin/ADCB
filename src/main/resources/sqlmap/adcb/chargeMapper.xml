@@ -46,9 +46,11 @@
 	    	BR_ID = #{param.Res_114.BR_ID},
 	    	ISSUER_PAYMENTID = #{param.bokuRes.issuerPaymentId},
 	    	RESULT_MSG = #{param.bokuRes.result.message},
-	    	HTTP_STATUS = #{param.HTTP_STATUS}
+	    	HTTP_STATUS = #{param.HTTP_STATUS},
+	    	REFUNDINFO = #{param.Res_114.REFUNDINFO},
+	    	SVC_AUTH = #{param.ncasRes.SVC_AUTH}
 		WHERE 
-			TO_CHAR (REG_DT, 'yyyymm') IN (#{param.current_month}, #{param.last_month})
+			INIT_DATE IN (#{param.current_month}, #{param.last_month})
 	    	AND REQUEST_ID = #{param.requestId}
  	</update>
  	

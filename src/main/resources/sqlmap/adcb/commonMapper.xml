@@ -67,7 +67,7 @@
 		FROM 
 			TB_CHARGE_INFO
 		WHERE 
-			TO_CHAR (REG_DT, 'yyyymm') IN (#{current_month}, #{last_month}) 
+			INIT_DATE IN (#{current_month}, #{last_month}) 
 		    AND REQUEST_ID = #{requestId}
  	</select>
  	

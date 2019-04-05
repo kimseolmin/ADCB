@@ -5,15 +5,17 @@ import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.StringTokenizer;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.axis2.client.ServiceClient;
+import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,7 +24,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -40,6 +41,17 @@ import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.LogUtil;
 import com.nexgrid.adcb.util.SendUtil;
 import com.nexgrid.adcb.util.StringUtil;
+
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsReqInVO;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsResOutVO;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ESBHeader;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestBody;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RequestRecord;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseBody;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.ResponseRecord;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RetrieveMobilePayArmPsblYn;
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RetrieveMobilePayArmPsblYnResponse;
 
 
 
@@ -547,6 +559,105 @@ public class CommonServiceImpl implements CommonService{
 		}catch (Exception adcbExc) {
 			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 		}
+	}
+	
+	
+	@Override
+	public void doEsbCm181(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+		logVO.setFlow("[ADCB] --> [ESB]");
+
+		String sub_no = paramMap.get("SUB_NO").toString();	// 고객의 가입번호
+		String ctn = paramMap.get("CTN").toString(); // 12자리 CTN
+		String mode = paramMap.get("MODE").toString();	// 1:장애인처리, 2:65세이상처리
+
+		
+		String esbUrl = Init.readConfig.getEsb_cm181_url();
+		int esbTimeout = Integer.parseInt(Init.readConfig.getEsb_time_out());
+		ESBHeader header = new ESBHeader();
+		RequestRecord reqRecord = new RequestRecord();
+		RequestBody reqBody = new RequestBody();
+		ResponseRecord resRecord = null;
+		
+		
+		// ESB header 
+		header.setServiceID("CM181");
+		header.setTransactionID(getEsbTransactionId());
+		header.setSystemID("ADCB");
+		header.setErrCode("");
+		header.setErrMsg("");
+		header.setReserved("");
+		reqRecord.setESBHeader(header);
+		
+		// ESB Request
+		DsReqInVO reqVO = new DsReqInVO();
+		reqVO.setEntrNo(sub_no);
+		reqVO.setCtn(ctn);
+		reqVO.setMode(mode);
+		reqVO.setNextOperatorId("1100000284");
+		reqBody.setDsReqInVO(reqVO);
+		reqRecord.setRequestBody(reqBody);
+		
+		RetrieveMobilePayArmPsblYn reqIn = new RetrieveMobilePayArmPsblYn();
+		reqIn.setRequestRecord(reqRecord);
+		
+		String seq = "[" + logVO.getSeqId() + "] ";
+		try {
+			
+			serviceLog.info(seq + "ESB(CM181) Request Url : " + esbUrl);
+			serviceLog.info(seq + "ESB(CM181) Request Header : " + header.toString());
+			serviceLog.info(seq + "ESB(CM181) Request Body : " + reqVO.toString());
+			
+			// ESB 호출
+			RetrieveMobilePayArmPsblYnServiceStub stub = new RetrieveMobilePayArmPsblYnServiceStub(esbUrl);
+			
+			// ESB Timeout 셋팅
+			ServiceClient serviceClient = stub._getServiceClient();
+			serviceClient.getOptions().setTimeOutInMilliSeconds(esbTimeout);
+			stub._setServiceClient(serviceClient);
+			
+			// ESB 호출 응답
+			RetrieveMobilePayArmPsblYnResponse esbRes = stub.retrieveMobilePayArmPsblYn(reqIn);
+			logVO.setFlow("[ADCB] <-- [ESB]");
+			
+			resRecord = esbRes.getResponseRecord();
+			header = resRecord.getESBHeader();
+			
+			serviceLog.info(seq + "ESB(CM181) Response Header : " + header.toString());
+			
+			
+		}catch(Exception e) {
+			if (e.getCause() instanceof ConnectTimeoutException) {
+				throw new CommonException(EnAdcbOmsCode.ESB_TIMEOUT);
+			}else {
+				throw new CommonException(EnAdcbOmsCode.ESB_INVALID_ERROR, e.getMessage());
+			}
+		}
+		
+		
+		if("".equals(header.getErrCode())) {
+			ResponseBody resBody = resRecord.getResponseBody();
+			if(resBody != null) {
+				DsResOutVO resVO = resBody.getDsResOutVO();
+				serviceLog.info(seq + "ESB(CM181) Response Body : " + resVO.toString());
+				// ESB 결과 저장
+				paramMap.put("esbCm181Res", resVO);
+			}
+		}else{
+			throw new CommonException(EnAdcbOmsCode.ESB_HEADER, header.getErrMsg());
+		}
+
+	}
+	
+	
+	@Override
+	public String getEsbTransactionId() {
+		String dTime = StringUtil.getCurrentTimeMilli();
+		
+		Random random = new Random();
+		Integer a = random.nextInt(9999999);
+		String rand01 = String.format("%07d", a);
+		
+		return dTime + rand01;
 	}
 	
 }

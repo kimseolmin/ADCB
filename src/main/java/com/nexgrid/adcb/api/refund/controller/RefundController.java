@@ -7,6 +7,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,20 +64,25 @@ public class RefundController {
 				Map<String, Object> result = (Map<String, Object>)dataMap.get("result");
 				logVO.setApiResultCode(result.get("reasonCode").toString());
 			}else {
+				
 				// 최초 요청 데이터 저장
 				refundService.insertRefundReq(paramMap, logVO);
 				
-				// NCAS 연동
-				commonService.getNcasGetMethod(paramMap, logVO);
+				// 부분 환불처리 및 환불 유효기간 체크 & 결제 정보 저장
+				refundService.partialRefundCheck(paramMap, logVO);
 				
-				// NCAS 연동 값 -> 자격 체크
-				commonService.userEligibilityCheck(paramMap, logVO);
+				// refund (RBP 연동)
+				refundService.refund(paramMap, logVO);	
 				
-				// refund
+				// 예외없이 왔을 경우 BOKU에게 성공 msg 전송
+				paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
+				dataMap.put("result", commonService.getSuccessResult());
+				logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 				
 				
 				
 			}
+			
 			
 			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			
@@ -88,7 +94,6 @@ public class RefundController {
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
-			dataMap.put("issuerRefundId", logVO.getSeqId());
 			dataMap.put("result", commonEx.sendException());
 			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
@@ -106,8 +111,6 @@ public class RefundController {
 			
 			logVO.setResultCode(EnAdcbOmsCode.INVALID_ERROR.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.INVALID_ERROR.mappingCode());
-			
-			dataMap.put("issuerRefundId", logVO.getSeqId());
 			
 			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
@@ -139,11 +142,13 @@ public class RefundController {
 					response.setStatus(200);
 					return dataMap;
 					
-				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
-					dataMap.put("issuerPaymentId", logVO.getSeqId());
+				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  EAI, SLA, SMS를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
+					dataMap.put("issuerRefundId", logVO.getSeqId());
+					
 					//Test일때만
 					response.setStatus(200);
-					response.getWriter().print(dataMap);
+					response.setContentType("application/json");
+					response.getWriter().print(new ObjectMapper().writeValueAsString(dataMap));
 					response.getWriter().flush();
 					response.getWriter().close();
 					

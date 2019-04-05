@@ -145,11 +145,11 @@ private static SequenceNoManager seqNoManager;
 		@Override
 		public void run() {
 			
-			if(test) {
-				// 정기적으로 health check
-				invokeHealthCheck();
-				test = false;
-			}
+//			if(test) {
+//				// 정기적으로 health check
+//				invokeHealthCheck();
+//				test = false;
+//			}
 			//invokeHealthCheck();
 			
 		}

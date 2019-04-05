@@ -95,6 +95,23 @@ public interface CommonService {
 	
 	
 	
+	/**
+	 * ESB 연동 - 취약계층인지를 판단하여 취약계층이면 ESB연동하여 연동결과를 esbCm181Res라는 이름으로 paramMap에 저장
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	void doEsbCm181(Map<String, Object> paramMap, LogVO logVO) throws Exception;
+	
+	
+	/**
+	 * ESB TransactionId
+	 * @return String ESB TransactionId
+	 */
+	String getEsbTransactionId();
+	
+	
+	
 	
 	
 }

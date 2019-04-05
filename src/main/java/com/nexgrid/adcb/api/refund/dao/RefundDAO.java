@@ -1,5 +1,6 @@
 package com.nexgrid.adcb.api.refund.dao;
 
+import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
@@ -24,5 +25,15 @@ public interface RefundDAO {
 	 * @throws Exception
 	 */
 	int insertRefundReq(@Param("param") Map<String, Object> paramMap) throws Exception;
+	
+	
+	
+	/**
+	 * 환불 유효기간 및 부분처리 체크
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	Map<String, Object> partialRefundCheck(Map<String, Object> paramMap) throws Exception;
 	
 }
