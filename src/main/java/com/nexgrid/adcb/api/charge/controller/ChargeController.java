@@ -84,7 +84,7 @@ public class ChargeController {
 				// charge
 				chargeService.charge(paramMap, logVO);
 				
-				// 예외없이 왔을 경우 BOKU에게 성공 msg 전송
+				// 예외없이 왔을 경우 성공 MSG
 				paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
 				dataMap.put("result", commonService.getSuccessResult());
 				logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());

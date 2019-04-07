@@ -145,7 +145,7 @@ public class ChargeService {
     	// 약관동의가 필요한 경우 ESB 연동
     	if("Y".equals(terms_deny_yn)) {
     		// ESB 연동
-    		doEsbMps208(paramMap, logVO);
+    		//doEsbMps208(paramMap, logVO);
     	}
     	
     	//청소년요금제와 일반 구분

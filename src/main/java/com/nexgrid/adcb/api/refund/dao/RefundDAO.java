@@ -36,4 +36,24 @@ public interface RefundDAO {
 	 */
 	Map<String, Object> partialRefundCheck(Map<String, Object> paramMap) throws Exception;
 	
+	
+	
+	/**
+	 * 환불 완료 또는 실패 정보 UPDATE
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	int updateRefundInfo(@Param("param") Map<String, Object> paramMap) throws Exception;
+	
+	
+	
+	/**
+	 * 환불 처리 누적 금액 & 환불후 잔액 UPDATE
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	int updateChargeInfo(@Param("param") Map<String, Object> paramMap) throws Exception;
+	
 }

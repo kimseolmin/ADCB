@@ -214,7 +214,7 @@ public class RefundService {
 		// 부분 환불이 있었을 경우 남은 잔액보다 요청 환불금액이 큰 경우 차단
 		if(payInfo.get("BALANCE") != null) {
 			Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
-			int amount = refundAmount.get("amount") == null ? 0 : (Integer)refundAmount.get("amount");
+			int amount = (Integer)refundAmount.get("amount");
 			int balance =  ((BigDecimal)payInfo.get("BALANCE")).intValue();
 			
 			// 이미 완전히 환불되었을 경우
@@ -242,8 +242,8 @@ public class RefundService {
 		
 		Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
 		String svc_auth = payInfo.get("SVC_AUTH").toString(); // 부정사용자|장애인부가서비스|65세이상부가서비스
-													// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
-													// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
+															// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
+															// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
 		String handicapped = svc_auth.split("|")[1]; // 장애인부가서비스
 		String old = svc_auth.split("|")[2]; // 65세이상부가서비스
 		
@@ -266,6 +266,8 @@ public class RefundService {
 		doRbpCancel(paramMap, logVO);
 		
 	}
+	
+	
 	
 	/**
 	 * 통합한도 연동: 차감취소
@@ -313,9 +315,60 @@ public class RefundService {
 		paramMap.put("Res_"+opCode, rbpResMap);
 		
 		// 환불 성공 SMS 정보 paramMap에 저장
-		
-		
 	}
+	
+	
+	
+	/**
+	 * 환불 완료 또는 실패 정보 UPDATE
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	 public void updateRefundInfo(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+			// update를 위한 data
+			paramMap.put("REFUND_DT", new Date()); // 환불완료일시
+			
+			logVO.setFlow("[ADCB] --> [DB]");
+			try {
+				refundDAO.updateRefundInfo(paramMap);
+			}catch(DataAccessException adcbExc){
+				SQLException se = (SQLException) adcbExc.getRootCause();
+				logVO.setRsCode(Integer.toString(se.getErrorCode()));
+				
+				throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			}catch(ConnectException adcbExc) {
+				throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+			}catch (Exception adcbExc) {
+				throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+			}
+			logVO.setFlow("[ADCB] <-- [DB]");
+	 }
+	 
+	 
+	 
+	 /**
+	  * 환불 처리 누적 금액 & 환불후 잔액 UPDATE
+	  * @param paramMap
+	  * @param logVO
+	  * @throws Exception
+	  */
+	 public void updateChargeInfo(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		 logVO.setFlow("[ADCB] --> [DB]");
+			try {
+				refundDAO.updateChargeInfo(paramMap);
+			}catch(DataAccessException adcbExc){
+				SQLException se = (SQLException) adcbExc.getRootCause();
+				logVO.setRsCode(Integer.toString(se.getErrorCode()));
+				
+				throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			}catch(ConnectException adcbExc) {
+				throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+			}catch (Exception adcbExc) {
+				throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+			}
+			logVO.setFlow("[ADCB] <-- [DB]");
+	 }
 	
 
 

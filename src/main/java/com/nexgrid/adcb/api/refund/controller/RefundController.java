@@ -78,15 +78,9 @@ public class RefundController {
 				paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
 				dataMap.put("result", commonService.getSuccessResult());
 				logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
-				
-				
-				
 			}
 			
-			
 			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
-			
-			
 			
 		}
 		catch(CommonException commonEx) {
@@ -156,10 +150,15 @@ public class RefundController {
 					paramMap.put("bokuRes", dataMap);
 					
 					// BOKU에게 응답준 결과 DB update
-					//chargeService.updateChargeInfo(paramMap, logVO);
+					refundService.updateRefundInfo(paramMap, logVO);
 					
-					// 청구 API가 성공일 경우에만 EAI
+					// 청구 API가 성공일 경우에만  
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
+						
+						// 환불 처리 누적 금액 & 환불후 잔액 UPDATE
+						refundService.updateChargeInfo(paramMap, logVO);
+						
+						// EAI
 						
 					}
 					
@@ -174,20 +173,9 @@ public class RefundController {
 				
 			// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
 			
-			
-			
 			LogUtil.EndServiceLog(logVO);
-			
-			
-			
 		}
-		
-		
 		return null;
-		
-		
-		
-		
 	}
 
 }

@@ -76,8 +76,22 @@
 			ISSUER_REFUNDID = #{param.bokuRes.issuerRefundId},
 			RESULT_MSG = #{param.bokuRes.result.message}
 		WHERE
-			INIT_DATE IN (#{pay_month}, #{pay_next_month})
+			INIT_DATE IN (#{param.current_month}, #{param.last_month})
 			AND REQUEST_ID = #{param.requestId}
+	</update>
+	
+	
+	
+	<!-- 환불 처리 누적 금액 & 환불후 잔액 UPDATE -->
+	<update id="updateChargeInfo">
+		UPDATE
+			TB_CHARGE_INFO
+		SET
+			BALANCE = AMOUNT - (PARTIAL_REFUND_SUM + #{param.refundAmount.amount}),
+			PARTIAL_REFUND_SUM = PARTIAL_REFUND_SUM + #{param.refundAmount.amount}
+		WHERE
+			INIT_DATE IN (#{param.pay_month}, #{param.pay_next_month})
+		    AND ISSUER_PAYMENTID = #{param.issuerPaymentId}
 	</update>
  	
  </mapper>
