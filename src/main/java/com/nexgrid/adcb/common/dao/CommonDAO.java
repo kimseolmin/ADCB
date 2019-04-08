@@ -2,6 +2,7 @@ package com.nexgrid.adcb.common.dao;
 
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.nexgrid.adcb.common.vo.LogVO;
@@ -36,7 +37,7 @@ public interface CommonDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	public int slaInsert(LogVO logVO) throws Exception;
+	public int slaInsert(@Param("param") Map<String, Object> paramMap, @Param("logVO") LogVO logVO) throws Exception;
 	
 	
 	/**
@@ -55,5 +56,26 @@ public interface CommonDAO {
 	 * @throws Exception
 	 */
 	Map<String, String> reqDuplicateCheck(Map<String, Object> paramMap) throws Exception;
+	
+	
+	
+	/**
+	 * 취소 및 환불 API에서 필요한 구매 정보 가져오기
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	Map<String, Object> getChargeInfo(Map<String, Object> paramMap) throws Exception;
+	
+	
+	
+	/**
+	 * 환불 처리 누적 금액 & 환불후 잔액 UPDATE
+	 * @param paramMap
+	 * @return
+	 * @throws Exception
+	 */
+	int updateChargeInfo(@Param("param") Map<String, Object> paramMap) throws Exception;
+	
 
 }

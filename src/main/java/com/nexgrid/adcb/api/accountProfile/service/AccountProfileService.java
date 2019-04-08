@@ -90,10 +90,10 @@ public class AccountProfileService {
 				purchase = true;
 			}
 		}catch(DataAccessException adcbExc){
-			SQLException se = (SQLException) adcbExc.getRootCause();
-			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			//SQLException se = (SQLException) adcbExc.getRootCause();
+			//logVO.setRsCode(Integer.toString(se.getErrorCode()));
 			logVO.setFlow("[ADCB] --> [DB]");
-			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
 			
 		}catch(ConnectException adcbExc) {
 			logVO.setFlow("[ADCB] --> [DB]");

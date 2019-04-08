@@ -39,7 +39,7 @@
 	<entry key="204">Maximum OTP resend attempts reached</entry>
 	<entry key="210">ACR known but has been deactivated</entry>
 	<entry key="300">Carrier Maintenance</entry>
-	<entry key="4xx">Custom Carrier Codes</entry>
+	<entry key="499">Custom Carrier Codes</entry>
 	
 	
 

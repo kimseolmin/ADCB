@@ -38,11 +38,6 @@ import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.StringUtil;
 
-import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub;
-import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsReqInVO;
-import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsResOutVO;
-import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RetrieveMobilePayArmPsblYn;
-import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.RetrieveMobilePayArmPsblYnResponse;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.BusinessHeader;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.DsInputInVO;
@@ -454,10 +449,10 @@ public class ChargeService {
 		try {
 			chargeDAO.insertChargeReq(paramMap);
 		}catch(DataAccessException adcbExc){
-			SQLException se = (SQLException) adcbExc.getRootCause();
-			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+//			SQLException se = (SQLException) adcbExc.getRootCause();
+//			logVO.setRsCode(Integer.toString(se.getErrorCode()));
 			
-			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
 		}catch(ConnectException adcbExc) {
 			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
 		}catch (Exception adcbExc) {
@@ -499,10 +494,10 @@ public class ChargeService {
 		try {
 			chargeDAO.updateChargeInfo(paramMap);
 		}catch(DataAccessException adcbExc){
-			SQLException se = (SQLException) adcbExc.getRootCause();
-			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
 			
-			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
 		}catch(ConnectException adcbExc) {
 			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
 		}catch (Exception adcbExc) {
@@ -533,10 +528,10 @@ public class ChargeService {
 		try {
 			chargeReq = commonDAO.reqDuplicateCheck(paramMap);
 		}catch(DataAccessException adcbExc){
-			SQLException se = (SQLException) adcbExc.getRootCause();
-			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
 			
-			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
 		}catch(ConnectException adcbExc) {
 			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
 		}catch (Exception adcbExc) {

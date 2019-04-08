@@ -162,6 +162,7 @@ public class CommonException extends Exception{
 	 */
 	public Map<String, Object> sendException(){
 		Map<String, Object> result = new HashMap<>();
+		
 		result.put("reasonCode", Integer.parseInt(getResReasonCode()) );
 		result.put("message", getResMsg());
 		

@@ -18,10 +18,14 @@ public enum EnAdcbOmsCode {
 	, TRANSACTION_NOT_FOUND("30000002", "거래내역을 찾을 수 없음", "107", HttpStatus.BAD_REQUEST)
 	, REFUND_DUPLICATE_REQ("30000003", "123", "환불 API 중복 요청", HttpStatus.BAD_REQUEST)
 	, UNKNOWN_STATUS("30000004", "7", "PaymentStatus: unknown status", HttpStatus.BAD_REQUEST)
-	, REFUND_YOUNG("30000005", "4xx", "청소년 요금제는 환불 불가능", HttpStatus.BAD_REQUEST)
+	, REFUND_YOUNG("30000005", "499", "청소년 요금제는 환불 불가능", HttpStatus.BAD_REQUEST)
 	, REFUND_WINDOW_EXPIRED("30000006", "110", "환불 유효기간 만료", HttpStatus.BAD_REQUEST)
 	, EXCEED_ORIGINAL_AMOUNT("30000007", "113", "환불액이 원래 거래금액 또는 부분환급 후 남은 금액보다 많음", HttpStatus.BAD_REQUEST)
 	, ALREADY_REFUNDED("30000008", "112", "이 거래는 이미 완전히 환불됨", HttpStatus.BAD_REQUEST)
+	, TRANSACTION_FAIL("30000009", "499", "실패된 거래로 환불 요청이 들어옴", HttpStatus.BAD_REQUEST)
+	, TRANSACTION_RESPONSE_FAIL("30000010", "499", "응답을 주지 못한 거래로 환불 또는 취소 요청이 들어옴", HttpStatus.BAD_REQUEST)
+	, REVERSE_WINDOW_EXPIRED("30000011", "111", "취소 유효기간 만료", HttpStatus.BAD_REQUEST)
+	, ALREADY_REVERSED("30000012", "106", "이미 취소된 요청", HttpStatus.BAD_REQUEST)
 	, INVALID_ERROR("39999999", "4", HttpStatus.INTERNAL_SERVER_ERROR)
 	
 	

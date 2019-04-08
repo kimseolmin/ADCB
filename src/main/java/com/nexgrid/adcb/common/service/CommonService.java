@@ -91,7 +91,7 @@ public interface CommonService {
 	 * @return
 	 * @throws Exception
 	 */
-	void slaInsert(LogVO logVO) throws Exception;
+	void slaInsert(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
 	
 	
@@ -109,6 +109,26 @@ public interface CommonService {
 	 * @return String ESB TransactionId
 	 */
 	String getEsbTransactionId();
+	
+	
+	
+	/**
+	 * 통합한도 연동: 차감취소
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	void doRbpCancel(Map<String, Object> paramMap, LogVO logVO) throws Exception;
+	
+	
+	
+	 /**
+	  * 환불 처리 누적 금액 & 환불후 잔액 UPDATE
+	  * @param paramMap
+	  * @param logVO
+	  * @throws Exception
+	  */
+	void updateChargeInfo(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
 	
 	

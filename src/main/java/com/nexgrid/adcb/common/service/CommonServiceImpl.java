@@ -223,10 +223,10 @@ public class CommonServiceImpl implements CommonService{
 		    		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_FEETYPE);
 		    	}
 			}catch(DataAccessException adcbExc){
-				SQLException se = (SQLException) adcbExc.getRootCause();
-				logVO.setRsCode(Integer.toString(se.getErrorCode()));
+				/*SQLException se = (SQLException) adcbExc.getRootCause();
+				logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
 				logVO.setFlow("[ADCB] --> [DB]");
-				throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+				throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
 				
 			}catch(ConnectException adcbExc) {
 				logVO.setFlow("[ADCB] --> [DB]");
@@ -409,10 +409,10 @@ public class CommonServiceImpl implements CommonService{
     	try {
     		testPhoneCnt = commonDAO.testPhoneCheck(ncasRes.get("CTN"));
 		}catch(DataAccessException adcbExc){
-			SQLException se = (SQLException) adcbExc.getRootCause();
-			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
 			logVO.setFlow("[ADCB] --> [DB]");
-			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
 			
 		}catch(ConnectException adcbExc) {
 			logVO.setFlow("[ADCB] --> [DB]");
@@ -544,14 +544,14 @@ public class CommonServiceImpl implements CommonService{
 	
 	
 	@Override
-	public void slaInsert(LogVO logVO) throws Exception{
+	public void slaInsert(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		try {
-			commonDAO.slaInsert(logVO);
+			commonDAO.slaInsert(paramMap, logVO);
 		}catch(DataAccessException adcbExc){
-			SQLException se = (SQLException) adcbExc.getRootCause();
-			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
 			logVO.setFlow("[ADCB] --> [DB]");
-			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
 			
 		}catch(ConnectException adcbExc) {
 			logVO.setFlow("[ADCB] --> [DB]");
@@ -659,5 +659,81 @@ public class CommonServiceImpl implements CommonService{
 		
 		return dTime + rand01;
 	}
+	
+	
+	
+	@Override
+	public void doRbpCancel(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+		
+		Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
+		String ctn = StringUtil.getCtn344(payInfo.get("CTN").toString());
+		String fee_type = payInfo.get("FEE_TYPE").toString();
+		String br_id = RbpKeyGenerator.getInstance(Init.readConfig.getRbp_system_id()).generateKey();
+		String refundInfo = payInfo.get("REFUNDINFO").toString();
+		String currentDate = StringUtil.getCurrentTimeMilli();
+		String price = "";
+		if("Refund".equals(logVO.getApiType()) ) { // Refund API일 경우에는 부분취소일 수 있으므로
+			Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
+			price = refundAmount.get("amount").toString();
+		}else {
+			price = payInfo.get("AMOUNT").toString();
+		}
+		
+		
+		Map<String, String> rbpReqMap = new HashMap<String, String>();	// RBP 요청
+		Map<String, String> rbpResMap = null;	// RBP 응답
+		
+		// RBP연동을 위한 파마리터 셋팅
+		rbpReqMap.put("CTN", ctn);	// 과금번호
+		rbpReqMap.put("SOC_CODE", fee_type); // 가입자의 요금제 코드 
+		rbpReqMap.put("CDRDATA", Init.readConfig.getRbp_cdrdata()); // CDR 버전
+		rbpReqMap.put("BR_ID", br_id); // Business RequestID
+		rbpReqMap.put("RCVER_CTN", ctn); // 수신자의 전화번호
+		rbpReqMap.put("SERVICE_FILTER", refundInfo); // 즉시차감 return 전문의 REFUNDINFO값을 넣는다.
+		rbpReqMap.put("START_USE_TIME", currentDate); 
+		rbpReqMap.put("END_USE_TIME", currentDate);
+		rbpReqMap.put("CALLED_NETWORK", Init.readConfig.getRbp_called_network()); // 착신 사업자 코드
+		rbpReqMap.put("PRICE", price);
+		rbpReqMap.put("PID", Init.readConfig.getRbp_pid()); // Product ID
+		rbpReqMap.put("DBID", Init.readConfig.getRbp_dbid()); // DETAIL BILLING ID
+		rbpReqMap.put("SVC_CTG", Init.readConfig.getRbp_svc_ctg()); // 통합한도 적용 서비스 구분
+		
+		// 결제취소 요청 paramMap에 저장
+		String opCode = Init.readConfig.getRbp_opcode_cancel();
+		paramMap.put("RbpReq_"+opCode, rbpReqMap);
+		
+		logVO.setFlow("[ADCB] --> [RBP]");
+		rbpResMap = rbpClientService.doRequest(logVO, opCode, paramMap);
+		
+		// 즉시차감 결과 paramMap에 저장
+		paramMap.put("Res_"+opCode, rbpResMap);
+		
+		// 환불 성공 SMS 정보 paramMap에 저장
+	}
+	
+	
+	
+	 /**
+	  * 환불 처리 누적 금액 & 환불후 잔액 UPDATE
+	  * @param paramMap
+	  * @param logVO
+	  * @throws Exception
+	  */
+	 public void updateChargeInfo(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		 logVO.setFlow("[ADCB] --> [DB]");
+			try {
+				commonDAO.updateChargeInfo(paramMap);
+			}catch(DataAccessException adcbExc){
+				/*SQLException se = (SQLException) adcbExc.getRootCause();
+				logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
+				
+				throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
+			}catch(ConnectException adcbExc) {
+				throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+			}catch (Exception adcbExc) {
+				throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+			}
+			logVO.setFlow("[ADCB] <-- [DB]");
+	 }
 	
 }

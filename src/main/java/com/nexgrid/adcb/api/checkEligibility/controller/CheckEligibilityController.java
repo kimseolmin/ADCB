@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +39,7 @@ public class CheckEligibilityController {
 	 * @return
 	 */
 	@RequestMapping(value="/checkEligibility", method = RequestMethod.POST)
-	public Map<String ,Object> getCheckEligibility(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
+	public void getCheckEligibility(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
 		
 		//For OMS, ServiceLog
 		LogVO logVO = new LogVO("CheckEligibility");
@@ -64,7 +65,9 @@ public class CheckEligibilityController {
 			// 소비자가 통신사 청구서를 사용할 자격이 있는 경우 true
 			if(commonService.userEligibilityCheck(paramMap, logVO)) {
 				dataMap.put("result", commonService.getSuccessResult());
+				paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
 				logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
+				logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 			}
 			
 		}
@@ -75,6 +78,7 @@ public class CheckEligibilityController {
 			
 			dataMap.put("msisdn", paramMap.get("msisdn"));
 			dataMap.put("result", commonEx.sendException());
+			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -87,6 +91,7 @@ public class CheckEligibilityController {
 			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
+			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			
 			logVO.setResultCode(EnAdcbOmsCode.INVALID_ERROR.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.INVALID_ERROR.mappingCode());
@@ -104,15 +109,30 @@ public class CheckEligibilityController {
 						
 		}finally {
 			
-			logVO.setResTime();
-			commonService.omsLogWrite(logVO);
-			LogUtil.EndServiceLog(dataMap, logVO);
-			
+			try {
+				//Test일때만
+				response.setStatus(200);
+				response.setContentType("application/json");
+				response.getWriter().print(new ObjectMapper().writeValueAsString(dataMap));
+				response.getWriter().flush();
+				response.getWriter().close();
+				
+				logVO.setResTime();
+				commonService.omsLogWrite(logVO);
+				
+				// SLA Insert
+				commonService.slaInsert(paramMap, logVO);
+				
+				
+			}catch (Exception ex) {
+				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
+				logger.error("[" + logVO.getSeqId() + "]" + ex);
+			}finally {
+				
+				LogUtil.EndServiceLog(dataMap, logVO);
+			}
 			
 		}
 		
-		//Test일때만
-		response.setStatus(200);
-		return dataMap;
 	}
 }

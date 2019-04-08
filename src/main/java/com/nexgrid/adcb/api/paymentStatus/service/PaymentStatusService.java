@@ -65,10 +65,10 @@ public class PaymentStatusService {
 		try {
 			paymentStatus = commonDAO.reqDuplicateCheck(paramMap);
 		}catch(DataAccessException adcbExc){
-			SQLException se = (SQLException) adcbExc.getRootCause();
-			logVO.setRsCode(Integer.toString(se.getErrorCode()));
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
 			
-			throw new CommonException(EnAdcbOmsCode.DB_ERROR, se.getMessage());
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
 		}catch(ConnectException adcbExc) {
 			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
 		}catch (Exception adcbExc) {

@@ -156,14 +156,14 @@ public class RefundController {
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
 						
 						// 환불 처리 누적 금액 & 환불후 잔액 UPDATE
-						refundService.updateChargeInfo(paramMap, logVO);
+						commonService.updateChargeInfo(paramMap, logVO);
 						
 						// EAI
 						
 					}
 					
 					// SLA Insert
-					commonService.slaInsert(logVO);
+					commonService.slaInsert(paramMap, logVO);
 				}
 				
 			}catch (Exception ex) {

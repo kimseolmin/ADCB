@@ -15,6 +15,7 @@
  	</select>
  	
  	
+ 	
  	<!-- 요금제 정상 여부 -->
  	<select id="getBlockFeeType" parameterType="java.lang.String" resultType="java.lang.Integer">
  		SELECT 
@@ -26,25 +27,54 @@
  	</select>
  	
  	
+ 	
  	<!-- SLA INSERT -->
- 	<insert id="slaInsert" parameterType="com.nexgrid.adcb.common.vo.LogVO">
+ 	<insert id="slaInsert">
  		INSERT INTO TB_API_LOGS (
 	 		SEQ_ID,
 	        RESULT_CODE,
 	        REQ_TIME,
 	        RSP_TIME,
 	        API_TYPE,
-         	API_RESULT
+         	API_RESULT,
+         	HTTP_STATUS,
+         	AMOUNT,
+         	MSISDN,
+         	CLIENT_TRANSACTIONID,
+         	MERCHANT_ID,
+         	REQUEST_ID
          	)
 	     VALUES (
-	     	#{seqId},
-			#{resultCode},
-			#{reqTime},
-			#{resTime},
-			#{apiType},
-			#{apiResultCode}
+	     	#{logVO.seqId},
+			#{logVO.resultCode},
+			#{logVO.reqTime},
+			#{logVO.resTime},
+			#{logVO.apiType},
+			#{logVO.apiResultCode},
+			#{param.HTTP_STATUS},
+			<choose>
+				<when test="param.purchaseAmount != null">
+					#{param.purchaseAmount.amount},	<!-- Charge API -->
+				</when>
+				<otherwise>
+					#{param.refundAmount.amount},	<!-- Refund API -->
+				</otherwise>
+			</choose>
+			#{param.msisdn},
+			<choose>
+				<when test="param.clientTransactionId != null">
+					#{param.clientTransactionId},	<!-- Charge API -->
+				</when>
+				<otherwise>
+					#{param.clientRefundId},	<!-- Refund API -->				
+				</otherwise>
+			</choose>
+			#{param.merchantId},
+			#{param.requestId}
 			)
  	</insert>
+ 	
+ 	
  	
  	<!-- test phone 등록 여부 확인 -->
  	<select id="testPhoneCheck" parameterType="java.lang.String" resultType="java.lang.Integer">
@@ -55,6 +85,8 @@
 	 	WHERE 
 	 		CTN = #{ctn}
  	</select>
+ 	
+ 	
  	
  	<!-- 청구 API 요청 중복 체크 & PaymentStatus 가져오기 -->
  	<select id="reqDuplicateCheck" parameterType="java.util.Map" resultType="java.util.Map">
@@ -71,6 +103,68 @@
 		    AND REQUEST_ID = #{requestId}
  	</select>
  	
- 
-  
+ 	
+ 	
+ 	<!-- 취소 및 환불 API에서 필요한 구매 정보 가져오기 -->
+ 	 <select id="getChargeInfo" parameterType="java.util.Map" resultType="java.util.Map">
+ 		SELECT
+ 			ISSUER_PAYMENTID,
+ 			AMOUNT,
+ 			PARTIAL_REFUND_SUM, 
+ 			BALANCE,
+ 			FEE_TYPE,
+ 			REFUNDINFO,
+ 			CTN,
+ 			SVC_AUTH,
+ 			SUB_NO,
+ 			REQUEST_ID,
+ 			RESULT_MSG,
+ 			RESULT,
+ 			HTTP_STATUS,
+ 			REG_DT,
+ 			REVERSE_DT
+		FROM 
+			TB_CHARGE_INFO
+		WHERE
+			INIT_DATE IN (#{month1}, #{month2})
+			<choose>
+				<when test="issuerPaymentId != null">	<!-- Refund API -->
+					AND ISSUER_PAYMENTID = #{issuerPaymentId}	
+				</when>
+				<otherwise>	<!-- Reverse API -->
+					AND REQUEST_ID = #{chargeRequestId}
+				</otherwise>
+			</choose>
+	</select>
+ 	
+ 	
+ 	
+ 	<!-- 환불 처리 누적 금액 & 환불후 잔액 UPDATE -->
+	<update id="updateChargeInfo">
+		UPDATE
+			TB_CHARGE_INFO
+		SET
+			<choose>
+				<when test="param.refundAmount != null">
+					BALANCE = AMOUNT - (PARTIAL_REFUND_SUM + #{param.refundAmount.amount}),
+					PARTIAL_REFUND_SUM = PARTIAL_REFUND_SUM + #{param.refundAmount.amount}
+				</when>
+				<otherwise>
+					BALANCE = AMOUNT - #{param.payInfo.AMOUNT},
+					PARTIAL_REFUND_SUM = #{param.payInfo.AMOUNT},
+					REVERSE_DT = #{param.REVERSE_DT}
+				</otherwise>
+			</choose>
+		WHERE
+			INIT_DATE IN (#{param.month1}, #{param.month2})
+			<choose>
+				<when test="param.issuerPaymentId != null">
+					 AND ISSUER_PAYMENTID = #{param.issuerPaymentId}
+				</when>
+				<otherwise>
+					AND REQUEST_ID = #{param.chargeRequestId}
+				</otherwise>
+			</choose>
+		   
+	</update>
  </mapper>

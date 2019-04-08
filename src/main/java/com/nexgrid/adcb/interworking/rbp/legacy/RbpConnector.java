@@ -148,7 +148,7 @@ public class RbpConnector implements Runnable{
 //				invokeHealthCheck();
 //				test = false;
 //			}
-			//invokeHealthCheck();
+//			invokeHealthCheck();
 			
 		}
 		

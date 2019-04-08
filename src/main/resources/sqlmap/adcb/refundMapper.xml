@@ -41,28 +41,8 @@
 			#{param.merchantId}
 			)
  	</insert>
- 	
- 	
- 	
- 	<!-- 환불 유효기간 및 부분처리 체크 -->
- 	<select id="partialRefundCheck" parameterType="java.util.Map" resultType="java.util.Map">
- 		SELECT
- 			ISSUER_PAYMENTID,
- 			AMOUNT,
- 			PARTIAL_REFUND_SUM, 
- 			BALANCE,
- 			FEE_TYPE,
- 			REFUNDINFO,
- 			CTN,
- 			SVC_AUTH,
- 			SUB_NO
-		FROM 
-			TB_CHARGE_INFO
-		WHERE
-			INIT_DATE IN (#{pay_month}, #{pay_next_month})
-		    AND ISSUER_PAYMENTID = #{issuerPaymentId}
-	</select>
-	
+ 		
+ 		
 	
 	<!-- 환불 완료 또는 실패 정보 UPDATE -->
 	<update id="updateRefundInfo">
@@ -82,16 +62,6 @@
 	
 	
 	
-	<!-- 환불 처리 누적 금액 & 환불후 잔액 UPDATE -->
-	<update id="updateChargeInfo">
-		UPDATE
-			TB_CHARGE_INFO
-		SET
-			BALANCE = AMOUNT - (PARTIAL_REFUND_SUM + #{param.refundAmount.amount}),
-			PARTIAL_REFUND_SUM = PARTIAL_REFUND_SUM + #{param.refundAmount.amount}
-		WHERE
-			INIT_DATE IN (#{param.pay_month}, #{param.pay_next_month})
-		    AND ISSUER_PAYMENTID = #{param.issuerPaymentId}
-	</update>
+
  	
  </mapper>

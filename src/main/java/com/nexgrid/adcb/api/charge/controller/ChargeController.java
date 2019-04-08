@@ -171,7 +171,7 @@ public class ChargeController {
 					}
 					
 					// SLA Insert
-					commonService.slaInsert(logVO);
+					commonService.slaInsert(paramMap, logVO);
 				}
 				
 			}catch (Exception ex) {
