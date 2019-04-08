@@ -1,6 +1,5 @@
-package com.nexgrid.adcb.api.reverse.controller;
+package com.nexgrid.adcb.api.submitMT.controller;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.nexgrid.adcb.api.reverse.service.ReverseService;
+import com.nexgrid.adcb.api.submitMT.service.SubmitMTService;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
@@ -25,57 +24,47 @@ import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.LogUtil;
 
 @RestController
-public class ReverseController {
+public class SubmitMTController {
 
-	private Logger logger = LoggerFactory.getLogger(ReverseController.class);
+	@Autowired
+	SubmitMTService submitMTService;
 	
 	@Autowired
 	private CommonService commonService;
 	
-	@Autowired
-	private ReverseService reverseService;
+	private Logger logger = LoggerFactory.getLogger(SubmitMTController.class);
 	
-	
-	@RequestMapping(value="/reverse", method = RequestMethod.POST)
-	public void refund(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
+	/**
+	 * SubmitMT API
+	 * @param request
+	 * @param response
+	 * @param paramMap
+	 */
+	@RequestMapping(value="/submitMT", produces = "application/json; charset=utf8",  method = RequestMethod.POST)
+	public void submitMT(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
 		
 		//For OMS, ServiceLog
-		LogVO logVO = new LogVO("Reverse");
+		LogVO logVO = new LogVO("SubmitMT");
 		
 		//Service Start Log Print
 		LogUtil.startServiceLog(logVO, request, paramMap);
 		
+		//Usage Data in Source
+		//Map<String, Object> paramMap = new HashMap<String, Object>();
+				
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		
 		//set flow
 		logVO.setFlow("[SVC] --> [ADCB]");
 		
-		boolean chargeResponse = false;
-		
 		try {
 			
 			// reqBody check
-			reverseService.reqBodyCheck(paramMap, logVO);
+			submitMTService.reqBodyCheck(paramMap, logVO);
 			
-			// 유효한 취소 요청인지 체크
-			chargeResponse = reverseService.reverseCheck(paramMap, logVO);
-			
-			// 취소 대상인 구매의 응답 정보
-			dataMap.put("paymentResponse", paramMap.get("paymentResponse"));
-			
-			// 거래가 성공이어서 차감취소를 해야 할 경우
-			if(chargeResponse) { 
-				commonService.doRbpCancel(paramMap, logVO);
-			}
-			
-			// 예외없이 왔을 경우 BOKU에게 성공 msg 전송
-			paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
-			dataMap.put("result", commonService.getSuccessResult());
-			logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
-			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
-
-		}catch(CommonException commonEx) {
+		}
+		catch(CommonException commonEx) {
 			
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
@@ -110,9 +99,8 @@ public class ReverseController {
 						
 		}finally {
 			
+			
 			try {
-				dataMap.put("issuerReverseId", logVO.getSeqId());
-				
 				//Test일때만
 				response.setStatus(200);
 				response.setContentType("application/json");
@@ -123,16 +111,8 @@ public class ReverseController {
 				logVO.setResTime();
 				commonService.omsLogWrite(logVO);
 				
-				// RBP연동-차감취소 성공 시 charge_info UPDATE
-				if(chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
-					paramMap.put("REVERSE_DT", new Date());
-					commonService.updateChargeInfo(paramMap, logVO);
-				}
-				
 				// SLA Insert
 				commonService.slaInsert(paramMap, logVO);
-				
-				// SMS Insert
 				
 				
 			}catch (Exception ex) {
@@ -145,5 +125,6 @@ public class ReverseController {
 			
 			
 		}
+
 	}
 }

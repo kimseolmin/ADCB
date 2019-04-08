@@ -172,6 +172,7 @@ public class LogUtil {
 			
 			String seq = "[" + logVO.getSeqId() + "] ";
 			
+			serviceLog.info(seq + "---------------------------- "+ conAPI +" START ----------------------------");
 			serviceLog.info(seq + conAPI + " RequestUrl : " + url);
 			
 			serviceLog.info(seq + conAPI + " RequestMethod : " + httpMethod);
@@ -239,6 +240,8 @@ public class LogUtil {
 			if(!"".equals(resBody)) {
 				serviceLog.info(seq + conAPI + " Response Body = " + URLDecoder.decode(resBody, "UTF-8"));
 			}
+			
+			serviceLog.info(seq + "---------------------------- "+ conAPI +" END ----------------------------");
 			
 			
 		} catch (Exception ex) {

@@ -42,7 +42,9 @@
          	MSISDN,
          	CLIENT_TRANSACTIONID,
          	MERCHANT_ID,
-         	REQUEST_ID
+         	REQUEST_ID,
+         	BAN_UNPAID_YN_CODE,
+         	CUST_GRD_CD
          	)
 	     VALUES (
 	     	#{logVO.seqId},
@@ -70,7 +72,24 @@
 				</otherwise>
 			</choose>
 			#{param.merchantId},
-			#{param.requestId}
+			#{param.requestId},
+			<choose>
+				<when test="param.ncasRes != null">
+					#{param.ncasRes.BAN_UNPAID_YN_CODE},
+				</when>
+				<otherwise>
+					#{param.payInfo.BAN_UNPAID_YN_CODE},
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="param.Res_111 != null">
+					#{param.Res_111.CUST_GRD_CD}
+				</when>
+				<otherwise>
+					#{param.payInfo.CUST_GRD_CD}
+				</otherwise>
+			</choose>
+			
 			)
  	</insert>
  	
@@ -122,7 +141,9 @@
  			RESULT,
  			HTTP_STATUS,
  			REG_DT,
- 			REVERSE_DT
+ 			REVERSE_DT,
+ 			BAN_UNPAID_YN_CODE,
+ 			CUST_GRD_CD
 		FROM 
 			TB_CHARGE_INFO
 		WHERE

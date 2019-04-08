@@ -109,6 +109,7 @@ public class RbpMessageSender extends Thread{
 		synchronized (rbpConnector.getSocket().getOutputStream()) {
 			
 			if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
+				logger.info(logSeq + "---------------------------- RBP START ----------------------------");
 				logger.info(logSeq + reqLog + " IP: " + rbpConnector.getServerIp());
 				logger.info(logSeq + reqLog + " PORT: " + rbpConnector.getServerPort());
 			}

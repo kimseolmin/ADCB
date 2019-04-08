@@ -85,6 +85,7 @@ public class RbpMessageReceiver extends Thread{
 				logSeq = "[" + seqId + "] ";
 				logger.info(logSeq + resLog + resMsg);
 				logger.info(logSeq + new String(new char[resLog.length()]).replace("\0", " ") + resMap);
+				logger.info(logSeq + "---------------------------- RBP END ----------------------------");
 				
 			}else if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) { // rbp server로부터 health check인 경우
 				

@@ -143,6 +143,8 @@ public class CommonServiceImpl implements CommonService{
 			//NCAS연동 결과값
 			Map<String, String> ncasRes = getNcasResHeader(resEntity);
 			
+	    	// paramMap에 NCAS 결과값 저장
+	    	paramMap.put("ncasRes", ncasRes);
 			
 			String ctn = ncasRes.get("CTN");
 	    	String respcode = ncasRes.get("RESPCODE"); // RESPCODE
@@ -235,10 +237,6 @@ public class CommonServiceImpl implements CommonService{
 				throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 			}
 			
-	    	// paramMap에 NCAS 결과값 저장
-	    	paramMap.put("ncasRes", ncasRes);
-	    	
-	    						
 		}catch(HttpClientErrorException adcbExc){
 			
 			logVO.setFlow("[ADCB] <-- [NCAS]");
@@ -420,7 +418,7 @@ public class CommonServiceImpl implements CommonService{
 		}catch (Exception adcbExc) {
 			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 		}
-    	if(testPhoneCnt < 0) {
+    	if(testPhoneCnt == 0) {
     		// CUST_TYPE_CODE : 개인,법인구분(I : 개인 / G : 법인) - 법인폰 차단
         	if(!"I".equals(cust_type_code)) {
         		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CORP);
@@ -603,6 +601,7 @@ public class CommonServiceImpl implements CommonService{
 		String seq = "[" + logVO.getSeqId() + "] ";
 		try {
 			
+			serviceLog.info(seq + "---------------------------- ESB(CM181) START ----------------------------");
 			serviceLog.info(seq + "ESB(CM181) Request Url : " + esbUrl);
 			serviceLog.info(seq + "ESB(CM181) Request Header : " + header.toString());
 			serviceLog.info(seq + "ESB(CM181) Request Body : " + reqVO.toString());
@@ -645,6 +644,8 @@ public class CommonServiceImpl implements CommonService{
 		}else{
 			throw new CommonException(EnAdcbOmsCode.ESB_HEADER, header.getErrMsg());
 		}
+		
+		serviceLog.info(seq + "---------------------------- ESB(CM181) END ----------------------------");
 
 	}
 	

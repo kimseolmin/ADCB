@@ -105,6 +105,7 @@ public class RcsgMessageSender extends Thread{
 		synchronized (rcsgConnector.getSocket().getOutputStream()) {
 			
 			if(Init.readConfig.getRcsg_msg_gbn_invoke().equals(msgGbn)) {
+				logger.info(logSeq + "---------------------------- RCSG START ----------------------------");
 				logger.info(logSeq + reqLog + " IP: " + rcsgConnector.getServerIp());
 				logger.info(logSeq + reqLog + " PORT: " + rcsgConnector.getServerPort());
 			}

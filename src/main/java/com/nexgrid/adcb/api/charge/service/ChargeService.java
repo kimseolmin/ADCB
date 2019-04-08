@@ -221,6 +221,7 @@ public class ChargeService {
 		
 		try {
 			
+			logger.info(seq + "---------------------------- ESB(MPS208) START ----------------------------");
 			logger.info(seq + "ESB(MPS208) Request Url : " + esbUrl);
 			logger.info(seq + "ESB(MPS208) Request Header : " + header.toString());
 			logger.info(seq + "ESB(MPS208) Request Body : " + reqVO.toString());
@@ -278,6 +279,8 @@ public class ChargeService {
 				}
 				
 			}
+			
+			logger.info(seq + "---------------------------- ESB(MPS208) END ----------------------------");
 			
 		}else{
 			throw new CommonException(EnAdcbOmsCode.ESB_HEADER, header.getErrMsg());

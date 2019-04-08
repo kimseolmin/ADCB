@@ -79,6 +79,7 @@ public class RcsgMessageReceiver extends Thread{
 				logSeq = "[" + seqId + "] ";
 				logger.info(logSeq + resLog + resMsg);
 				logger.info(logSeq + new String(new char[resLog.length()]).replace("\0", " ") + resMap);
+				logger.info(logSeq + "---------------------------- RCSG END ----------------------------");
 				
 			}else if(Init.readConfig.getRcsg_msg_gbn_invoke().equals(msgGbn)) { // rcsg server로부터 health check인 경우
 				
