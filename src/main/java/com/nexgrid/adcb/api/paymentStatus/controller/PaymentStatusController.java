@@ -41,7 +41,7 @@ public class PaymentStatusController {
 		LogVO logVO = new LogVO("PaymentStatus");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap);
+		LogUtil.startServiceLog(logVO, request, paramMap.toString());
 		
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();

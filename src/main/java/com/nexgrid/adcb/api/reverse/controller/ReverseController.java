@@ -43,7 +43,7 @@ public class ReverseController {
 		LogVO logVO = new LogVO("Reverse");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap);
+		LogUtil.startServiceLog(logVO, request, paramMap.toString());
 		
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();

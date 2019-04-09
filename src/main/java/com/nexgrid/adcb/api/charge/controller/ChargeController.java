@@ -50,7 +50,7 @@ public class ChargeController {
 		LogVO logVO = new LogVO("Charge");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap);
+		LogUtil.startServiceLog(logVO, request, paramMap.toString());
 		
 		//Return Value
 		

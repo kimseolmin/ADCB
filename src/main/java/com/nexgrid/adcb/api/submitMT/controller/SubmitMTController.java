@@ -20,6 +20,7 @@ import com.nexgrid.adcb.api.submitMT.service.SubmitMTService;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.common.vo.SmsSendVO;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.LogUtil;
 
@@ -41,16 +42,16 @@ public class SubmitMTController {
 	 * @param paramMap
 	 */
 	@RequestMapping(value="/submitMT", produces = "application/json; charset=utf8",  method = RequestMethod.POST)
-	public void submitMT(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) Map<String, Object> paramMap){
+	public void submitMT(HttpServletRequest request, HttpServletResponse response, @RequestBody(required = false) SmsSendVO smsVO){
 		
 		//For OMS, ServiceLog
 		LogVO logVO = new LogVO("SubmitMT");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap);
+		LogUtil.startServiceLog(logVO, request, smsVO.toString());
 		
 		//Usage Data in Source
-		//Map<String, Object> paramMap = new HashMap<String, Object>();
+		Map<String, Object> paramMap = new HashMap<String, Object>();
 				
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -61,7 +62,22 @@ public class SubmitMTController {
 		try {
 			
 			// reqBody check
-			submitMTService.reqBodyCheck(paramMap, logVO);
+			submitMTService.reqBodyCheck(smsVO, logVO);
+			paramMap.put("msisdn", smsVO.getMsisdn());
+			
+			// NCAS 연동
+			commonService.getNcasGetMethod(paramMap, logVO);
+			
+			// SMS 저장 
+			submitMTService.insertSmsInfo(smsVO, logVO);
+			
+			dataMap.put("correlatorId", smsVO.getSeq());
+			dataMap.put("result", commonService.getSuccessResult());
+			paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
+			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
+			logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
+			
+			
 			
 		}
 		catch(CommonException commonEx) {

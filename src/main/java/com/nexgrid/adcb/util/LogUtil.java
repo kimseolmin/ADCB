@@ -85,14 +85,14 @@ public class LogUtil {
 	 * @param request
 	 * @param paramMap
 	 */
-	public static void startServiceLog(LogVO logVO, HttpServletRequest request, Map<String,Object> paramMap) {
+	public static void startServiceLog(LogVO logVO, HttpServletRequest request, String reqBody) {
 
 		try {
 		
 			startServiceLog(logVO, request);
 			String seq = "[" + logVO.getSeqId() + "] ";
-			if(paramMap!=null && paramMap.size()>0) {
-				serviceLog.info(seq + "Request Body : " + paramMap.toString());
+			if(reqBody !=null && reqBody.length() > 0) {
+				serviceLog.info(seq + "Request Body : " + reqBody);
 			}else {
 				serviceLog.info(seq + "Request Body : ");
 			}

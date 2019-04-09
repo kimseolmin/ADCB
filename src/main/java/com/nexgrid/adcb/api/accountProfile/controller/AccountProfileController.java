@@ -50,7 +50,7 @@ public class AccountProfileController {
 		LogVO logVO = new LogVO("AccountProfile");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap);
+		LogUtil.startServiceLog(logVO, request, paramMap.toString());
 		
 		//Usage Data in Source
 		//Map<String, Object> paramMap = new HashMap<String, Object>();

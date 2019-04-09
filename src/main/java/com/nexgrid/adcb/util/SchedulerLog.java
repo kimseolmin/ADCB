@@ -26,7 +26,7 @@ public class SchedulerLog extends TimerTask {
 		if ((currTime - lastTime) >= (60 * 1000)) {
 			
 			//oms가 찍히지 않더라도 빈파일을 생성해주기 위함.
-			//omsLog.info("");
+			omsLog.info("");
 			
 			lastTime = currTime;
 		}
