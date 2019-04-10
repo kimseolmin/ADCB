@@ -1,14 +1,12 @@
 package com.nexgrid.adcb.api.submitMT.service;
 
 import java.net.ConnectException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
-import com.nexgrid.adcb.common.dao.CommonDAO;
+import com.nexgrid.adcb.api.submitMT.dao.SubmitMTDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.common.vo.SmsSendVO;
@@ -19,7 +17,9 @@ import com.nexgrid.adcb.util.StringUtil;
 public class SubmitMTService {
 
 	@Autowired
-	CommonDAO commonDAO;
+	SubmitMTDAO submitMTDAO;
+	
+	
 	
 	/**
 	 * SubmitMT API body 필수값 체크
@@ -63,7 +63,7 @@ public class SubmitMTService {
 		
 		try {
 			
-			commonDAO.insertSmsSend(smsVO);
+			submitMTDAO.insertSmsSend(smsVO);
 		}
 		catch(DataAccessException adcbExc){
 			/*SQLException se = (SQLException) adcbExc.getRootCause();

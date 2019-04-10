@@ -1,13 +1,11 @@
 package com.nexgrid.adcb.common.dao;
 
-import java.util.List;
 import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import com.nexgrid.adcb.common.vo.LogVO;
-import com.nexgrid.adcb.common.vo.SmsSendVO;
 
 @Repository
 public interface CommonDAO {
@@ -77,17 +75,6 @@ public interface CommonDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	int updateChargeInfo(@Param("param") Map<String, Object> paramMap) throws Exception;
+	int setBalance(@Param("param") Map<String, Object> paramMap) throws Exception;
 	
-	
-	
-	/**
-	 * SMS 정보 INSERT
-	 * @param smsList
-	 * @return
-	 * @throws Exception
-	 */
-	int insertSmsSend(SmsSendVO smsVO) throws Exception;
-	
-
 }

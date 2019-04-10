@@ -39,6 +39,9 @@
 	<entry key="204">Maximum OTP resend attempts reached</entry>
 	<entry key="210">ACR known but has been deactivated</entry>
 	<entry key="300">Carrier Maintenance</entry>
+	<entry key="400">Youth fee is not refundable.</entry>
+	<entry key="401">This transaction has failed.</entry>
+	<entry key="402">This transaction with no consequences.</entry>
 	<entry key="499">Custom Carrier Codes</entry>
 	
 	

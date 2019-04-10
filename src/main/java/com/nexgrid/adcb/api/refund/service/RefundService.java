@@ -225,6 +225,11 @@ public class RefundService {
 			throw new CommonException(EnAdcbOmsCode.TRANSACTION_FAIL);
 		}
 		
+		// 청소년 요금제의 거래로 환불을 요청한 경우
+		if("Y".equals(payInfo.get("YOUNG_FEE_YN"))) {
+			throw new CommonException(EnAdcbOmsCode.REFUND_YOUNG);
+		}
+		
 		// 부분 환불이 있었을 경우 남은 잔액보다 요청 환불금액이 큰 경우 차단
 		if(payInfo.get("BALANCE") != null) {
 			Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");

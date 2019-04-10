@@ -126,7 +126,7 @@ public class ReverseController {
 				// RBP연동-차감취소 성공 시 charge_info UPDATE
 				if(chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
 					paramMap.put("REVERSE_DT", new Date());
-					commonService.updateChargeInfo(paramMap, logVO);
+					commonService.setBalance(paramMap, logVO);
 				}
 				
 				// SLA Insert

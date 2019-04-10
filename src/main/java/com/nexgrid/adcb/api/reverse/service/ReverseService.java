@@ -125,6 +125,11 @@ public class ReverseService {
 				throw new CommonException(EnAdcbOmsCode.ALREADY_REVERSED);
 			}
 			
+			// 청소년요금제의 거래일 경우
+			if("Y".equals(payInfo.get("YOUNG_FEE_YN"))) {
+				throw new CommonException(EnAdcbOmsCode.REFUND_YOUNG);
+			}
+			
 			resMap.put("issuerPaymentId", payInfo.get("ISSUER_PAYMENTID"));
 			chargeResponse = true;
 		}

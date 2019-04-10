@@ -128,7 +128,7 @@ public interface CommonService {
 	  * @param logVO
 	  * @throws Exception
 	  */
-	void updateChargeInfo(Map<String, Object> paramMap, LogVO logVO) throws Exception;
+	void setBalance(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
 	
 	

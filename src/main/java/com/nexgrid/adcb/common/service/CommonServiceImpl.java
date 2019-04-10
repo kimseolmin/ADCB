@@ -58,7 +58,7 @@ import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.Retriev
 @Service("commonService")
 public class CommonServiceImpl implements CommonService{
 
-	@Inject
+	@Autowired
 	private CommonDAO commonDAO;
 	
 	@Autowired
@@ -720,10 +720,10 @@ public class CommonServiceImpl implements CommonService{
 	  * @param logVO
 	  * @throws Exception
 	  */
-	 public void updateChargeInfo(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+	 public void setBalance(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		 logVO.setFlow("[ADCB] --> [DB]");
 			try {
-				commonDAO.updateChargeInfo(paramMap);
+				commonDAO.setBalance(paramMap);
 			}catch(DataAccessException adcbExc){
 				/*SQLException se = (SQLException) adcbExc.getRootCause();
 				logVO.setRsCode(Integer.toString(se.getErrorCode()));*/

@@ -156,7 +156,7 @@ public class RefundController {
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
 						
 						// 환불 처리 누적 금액 & 환불후 잔액 UPDATE
-						commonService.updateChargeInfo(paramMap, logVO);
+						commonService.setBalance(paramMap, logVO);
 						
 						// EAI
 						
