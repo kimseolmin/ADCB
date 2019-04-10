@@ -89,6 +89,7 @@ public class RbpMessageReceiver extends Thread{
 				
 			}else if(Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) { // rbp server로부터 health check인 경우
 				
+				logger.info(logSeq + "---------------------------- RBP START ----------------------------");
 				resLog = "RBP Health Check Response";
 				rbpConnector.setLogVO(new LogVO("healthCheck"));
 				logSeq = "[" + rbpConnector.getLogVO().getSeqId() + "] ";

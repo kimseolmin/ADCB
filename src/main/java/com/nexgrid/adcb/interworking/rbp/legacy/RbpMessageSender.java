@@ -118,6 +118,9 @@ public class RbpMessageSender extends Thread{
 			logger.info(logSeq + reqLog + reqMap);
 			logger.info(logSeq + new String(new char[reqLog.length()]).replace("\0", " ") + invokeMsg);
 			rbpConnector.getLogVO().setRbpReqTime();
+			if(!Init.readConfig.getRbp_msg_gbn_invoke().equals(msgGbn)) {
+				logger.info(logSeq + "---------------------------- RBP END ----------------------------");
+			}
 			
 			rbpConnector.getSocket().getOutputStream().write(reqByte);
 			rbpConnector.getSocket().getOutputStream().flush();

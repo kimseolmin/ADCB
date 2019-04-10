@@ -114,6 +114,10 @@ public class RcsgMessageSender extends Thread{
 			logger.info(logSeq + reqLog + reqMap);
 			logger.info(logSeq + new String(new char[reqLog.length()]).replace("\0", " ") + invokeMsg);
 			rcsgConnector.getLogVO().setRcsgReqTime();
+			if(!Init.readConfig.getRcsg_msg_gbn_invoke().equals(msgGbn)) {
+				logger.info(logSeq + "---------------------------- RCSG END ----------------------------");
+			}
+			
 			
 			rcsgConnector.getSocket().getOutputStream().write(reqByte);
 			rcsgConnector.getSocket().getOutputStream().flush();
