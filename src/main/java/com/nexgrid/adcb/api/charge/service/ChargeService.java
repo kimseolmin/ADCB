@@ -310,9 +310,6 @@ public class ChargeService {
 		
 		String br_id = RbpKeyGenerator.getInstance(Init.readConfig.getRbp_system_id()).generateKey();
 		String reqCtn = StringUtil.getCtn344(ctn);
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-		long tempTimeMillis = System.currentTimeMillis();
-		String currentDate = dateFormat.format(new Date(tempTimeMillis));
 		Map<String, Object> purchaseAmount = (HashMap<String, Object>)paramMap.get("purchaseAmount");
 		String price = purchaseAmount.get("amount").toString();
 		
@@ -323,8 +320,8 @@ public class ChargeService {
 		rbpReqMap.put("BR_ID", br_id); // Business RequestID
 		rbpReqMap.put("RCVER_CTN", reqCtn); // 수신자의 전화번호
 		rbpReqMap.put("SERVICE_FILTER", reqCtn); // 발신 번호
-		rbpReqMap.put("START_USE_TIME", currentDate); 
-		rbpReqMap.put("END_USE_TIME", currentDate);
+		rbpReqMap.put("START_USE_TIME", StringUtil.getCurrentTimeMilli()); 
+		rbpReqMap.put("END_USE_TIME", StringUtil.getCurrentTimeMilli());
 		rbpReqMap.put("CALLED_NETWORK", Init.readConfig.getRbp_called_network()); // 착신 사업자 코드
 		rbpReqMap.put("PRICE", price);
 		rbpReqMap.put("PID", Init.readConfig.getRbp_pid()); // Product ID

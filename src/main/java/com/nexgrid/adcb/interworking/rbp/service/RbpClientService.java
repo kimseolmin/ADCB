@@ -12,6 +12,7 @@ import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.interworking.rbp.legacy.RbpConnector;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpResultCode;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnCanCelPart;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnCancel;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnCharge;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpReturnSelectLimit;
@@ -102,20 +103,26 @@ public class RbpClientService {
 				logVO.setRbpResTime();
 				
 				// 응답 형식 정상여부 체크 (필수 응답값 없으면 exception)
-				if(Init.readConfig.getRbp_opcode_select().equals(opCode)) {
+				if(Init.readConfig.getRbp_opcode_select().equals(opCode)) {	// 한도조회
 					for(EnRbpReturnSelectLimit e: EnRbpReturnSelectLimit.values()) {
 						if(!resMap.containsKey(e.toString())) {
 							throw new CommonException(EnAdcbOmsCode.RBP_RES_BODY_KEY);
 						}
 					}
-				}else if(Init.readConfig.getRbp_opcode_charge().equals(opCode)) {
+				}else if(Init.readConfig.getRbp_opcode_charge().equals(opCode)) { // 즉시차감
 					for(EnRbpReturnCharge e: EnRbpReturnCharge.values()) {
 						if(!resMap.containsKey(e.toString())) {
 							throw new CommonException(EnAdcbOmsCode.RBP_RES_BODY_KEY);
 						}
 					}
-				}else if(Init.readConfig.getRbp_opcode_cancel().equals(opCode)) {
+				}else if(Init.readConfig.getRbp_opcode_cancel().equals(opCode)) { // 차감취소
 					for(EnRbpReturnCancel e : EnRbpReturnCancel.values()) {
+						if(!resMap.containsKey(e.toString())) {
+							throw new CommonException(EnAdcbOmsCode.RBP_RES_BODY_KEY);
+						}
+					}
+				}else if(Init.readConfig.getRbp_opcode_cancel_part().equals(opCode)) { // 부분취소
+					for(EnRbpReturnCanCelPart e : EnRbpReturnCanCelPart.values()) {
 						if(!resMap.containsKey(e.toString())) {
 							throw new CommonException(EnAdcbOmsCode.RBP_RES_BODY_KEY);
 						}

@@ -170,10 +170,19 @@ private static SequenceNoManager seqNoManager;
 				Map<String, String> reqMap = new HashMap<String, String>();
 				reqMap.put("CON_ID", conId + "");
 				Map<String, String> resMap = sendMsg(Init.readConfig.getRcsg_msg_gbn_invoke(), Init.readConfig.getRcsg_opcode_con_qry(), reqMap);
+				String logSeq = "[" + logVO.getSeqId() + "] ";
 				
-				if(resMap == null || !"1".equals(resMap.get("CON_STS"))) {
+				if(resMap == null) {
+					logger.error(logSeq + "RCSG Health Check(return) Error: RCSG 응답없음!!!");
 					isConnected = false;
+					logger.info(logSeq + "---------------------------- RCSG END ----------------------------");
+				}else {
+					if( !"1".equals(resMap.get("CON_STS"))) {
+						isConnected = false;
+					}
 				}
+				
+				
 			}
 		}catch (Exception e) {
 			logger.error("[Health Check " + getName() + "] RCSG Error : " + e.getMessage(), e);

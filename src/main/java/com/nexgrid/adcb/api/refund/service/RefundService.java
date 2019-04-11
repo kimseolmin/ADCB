@@ -284,7 +284,18 @@ public class RefundService {
 		}
 		
 		// 통합한도 연동: 차감취소
-		commonService.doRbpCancel(paramMap, logVO);
+		int payAmount = ((BigDecimal)payInfo.get("AMOUNT")).intValue();
+		Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
+		int refundamount = (Integer)refundAmount.get("amount");
+		
+		if(payAmount == refundamount) {	// 전체 환불일 경우
+			commonService.doRbpCancel(paramMap, logVO);
+		}else { // 부분 환불일 경우
+			doRbpCancelPart(paramMap, logVO);
+		}
+		
+		
+		
 		
 	}
 	
@@ -313,6 +324,57 @@ public class RefundService {
 				throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 			}
 			logVO.setFlow("[ADCB] <-- [DB]");
+	 }
+	 
+	 
+	 
+	 /**
+	  * 부분취소 (RBP연동)
+	  * @param paramMap
+	  * @param logVO
+	  * @throws Exception
+	  */
+	 public void doRbpCancelPart(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+		 
+		 Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
+		 String ctn = StringUtil.getCtn344(payInfo.get("CTN").toString());
+		 String fee_type = payInfo.get("FEE_TYPE").toString();
+		 String br_id = payInfo.get("BR_ID").toString();
+		 String refundInfo = payInfo.get("REFUNDINFO").toString();
+		 String start_use_time = payInfo.get("START_USE_TIME").toString();
+		 Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
+		 String price = refundAmount.get("amount").toString();
+		 
+		 Map<String, String> rbpReqMap = new HashMap<String, String>();	// RBP 요청
+		 Map<String, String> rbpResMap = null;	// RBP 응답
+		 
+		// RBP연동을 위한 파마리터 셋팅
+		rbpReqMap.put("CTN", ctn);	// 과금번호
+		rbpReqMap.put("SOC_CODE", fee_type); // 가입자의 요금제 코드 
+		rbpReqMap.put("CDRDATA", Init.readConfig.getRbp_cdrdata()); // CDR 버전
+		rbpReqMap.put("BR_ID", br_id); // Business RequestID
+		rbpReqMap.put("RCVER_CTN", ctn); // 수신자의 전화번호
+		rbpReqMap.put("SERVICE_FILTER", refundInfo); // 즉시차감 return 전문의 REFUNDINFO값을 넣는다.
+		rbpReqMap.put("START_USE_TIME", start_use_time); 
+		rbpReqMap.put("END_USE_TIME", StringUtil.getCurrentTimeMilli());
+		rbpReqMap.put("CALLED_NETWORK", Init.readConfig.getRbp_called_network()); // 착신 사업자 코드
+		rbpReqMap.put("PRICE", price);
+		rbpReqMap.put("PID", Init.readConfig.getRbp_pid()); // Product ID
+		rbpReqMap.put("DBID", Init.readConfig.getRbp_dbid()); // DETAIL BILLING ID
+		rbpReqMap.put("SVC_CTG", Init.readConfig.getRbp_svc_ctg()); // 통합한도 적용 서비스 구분		
+	 
+		// 부분취소 요청 paramMap에 저장
+		String opCode = Init.readConfig.getRbp_opcode_cancel_part();
+		paramMap.put("RbpReq_"+opCode, rbpReqMap);
+		
+		logVO.setFlow("[ADCB] --> [RBP]");
+		rbpResMap = rbpClientService.doRequest(logVO, opCode, paramMap);
+		
+		// 즉시차감 결과 paramMap에 저장
+		paramMap.put("Res_"+opCode, rbpResMap);
+		
+		// 환불 성공 SMS 정보 paramMap에 저장
+		
 	 }
 	 
 	 

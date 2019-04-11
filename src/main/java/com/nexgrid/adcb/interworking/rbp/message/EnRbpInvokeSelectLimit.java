@@ -15,8 +15,8 @@ public enum EnRbpInvokeSelectLimit {
 	, SERVICE_FILTER
 	, START_USE_TIME
 	, CALL_REFERENCE
-	, AMOUNT("1")
-	, PRICE
+	, AMOUNT("0")
+	, PRICE("0")
 	, BILL_FLAG("00")
 	, SUB_FLAG
 	, CALLED_NETWORK

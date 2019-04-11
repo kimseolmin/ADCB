@@ -52,7 +52,15 @@
 			HTTP_STATUS = #{param.HTTP_STATUS},
 			REFUND_DT = #{param.REFUND_DT},
 			RESULT = #{param.bokuRes.result.reasonCode},
-			BR_ID = #{param.Res_116.BR_ID},
+			<choose>
+				<when test="param.Res_116 != null"> <!-- 차감취소 -->
+					BR_ID = #{param.Res_116.BR_ID},
+				</when>
+				<otherwise> <!-- 부분취소 -->
+					BR_ID = #{param.Res_117.BR_ID}, 
+				</otherwise>
+			</choose>
+			
 			ISSUER_REFUNDID = #{param.bokuRes.issuerRefundId},
 			RESULT_MSG = #{param.bokuRes.result.message}
 		WHERE

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpHeader;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeCancel;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeCancelPart;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeCharge;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeConQry;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpInvokeSelectLimit;
@@ -142,6 +143,10 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 			for(EnRbpInvokeCancel e : EnRbpInvokeCancel.values()) {
 				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
 			}
+		}else if(Init.readConfig.getRbp_opcode_cancel_part().equals(opCode)) { // 부분 취소
+			for(EnRbpInvokeCancelPart e : EnRbpInvokeCancelPart.values()) {
+				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
+			}
 		}
 		
 		
@@ -167,7 +172,7 @@ public static final Logger logger = LoggerFactory.getLogger(RbpMessageConverter.
 	private String getStrParameter(String tag, String val, String defaultVal) {
 		String str = "";
 		
-		if(defaultVal != null) {
+		if(val == null && defaultVal != null) {
 			val = defaultVal;
 		}
 		

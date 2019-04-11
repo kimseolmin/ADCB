@@ -168,10 +168,19 @@ public class RbpConnector implements Runnable{
 				Map<String, String> reqMap = new HashMap<String, String>();
 				reqMap.put("CON_ID", conId + "");
 				Map<String, String> resMap = sendMsg(Init.readConfig.getRbp_msg_gbn_invoke(), Init.readConfig.getRbp_opcode_con_qry(), reqMap);
+				String logSeq = "[" + logVO.getSeqId() + "] ";
 				
-				if(resMap == null || !"1".equals(resMap.get("CON_STS"))) {
+				if(resMap == null) {
+					logger.error(logSeq + "RBP Health Check(return) Error: RBP 응답없음!!!");
 					isConnected = false;
+					logger.info(logSeq + "---------------------------- RBP END ----------------------------");
+				}else {
+					if(!"1".equals(resMap.get("CON_STS"))) {
+						isConnected = false;
+					}
 				}
+				
+				
 			}
 		}catch (Exception e) {
 			logger.error("[Health Check " + getName() + "] RBP Error : " + e.getMessage(), e);

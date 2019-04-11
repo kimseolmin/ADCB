@@ -87,7 +87,7 @@ public class RcsgMessageReceiver extends Thread{
 				resLog = "RCSG Health Check Response";
 				rcsgConnector.setLogVO(new LogVO("healthCheck"));
 				logSeq = "[" + rcsgConnector.getLogVO().getSeqId() + "] ";
-				logger.info(logSeq + "---------------------------- RCSG START ----------------------------");
+				logger.info(logSeq + "---------------------------- RCSG START (Server's health check)----------------------------");
 				logger.info(logSeq + resLog + " IP: " + rcsgConnector.getServerIp());
 				logger.info(logSeq + resLog + " PORT: " + rcsgConnector.getServerPort());
 				resLog += " Data: ";
