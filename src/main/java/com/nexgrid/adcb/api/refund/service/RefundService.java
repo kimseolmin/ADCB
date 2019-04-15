@@ -128,7 +128,7 @@ public class RefundService {
 				resMap.put("result", result);
 				
 				paramMap.put("duplicateRes", resMap);
-				paramMap.put("http_status", refundReq.get("HTTP_STATUS"));
+				paramMap.put("http_status", refundReq.get("http_status"));
 				
 				return true;
 			}else {

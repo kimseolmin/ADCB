@@ -46,7 +46,7 @@
 	    	BR_ID = #{param.Res_114.BR_ID},
 	    	ISSUER_PAYMENTID = #{param.bokuRes.issuerPaymentId},
 	    	RESULT_MSG = #{param.bokuRes.result.message},
-	    	HTTP_STATUS = #{param.HTTP_STATUS},
+	    	HTTP_STATUS = #{param.http_status},
 	    	REFUNDINFO = #{param.Res_114.REFUNDINFO},
 	    	SVC_AUTH = #{param.ncasRes.SVC_AUTH},
 	    	START_USE_TIME = #{param.Req_114.START_USE_TIME},

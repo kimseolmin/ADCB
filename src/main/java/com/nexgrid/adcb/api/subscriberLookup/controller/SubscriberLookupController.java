@@ -62,7 +62,7 @@ public class SubscriberLookupController {
 			
 			//NCAS 연동이 예외 없이 돌아왔을 경우
 			dataMap.put("result", commonService.getSuccessResult());
-			paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
+			paramMap.put("http_status", HttpStatus.OK.value());
 			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 			
@@ -74,7 +74,7 @@ public class SubscriberLookupController {
 			
 			dataMap.put("msisdn", paramMap.get("msisdn"));
 			dataMap.put("result", commonEx.sendException());
-			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
+			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -87,7 +87,7 @@ public class SubscriberLookupController {
 			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
-			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
+			paramMap.put("http_status", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			
 			logVO.setResultCode(EnAdcbOmsCode.INVALID_ERROR.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.INVALID_ERROR.mappingCode());

@@ -71,7 +71,7 @@ public class AccountProfileController {
 			
 			// NCAS 연동 값 -> boku 결과 값
 			dataMap = accountProfileService.getAccountProfile(paramMap, logVO);
-			paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
+			paramMap.put("http_status", HttpStatus.OK.value());
 			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 			
@@ -83,7 +83,7 @@ public class AccountProfileController {
 			
 			dataMap.put("msisdn", paramMap.get("msisdn"));
 			dataMap.put("result", commonEx.sendException());
-			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
+			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -96,7 +96,7 @@ public class AccountProfileController {
 			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
-			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
+			paramMap.put("http_status", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			
 			logVO.setResultCode(EnAdcbOmsCode.INVALID_ERROR.value());
 			logVO.setApiResultCode(EnAdcbOmsCode.INVALID_ERROR.mappingCode());

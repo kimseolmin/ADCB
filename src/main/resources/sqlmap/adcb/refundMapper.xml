@@ -49,7 +49,7 @@
 		UPDATE
 			TB_REFUND_INFO
 		SET 
-			HTTP_STATUS = #{param.HTTP_STATUS},
+			HTTP_STATUS = #{param.http_status},
 			REFUND_DT = #{param.REFUND_DT},
 			RESULT = #{param.bokuRes.result.reasonCode},
 			<choose>

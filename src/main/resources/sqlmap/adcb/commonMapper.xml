@@ -53,7 +53,7 @@
 			#{logVO.resTime},
 			#{logVO.apiType},
 			#{logVO.apiResultCode},
-			#{param.HTTP_STATUS},
+			#{param.http_status},
 			<choose>
 				<when test="param.purchaseAmount != null">
 					#{param.purchaseAmount.amount},	<!-- Charge API -->

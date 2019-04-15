@@ -75,7 +75,7 @@ public class RefundController {
 				refundService.refund(paramMap, logVO);	
 				
 				// 예외없이 왔을 경우 BOKU에게 성공 msg 전송
-				paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
+				paramMap.put("http_status", HttpStatus.OK.value());
 				dataMap.put("result", commonService.getSuccessResult());
 				logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 			}
@@ -89,7 +89,7 @@ public class RefundController {
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
 			dataMap.put("result", commonEx.sendException());
-			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
+			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -109,7 +109,7 @@ public class RefundController {
 			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
 
-			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
+			paramMap.put("http_status", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());

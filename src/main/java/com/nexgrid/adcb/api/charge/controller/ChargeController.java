@@ -84,7 +84,7 @@ public class ChargeController {
 				chargeService.charge(paramMap, logVO);
 				
 				// 예외없이 왔을 경우 성공 MSG
-				paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
+				paramMap.put("http_status", HttpStatus.OK.value());
 				dataMap.put("result", commonService.getSuccessResult());
 				logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 			}
@@ -100,7 +100,7 @@ public class ChargeController {
 			
 			dataMap.put("issuerPaymentId", logVO.getSeqId());
 			dataMap.put("result", commonEx.sendException());
-			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
+			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -121,7 +121,7 @@ public class ChargeController {
 			Map<String, Object> result = CommonException.checkException(paramMap);
 			dataMap.put("result", result);
 
-			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
+			paramMap.put("http_status", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
