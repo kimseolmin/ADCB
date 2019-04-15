@@ -53,7 +53,6 @@ public class ChargeController {
 		LogUtil.startServiceLog(logVO, request, paramMap.toString());
 		
 		//Return Value
-		
 		Map<String, Object> dataMap = new HashMap<String, Object>();
 		
 		//set flow
@@ -111,7 +110,7 @@ public class ChargeController {
 		}
 		catch(Exception ex){
 			
-			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
+			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
 			
@@ -133,8 +132,7 @@ public class ChargeController {
 			
 			try {
 				logVO.setResTime();
-				logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
-				
+
 				// OMS Write
 				commonService.omsLogWrite(logVO);
 				
@@ -147,10 +145,13 @@ public class ChargeController {
 					LogUtil.EndServiceLog(logVO);
 					//Test일때만
 					response.setStatus(200);
+					logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
 					return dataMap;
 					
 				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
 					dataMap.put("issuerPaymentId", logVO.getSeqId());
+					logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
+					
 					//ObjectMapper mapper = new ObjectMapper();
 					//Test일때만
 					response.setStatus(200);
@@ -167,7 +168,7 @@ public class ChargeController {
 					
 					// 청구 API가 성공일 경우에만 EAI
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
-						
+						chargeService.insertEAI(paramMap, logVO);
 					}
 					
 					// SLA Insert

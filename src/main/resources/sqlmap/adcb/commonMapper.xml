@@ -146,7 +146,12 @@
  			CUST_GRD_CD,
  			YOUNG_FEE_YN,
  			BR_ID,
- 			START_USE_TIME
+ 			START_USE_TIME,
+ 			ISSUER_REVERSEID,
+ 			BAN,
+ 			ACE_NO,
+ 			MERCHANT_ID,
+ 			PRODUCT_DESCRIPTION
 		FROM 
 			TB_CHARGE_INFO
 		WHERE
@@ -169,27 +174,69 @@
 			TB_CHARGE_INFO
 		SET
 			<choose>
-				<when test="param.refundAmount != null">
+				<when test="param.refundAmount != null"> <!-- Refund API -->
 					BALANCE = AMOUNT - (PARTIAL_REFUND_SUM + #{param.refundAmount.amount}),
 					PARTIAL_REFUND_SUM = PARTIAL_REFUND_SUM + #{param.refundAmount.amount}
 				</when>
-				<otherwise>
+				<otherwise>	<!-- Reverse API -->
 					BALANCE = AMOUNT - #{param.payInfo.AMOUNT},
 					PARTIAL_REFUND_SUM = #{param.payInfo.AMOUNT},
-					REVERSE_DT = #{param.REVERSE_DT}
+					REVERSE_DT = #{param.REVERSE_DT},
+					ISSUER_REVERSEID = #{param.issuerReverseId}
 				</otherwise>
 			</choose>
 		WHERE
 			INIT_DATE IN (#{param.month1}, #{param.month2})
 			<choose>
-				<when test="param.issuerPaymentId != null">
+				<when test="param.issuerPaymentId != null"> <!-- Refund API -->
 					 AND ISSUER_PAYMENTID = #{param.issuerPaymentId}
 				</when>
-				<otherwise>
+				<otherwise> <!-- Reverse API -->
 					AND REQUEST_ID = #{param.chargeRequestId}
 				</otherwise>
 			</choose>
 		   
 	</update>
+	
+	
+	
+	<!-- EAI -->
+	<insert id="insertEAI" parameterType="com.nexgrid.adcb.common.vo.EaiVO">
+		INSERT INTO TB_ADCB_EAI_SDW (
+			NEW_REQUEST_TYPE,
+			NEW_BAN_UNPAID_YN_CODE,
+			NEW_ACCOUNT_TYPE,
+			NEW_SMLS_STLM_DV_CD,
+			NEW_SMLS_STLM_CMPNY_CD,
+			NEW_CUST_GRD_CD,
+			NEW_PRSS_YYMM,
+			NEW_REQUEST_DATE,
+			NEW_TOTAL,
+			NEW_BAN,
+			NEW_ACE_NO,
+			NEW_SUBS_NO,
+			NEW_REQUEST_ID,
+			NEW_MERCHANT_ID,
+			NEW_PRODUCT_DESCRIPTION
+			)
+		 VALUES (
+		 	#{new_request_type},
+			#{new_ban_unpaid_yn_code},
+			#{new_account_type},
+			#{new_smls_stlm_dv_cd},
+			#{new_smls_stlm_cmpny_cd},
+			#{new_cust_grd_cd},
+			#{new_prss_yymm},
+			#{new_request_date},
+			#{new_total},
+			#{new_ban},
+			#{new_ace_no},
+			#{new_subs_no},
+			#{new_request_id},
+			#{new_merchant_id},
+			#{new_product_description}
+		 	)
+		
+	</insert>
 	
  </mapper>

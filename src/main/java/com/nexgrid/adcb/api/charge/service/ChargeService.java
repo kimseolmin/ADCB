@@ -26,6 +26,7 @@ import com.nexgrid.adcb.api.charge.dao.ChargeDAO;
 import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
+import com.nexgrid.adcb.common.vo.EaiVO;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.common.vo.SmsSendVO;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpResultCode;
@@ -140,7 +141,7 @@ public class ChargeService {
     	// 약관동의가 필요한 경우 ESB 연동
     	if("Y".equals(terms_deny_yn)) {
     		// ESB 연동
-    		doEsbMps208(paramMap, logVO);
+//    		doEsbMps208(paramMap, logVO);
     	}
     	
     	//청소년요금제와 일반 구분
@@ -157,7 +158,7 @@ public class ChargeService {
     				mode = "2";
     			}
     			paramMap.put("MODE", mode);
-    			commonService.doEsbCm181(paramMap, logVO);
+//    			commonService.doEsbCm181(paramMap, logVO);
     		}
     		
     		
@@ -331,7 +332,7 @@ public class ChargeService {
 		
 		// 즉시차감 요청 paramMap에 저장
 		String opCode = Init.readConfig.getRbp_opcode_charge();
-		paramMap.put("RbpReq_" + opCode, rbpReqMap);
+		paramMap.put("Req_" + opCode, rbpReqMap);
 		
 		// RBP 연동
 		logVO.setFlow("[ADCB] --> [RBP]");
@@ -348,8 +349,6 @@ public class ChargeService {
 					
 					
 		    		// 한도초과 SMS 정보 paramMap에 저장
-
-		    		
 		    		
 				}
 			}
@@ -407,7 +406,7 @@ public class ChargeService {
 		
 		// 즉시차감 요청 paramMap에 저장
 		String opCode = Init.readConfig.getRcsg_opcode_charge();
-		paramMap.put("RcsgReq_"+opCode, rcsgReqMap);
+		paramMap.put("Req_"+opCode, rcsgReqMap);
 		
 		// RCSG 연동
 		logVO.setFlow("[ADCB] --> [RCSG]");
@@ -420,13 +419,25 @@ public class ChargeService {
 			
 			// RCSG의 RESULT가 "0000"이 아니기 때문에 생겨난 exception일 경우에만
 			if(EnAdcbOmsCode.RCSG_API.value().equals(firstCode)) {
+				List<SmsSendVO> smsList = new ArrayList<>();
 				if(EnRcsgResultCode.RS_4008.getDefaultValue().equals(rcsgRsCode)) { // 한도초과일 경우 
 					//한도초과 SMS 전송정보 paramMap에 저장
-					
-				}else { // 한도 초과가 아닌 다른 실패인 경우 
-					// 결제 실패 SMS 전송 정보 paramMap에 저장
-					
+					for(int i=0; i<2; i++) {
+						SmsSendVO smsVO = new SmsSendVO();
+						smsVO.setGubun("01");
+						smsVO.setTo_ctn(StringUtil.getCtn344(ctn));
+						smsVO.setRequest_id(paramMap.get("requestId").toString());
+						if(i == 0) {
+							smsVO.setContent(Init.readConfig.getLimit_excess());
+						}else {
+							smsVO.setContent(Init.readConfig.getLimit_excess2());
+						}
+						
+						smsList.add(smsVO);
+					}
+					paramMap.put("smsList", smsList);
 				}
+				
 			}
 			throw common;
 		}
@@ -461,16 +472,6 @@ public class ChargeService {
 		logVO.setFlow("[ADCB] <-- [DB]");
 		
 	}
-	
-	
-	
-	/**
-	 * ESB 연동 - 취약계층인지를 판단하여 취약계층이면 ESB연동하여 연동결과를 esbCm181Res라는 이름으로 paramMap에 저장
-	 * @param paramMap
-	 * @param logVO
-	 * @throws Exception
-	 */
-
 	
 	
 	
@@ -561,12 +562,53 @@ public class ChargeService {
 			}else {
 				throw new CommonException(EnAdcbOmsCode.CHARGE_DUPLICATE_REQ);
 			}
-			
 		}
+	}
+	
+	
+	
+	/**
+	 * EAI 연동
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	public void insertEAI(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		
+		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
+		Map<String, String> Res_111 = (HashMap<String,String>) paramMap.get("Res_111");
+		Map<String, String> Req_114 = (HashMap<String,String>) paramMap.get("Req_114");
+		Map<String, Object> purchaseAmount = (HashMap<String, Object>)paramMap.get("purchaseAmount");
 		
 		
+		EaiVO eaiVO = new EaiVO();
+		eaiVO.setNew_ban_unpaid_yn_code(ncasRes.get("BAN_UNPAID_YN_CODE"));
+		eaiVO.setNew_account_type("02");
+		eaiVO.setNew_cust_grd_cd(Res_111 == null ? "" : Res_111.get("CUST_GRD_CD"));
+		eaiVO.setNew_prss_yymm(Req_114.get("START_USE_TIME").substring(0, 6));
+		eaiVO.setNew_request_date(new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(Req_114.get("START_USE_TIME")));
+		eaiVO.setNew_total(purchaseAmount.get("amount").toString());
+		eaiVO.setNew_ban(ncasRes.get("BAN"));
+		eaiVO.setNew_ace_no(ncasRes.get("ACENO"));
+		eaiVO.setNew_subs_no(ncasRes.get("SUB_NO"));
+		eaiVO.setNew_request_id(paramMap.get("requestId").toString());
+		eaiVO.setNew_merchant_id(paramMap.containsKey("merchantId") ? paramMap.get("merchantId").toString() : "");
+		eaiVO.setNew_product_description(paramMap.get("productDescription").toString());
 		
-		
+		logVO.setFlow("[ADCB] --> [DB]");
+		try {
+			commonDAO.insertEAI(eaiVO);
+		}catch(DataAccessException adcbExc){
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
+			
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
+		}catch(ConnectException adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+		}
+		logVO.setFlow("[ADCB] <-- [DB]");
 	}
 	
 }

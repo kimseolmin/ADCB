@@ -21,6 +21,7 @@ import com.nexgrid.adcb.api.refund.dao.RefundDAO;
 import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
+import com.nexgrid.adcb.common.vo.EaiVO;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.interworking.rbp.service.RbpClientService;
 import com.nexgrid.adcb.interworking.rbp.util.RbpKeyGenerator;
@@ -230,10 +231,11 @@ public class RefundService {
 			throw new CommonException(EnAdcbOmsCode.REFUND_YOUNG);
 		}
 		
-		// 부분 환불이 있었을 경우 남은 잔액보다 요청 환불금액이 큰 경우 차단
-		if(payInfo.get("BALANCE") != null) {
-			Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
-			int amount = (Integer)refundAmount.get("amount");
+		Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
+		int refund = (Integer)refundAmount.get("amount");
+		
+		if(payInfo.get("BALANCE") != null) { // 부분 환불이 있었을 경우
+			
 			int balance =  ((BigDecimal)payInfo.get("BALANCE")).intValue();
 			
 			// 이미 완전히 환불되었을 경우
@@ -242,7 +244,13 @@ public class RefundService {
 			}
 			
 			// 잔액보다 요청 환불금액이 큰 경우
-			if(balance < amount) {
+			if(balance < refund) {
+				throw new CommonException(EnAdcbOmsCode.EXCEED_ORIGINAL_AMOUNT);
+			}
+		}else {	
+			// 결제 금액 보다 환불요청금액이 클 경우 
+			int amount =  ((BigDecimal)payInfo.get("AMOUNT")).intValue();
+			if(amount < refund) {
 				throw new CommonException(EnAdcbOmsCode.EXCEED_ORIGINAL_AMOUNT);
 			}
 		}
@@ -280,7 +288,7 @@ public class RefundService {
 			}
 			paramMap.put("MODE", mode);
 			// ESB 연동
-			commonService.doEsbCm181(paramMap, logVO);
+//			commonService.doEsbCm181(paramMap, logVO);
 		}
 		
 		// 통합한도 연동: 차감취소
@@ -365,7 +373,7 @@ public class RefundService {
 	 
 		// 부분취소 요청 paramMap에 저장
 		String opCode = Init.readConfig.getRbp_opcode_cancel_part();
-		paramMap.put("RbpReq_"+opCode, rbpReqMap);
+		paramMap.put("Req_"+opCode, rbpReqMap);
 		
 		logVO.setFlow("[ADCB] --> [RBP]");
 		rbpResMap = rbpClientService.doRequest(logVO, opCode, paramMap);
@@ -376,6 +384,53 @@ public class RefundService {
 		// 환불 성공 SMS 정보 paramMap에 저장
 		
 	 }
+	 
+	 
+	 
+	 
+	/**
+	 * EAI 연동
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	public void insertEAI(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		
+		Map<String, Object> payInfo = (Map<String, Object>) paramMap.get("payInfo");
+		Map<String, String> reqCancel = (Map<String, String>) (paramMap.containsKey("Req_116") ? paramMap.get("Req_116") : paramMap.get("Req_117"));
+		Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
+		
+		
+		EaiVO eaiVO = new EaiVO();
+		eaiVO.setNew_request_type("0");
+		eaiVO.setNew_ban_unpaid_yn_code(payInfo.get("BAN_UNPAID_YN_CODE").toString());
+		eaiVO.setNew_account_type("03");
+		eaiVO.setNew_cust_grd_cd(payInfo.get("CUST_GRD_CD") == null ? "" : payInfo.get("CUST_GRD_CD").toString());
+		eaiVO.setNew_prss_yymm(payInfo.get("START_USE_TIME").toString().substring(0, 6));
+		eaiVO.setNew_request_date(new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(reqCancel.get("END_USE_TIME")));
+		eaiVO.setNew_total(refundAmount.get("amount").toString());
+		eaiVO.setNew_ban(payInfo.get("BAN").toString());
+		eaiVO.setNew_ace_no(payInfo.get("ACE_NO").toString());
+		eaiVO.setNew_subs_no(payInfo.get("SUB_NO").toString());
+		eaiVO.setNew_request_id(paramMap.get("requestId").toString());
+		eaiVO.setNew_merchant_id(payInfo.get("MERCHANT_ID") == null ? "" : payInfo.get("MERCHANT_ID").toString());
+		eaiVO.setNew_product_description(payInfo.get("PRODUCT_DESCRIPTION").toString());
+		
+		logVO.setFlow("[ADCB] --> [DB]");
+		try {
+			commonDAO.insertEAI(eaiVO);
+		}catch(DataAccessException adcbExc){
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
+			
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
+		}catch(ConnectException adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+		}
+		logVO.setFlow("[ADCB] <-- [DB]");
+	}
 	 
 	 
 	 

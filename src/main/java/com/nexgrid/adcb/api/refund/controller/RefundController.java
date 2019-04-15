@@ -99,7 +99,7 @@ public class RefundController {
 		}
 		catch(Exception ex){
 			
-			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
+			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
 			
@@ -152,13 +152,14 @@ public class RefundController {
 					// BOKU에게 응답준 결과 DB update
 					refundService.updateRefundInfo(paramMap, logVO);
 					
-					// 청구 API가 성공일 경우에만  
+					// Refund API가 성공일 경우에만  
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
 						
 						// 환불 처리 누적 금액 & 환불후 잔액 UPDATE
 						commonService.setBalance(paramMap, logVO);
 						
 						// EAI
+						refundService.insertEAI(paramMap, logVO);
 						
 					}
 					

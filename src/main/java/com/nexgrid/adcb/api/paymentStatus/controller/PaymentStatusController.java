@@ -81,7 +81,7 @@ public class PaymentStatusController {
 		}
 		catch(Exception ex){
 			
-			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
+			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
 			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());

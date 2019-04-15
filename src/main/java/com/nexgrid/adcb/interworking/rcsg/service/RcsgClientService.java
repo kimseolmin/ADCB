@@ -78,7 +78,7 @@ public class RcsgClientService {
 	 */
 	public Map<String, String> doRequest(LogVO logVO, String opCode, Map<String, Object> paramMap) throws Exception{
 		
-		Map<String, String> reqMap = (Map<String, String>)paramMap.get("RcsgReq_"+opCode);
+		Map<String, String> reqMap = (Map<String, String>)paramMap.get("Req_"+opCode);
 		Map<String, String> resMap = null;
 		
 		for(RcsgConnector rcsgConn : connList) {

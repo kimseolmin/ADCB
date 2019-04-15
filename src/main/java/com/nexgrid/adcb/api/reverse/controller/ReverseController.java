@@ -62,14 +62,16 @@ public class ReverseController {
 			chargeResponse = reverseService.reverseCheck(paramMap, logVO);
 			
 			// 취소 대상인 구매의 응답 정보
-			dataMap.put("paymentResponse", paramMap.get("paymentResponse"));
+			if(paramMap.containsKey("paymentResponse")) {
+				dataMap.put("paymentResponse", paramMap.get("paymentResponse"));
+			}
 			
-			// 거래가 성공이어서 차감취소를 해야 할 경우
-			if(chargeResponse) { 
+			// 거래가 성공이어서 차감취소를 해야 할 경우 && 중복된 취소요청이 아닐 경우
+			if(chargeResponse && !paramMap.containsKey("duplicateRes")) { 
 				commonService.doRbpCancel(paramMap, logVO);
 			}
 			
-			// 예외없이 왔을 경우 BOKU에게 성공 msg 전송
+			// 예외없이 왔을 경우 성공
 			paramMap.put("HTTP_STATUS", HttpStatus.OK.value());
 			dataMap.put("result", commonService.getSuccessResult());
 			logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
@@ -77,21 +79,25 @@ public class ReverseController {
 
 		}catch(CommonException commonEx) {
 			
-			logVO.setResultCode(commonEx.getOmsErrCode());
-			logVO.setApiResultCode(commonEx.getResReasonCode());
+
+				logVO.setResultCode(commonEx.getOmsErrCode());
+				logVO.setApiResultCode(commonEx.getResReasonCode());
+				
+				dataMap.put("result", commonEx.sendException());
+				paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
+				response.setStatus(commonEx.getStatusCode());
+				
+				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
+				logger.error("[" + logVO.getSeqId() + "] Error Message : " + commonEx.getLogMsg());
+				logger.error("[" + logVO.getSeqId() + "]", commonEx);
+
 			
-			dataMap.put("result", commonEx.sendException());
-			paramMap.put("HTTP_STATUS", commonEx.getStatusCode());
-			response.setStatus(commonEx.getStatusCode());
 			
-			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
-			logger.error("[" + logVO.getSeqId() + "] Error Message : " + commonEx.getLogMsg());
-			logger.error("[" + logVO.getSeqId() + "]", commonEx);
-			
+						
 		}
 		catch(Exception ex){
 			
-			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR);
+			paramMap.put("sCode", HttpStatus.INTERNAL_SERVER_ERROR.value());
 			paramMap.put("eCode", EnAdcbOmsCode.INVALID_ERROR.value());
 			paramMap.put("apiResultCode", EnAdcbOmsCode.INVALID_ERROR.mappingCode());
 			paramMap.put("HTTP_STATUS", HttpStatus.INTERNAL_SERVER_ERROR.value());
@@ -111,7 +117,12 @@ public class ReverseController {
 		}finally {
 			
 			try {
-				dataMap.put("issuerReverseId", logVO.getSeqId());
+				if(paramMap.containsKey("duplicateRes")) { // 중복된 취소요청일 경우
+					dataMap.putAll((Map<String, Object>) paramMap.get("duplicateRes"));
+				}else{
+					dataMap.put("issuerReverseId", logVO.getSeqId());
+				}
+				
 				
 				//Test일때만
 				response.setStatus(200);
@@ -123,10 +134,19 @@ public class ReverseController {
 				logVO.setResTime();
 				commonService.omsLogWrite(logVO);
 				
-				// RBP연동-차감취소 성공 시 charge_info UPDATE
-				if(chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
+				
+				// RBP연동-차감취소 성공 시
+				if(chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())  
+						&& !paramMap.containsKey("duplicateRes")) {
+
+					// charge_info UPDATE
 					paramMap.put("REVERSE_DT", new Date());
+					paramMap.put("issuerReverseId", logVO.getSeqId());
 					commonService.setBalance(paramMap, logVO);
+					
+					// EAI
+					reverseService.insertEAI(paramMap, logVO);
+					
 				}
 				
 				// SLA Insert

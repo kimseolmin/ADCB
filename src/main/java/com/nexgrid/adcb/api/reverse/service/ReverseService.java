@@ -9,11 +9,14 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
+import com.nexgrid.adcb.common.service.CommonService;
+import com.nexgrid.adcb.common.vo.EaiVO;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.StringUtil;
@@ -23,6 +26,9 @@ public class ReverseService {
 
 	@Inject
 	private CommonDAO commonDAO;
+	
+	@Autowired
+	private CommonService commonService;
 	
 	/**
 	 * PaymentStatus 필수 Body값 체크
@@ -78,9 +84,10 @@ public class ReverseService {
 		logVO.setFlow("[ADCB] <-- [DB]");
 		
 		
-		// 거래내역 찾을 수 없음
-		if(payInfo == null) {
-			throw new CommonException(EnAdcbOmsCode.TRANSACTION_NOT_FOUND);
+		
+		if(payInfo == null) { // 거래내역 찾을 수 없을 경우에는 성공 메세지를 던져줘야 함.
+			return false;
+			//throw new CommonException(EnAdcbOmsCode.TRANSACTION_NOT_FOUND);
 		}else {
 			//paramMap에 pay정보 저장
 			paramMap.put("payInfo", payInfo);
@@ -101,7 +108,7 @@ public class ReverseService {
 		}
 		
 		
-		// 이미 줬던 응답을 다시 준다.
+		// 이미 줬던 구매응답을 다시 준다.
 		Map<String, Object> resMap = new HashMap<>();
 
 		Map<String, Object> result = new HashMap<>();
@@ -122,7 +129,9 @@ public class ReverseService {
 			
 			// 이미 취소가 된 경우
 			if(payInfo.get("REVERSE_DT") != null) {
-				throw new CommonException(EnAdcbOmsCode.ALREADY_REVERSED);
+				Map<String, Object> duplicateRes = new HashMap<>();
+				duplicateRes.put("issuerReverseId", payInfo.get("ISSUER_REVERSEID"));
+				paramMap.put("duplicateRes", duplicateRes);
 			}
 			
 			// 청소년요금제의 거래일 경우
@@ -140,6 +149,47 @@ public class ReverseService {
 	
 	
 	
+	/**
+	 * EAI 연동
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	public void insertEAI(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+		
+		Map<String, Object> payInfo = (Map<String, Object>) paramMap.get("payInfo");
+		Map<String, String> reqCancel = (Map<String, String>) paramMap.get("Req_116");
+		
+		EaiVO eaiVO = new EaiVO();
+		eaiVO.setNew_request_type("0");
+		eaiVO.setNew_ban_unpaid_yn_code(payInfo.get("BAN_UNPAID_YN_CODE").toString());
+		eaiVO.setNew_account_type("03");
+		eaiVO.setNew_cust_grd_cd(payInfo.get("CUST_GRD_CD") == null ? "" : payInfo.get("CUST_GRD_CD").toString());
+		eaiVO.setNew_prss_yymm(payInfo.get("START_USE_TIME").toString().substring(0, 6));
+		eaiVO.setNew_request_date(new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(reqCancel.get("END_USE_TIME")));
+		eaiVO.setNew_total(payInfo.get("AMOUNT").toString());
+		eaiVO.setNew_ban(payInfo.get("BAN").toString());
+		eaiVO.setNew_ace_no(payInfo.get("ACE_NO").toString());
+		eaiVO.setNew_subs_no(payInfo.get("SUB_NO").toString());
+		eaiVO.setNew_request_id(paramMap.get("chargeRequestId").toString());
+		eaiVO.setNew_merchant_id(payInfo.get("MERCHANT_ID") == null ? "" : payInfo.get("MERCHANT_ID").toString());
+		eaiVO.setNew_product_description(payInfo.get("PRODUCT_DESCRIPTION").toString());
+		
+		logVO.setFlow("[ADCB] --> [DB]");
+		try {
+			commonDAO.insertEAI(eaiVO);
+		}catch(DataAccessException adcbExc){
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
+			
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
+		}catch(ConnectException adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+		}
+		logVO.setFlow("[ADCB] <-- [DB]");
+	}
 	
 	
 }

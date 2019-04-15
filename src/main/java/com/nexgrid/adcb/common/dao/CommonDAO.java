@@ -5,6 +5,7 @@ import java.util.Map;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
+import com.nexgrid.adcb.common.vo.EaiVO;
 import com.nexgrid.adcb.common.vo.LogVO;
 
 @Repository
@@ -76,5 +77,15 @@ public interface CommonDAO {
 	 * @throws Exception
 	 */
 	int setBalance(@Param("param") Map<String, Object> paramMap) throws Exception;
+	
+	
+	
+	/**
+	 * EAI INSERT
+	 * @param eaiVO
+	 * @return
+	 * @throws Exception
+	 */
+	int insertEAI(EaiVO eaiVO) throws Exception;
 	
 }

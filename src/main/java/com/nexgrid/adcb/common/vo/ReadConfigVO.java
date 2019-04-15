@@ -71,6 +71,7 @@ public class ReadConfigVO {
 	// SMS format
 	private String charge_section_list = "";
 	private String limit_excess = "";
+	private String limit_excess2 = "";
 	private String charge_complete = "";
 	private String section_excess = "";
 	
@@ -414,6 +415,12 @@ public class ReadConfigVO {
 	}
 	public void setLimit_excess(String limit_excess) {
 		this.limit_excess = limit_excess;
+	}
+	public String getLimit_excess2() {
+		return limit_excess2;
+	}
+	public void setLimit_excess2(String limit_excess2) {
+		this.limit_excess2 = limit_excess2;
 	}
 	public String getCharge_complete() {
 		return charge_complete;

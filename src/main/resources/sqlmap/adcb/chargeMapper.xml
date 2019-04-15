@@ -49,8 +49,8 @@
 	    	HTTP_STATUS = #{param.HTTP_STATUS},
 	    	REFUNDINFO = #{param.Res_114.REFUNDINFO},
 	    	SVC_AUTH = #{param.ncasRes.SVC_AUTH},
-	    	START_USE_TIME = #{param.RbpReq_114.START_USE_TIME},
-	    	END_USE_TIME = #{param.RbpReq_114.END_USE_TIME}
+	    	START_USE_TIME = #{param.Req_114.START_USE_TIME},
+	    	END_USE_TIME = #{param.Req_114.END_USE_TIME}
 		WHERE 
 			INIT_DATE IN (#{param.current_month}, #{param.last_month})
 	    	AND REQUEST_ID = #{param.requestId}

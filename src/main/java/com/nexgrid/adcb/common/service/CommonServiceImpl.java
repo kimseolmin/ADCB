@@ -400,8 +400,8 @@ public class CommonServiceImpl implements CommonService{
     	String cust_flag = ncasRes.get("CUST_FLAG"); //고객정보 구분값 (ex: YL00000000)
     											// 1번째 byte: 결제차단여부 ('Y':결제차단->결제이용동의 필요, 'N':결제가능->결제이용동의 완료)
     											// 2번째 byte: PIN번호 설정여부 ('Y':PIN번호사용, 'N':PIN번호사용안함, '0'(숫자):PIN번호미설정, 'L':5회실패로 잠금상태)
-
-    	
+    	String dual_ctn = ncasRes.get("DUAL_CTN"); // 듀얼넘버 확인, 듀얼넘버가 아니면 NULL
+		
     	// test phone은 통과!
     	int testPhoneCnt = 0;
     	try {
@@ -440,6 +440,11 @@ public class CommonServiceImpl implements CommonService{
         		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PREPAY);
         	  }
         	  
+        	  // 듀얼 넘버 확인, NULL인 경우 듀얼넘버 아님. - 듀얼넘버 차단
+        	  if(!"".equals(dual_ctn)) {
+        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_DUAL);
+        	  }
+        	  
         	  
         	  // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
         	  svc_auth = svc_auth.substring(0, 1);
@@ -449,15 +454,13 @@ public class CommonServiceImpl implements CommonService{
         	  
         	  
         	// 실사용자 만나이 구하기
-    		int age = 0;
-    		if(cust_type_code.equals("I")){
-    			try {
-    				age = StringUtil.calculateManAge(sub_birth_pers_id, sub_sex_pers_id);
-    			} catch (Exception e) {
-    				//에러가 날 경우 차단시킨다
-    				age = 0;
-    			}
-    		}
+      		int age = 0;
+      		try {
+      			age = StringUtil.calculateManAge(sub_birth_pers_id, sub_sex_pers_id);
+      		} catch (Exception e) {
+      			//에러가 날 경우 차단시킨다
+      			age = 0;
+      		}
     		// 만 14세 미만 차단
     		if(age < 14 ) {
     			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_14);
@@ -467,9 +470,9 @@ public class CommonServiceImpl implements CommonService{
     				//통합한도 연동
     				return userGradeCheck(paramMap, logVO);
     			}
-    			
     		}
     	}
+    	
     	
     	return true;
 	};
@@ -522,7 +525,7 @@ public class CommonServiceImpl implements CommonService{
 		
 		// 한도조회 요청 paramMap에 저장
 		String opCode = Init.readConfig.getRbp_opcode_select();
-		paramMap.put("RbpReq_"+opCode, rbpReqMap);
+		paramMap.put("Req_"+opCode, rbpReqMap);
 		
 		// RBP 연동
 		logVO.setFlow("[ADCB] --> [RBP]");
@@ -709,7 +712,7 @@ public class CommonServiceImpl implements CommonService{
 		
 		// 결제취소 요청 paramMap에 저장
 		String opCode = Init.readConfig.getRbp_opcode_cancel();
-		paramMap.put("RbpReq_"+opCode, rbpReqMap);
+		paramMap.put("Req_"+opCode, rbpReqMap);
 		
 		logVO.setFlow("[ADCB] --> [RBP]");
 		rbpResMap = rbpClientService.doRequest(logVO, opCode, paramMap);
