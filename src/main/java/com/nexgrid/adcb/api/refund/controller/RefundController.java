@@ -129,7 +129,7 @@ public class RefundController {
 				logVO.setFlow("[ADCB] --> [SVC]");
 				if(paramMap.containsKey("duplicateRes") || EnAdcbOmsCode.CHARGE_DUPLICATE_REQ.value().equals(logVO.getResultCode())) { // 중복 요청일 경우
 					if(paramMap.containsKey("http_status")) {
-						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
+						response.setStatus( ((BigDecimal)paramMap.get("HTTP_STATUS")).intValue());
 					}
 					LogUtil.EndServiceLog(logVO);
 					//Test일때만

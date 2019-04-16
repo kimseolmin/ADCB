@@ -132,6 +132,7 @@ public class ChargeController {
 			
 			try {
 				logVO.setResTime();
+				logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
 
 				// OMS Write
 				commonService.omsLogWrite(logVO);
@@ -142,15 +143,15 @@ public class ChargeController {
 					if(paramMap.containsKey("http_status")) {
 						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
 					}
-					LogUtil.EndServiceLog(logVO);
+					
 					//Test일때만
 					response.setStatus(200);
-					logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
+					
+					LogUtil.EndServiceLog(logVO);
 					return dataMap;
 					
 				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
 					dataMap.put("issuerPaymentId", logVO.getSeqId());
-					logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
 					
 					//ObjectMapper mapper = new ObjectMapper();
 					//Test일때만

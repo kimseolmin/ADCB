@@ -126,8 +126,8 @@ public class ChargeService {
 		String svc_auth = ncasRes.get("SVC_AUTH"); // 부정사용자|장애인부가서비스|65세이상부가서비스
 													// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
 													// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
-		String handicapped = svc_auth.split("|")[1]; // 장애인부가서비스
-		String old = svc_auth.split("|")[2]; // 65세이상부가서비스
+		String handicapped = svc_auth.split("\\|")[1]; // 장애인부가서비스
+		String old = svc_auth.split("\\|")[2]; // 65세이상부가서비스
 		
 		
 		// 결제이용동의 정보
@@ -141,7 +141,7 @@ public class ChargeService {
     	// 약관동의가 필요한 경우 ESB 연동
     	if("Y".equals(terms_deny_yn)) {
     		// ESB 연동
-//    		doEsbMps208(paramMap, logVO);
+    		doEsbMps208(paramMap, logVO);
     	}
     	
     	//청소년요금제와 일반 구분
@@ -158,18 +158,23 @@ public class ChargeService {
     				mode = "2";
     			}
     			paramMap.put("MODE", mode);
-//    			commonService.doEsbCm181(paramMap, logVO);
+    			commonService.doEsbCm181(paramMap, logVO);
     		}
     		
     		
     		// RBP 연동
     		doRbpCharge(paramMap, logVO);
+    		
+    		// 결제 성공 SMS 전송 정보 paramMap에 저장.
     	}else {
     		// RCSG 연동
     		doRcsgCharge(paramMap, logVO);
+    		
+    		// 결제 성공 SMS 전송 정보 paramMap에 저장.
+    		
     	}
     	
-    	// 결제 성공 SMS 전송 정보 paramMap에 저장.
+    	
     	
 	}
 	
@@ -387,7 +392,8 @@ public class ChargeService {
 		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
 		long tempTimeMillis = System.currentTimeMillis();
 		String currentDate = dateFormat.format(new Date(tempTimeMillis));
-		String price = paramMap.get("purchaseAmount").toString();
+		Map<String, Object> purchaseAmount = (HashMap<String, Object>)paramMap.get("purchaseAmount");
+		String price = purchaseAmount.get("amount").toString();
 		
 		// RCSG연동을 위한 파마리터 셋팅
 		rcsgReqMap.put("CTN", reqCtn);	// 과금번호
@@ -419,22 +425,13 @@ public class ChargeService {
 			
 			// RCSG의 RESULT가 "0000"이 아니기 때문에 생겨난 exception일 경우에만
 			if(EnAdcbOmsCode.RCSG_API.value().equals(firstCode)) {
-				List<SmsSendVO> smsList = new ArrayList<>();
+				
 				if(EnRcsgResultCode.RS_4008.getDefaultValue().equals(rcsgRsCode)) { // 한도초과일 경우 
+					
+					List<SmsSendVO> smsList = new ArrayList<>();
+					smsList.add(commonService.addSmsInfo(paramMap, "limit_excess", StringUtil.getCtn344(ctn)));
+					smsList.add(commonService.addSmsInfo(paramMap, "limit_excess2", StringUtil.getCtn344(ctn)));
 					//한도초과 SMS 전송정보 paramMap에 저장
-					for(int i=0; i<2; i++) {
-						SmsSendVO smsVO = new SmsSendVO();
-						smsVO.setGubun("01");
-						smsVO.setTo_ctn(StringUtil.getCtn344(ctn));
-						smsVO.setRequest_id(paramMap.get("requestId").toString());
-						if(i == 0) {
-							smsVO.setContent(Init.readConfig.getLimit_excess());
-						}else {
-							smsVO.setContent(Init.readConfig.getLimit_excess2());
-						}
-						
-						smsList.add(smsVO);
-					}
 					paramMap.put("smsList", smsList);
 				}
 				
@@ -556,7 +553,7 @@ public class ChargeService {
 				resMap.put("result", result);
 				
 				paramMap.put("duplicateRes", resMap);
-				paramMap.put("http_status", chargeReq.get("http_status"));
+				paramMap.put("http_status", chargeReq.get("HTTP_STATUS"));
 				
 				return true;
 			}else {

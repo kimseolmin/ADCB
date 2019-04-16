@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.common.vo.SmsSendVO;
 
 
 
@@ -129,6 +130,18 @@ public interface CommonService {
 	  * @throws Exception
 	  */
 	void setBalance(Map<String, Object> paramMap, LogVO logVO) throws Exception;
+	
+		
+
+	/**
+	 * 결제 성공,취소 또는 환불 성공시 SMS 정보 추가
+	 * @param paramMap
+	 * @param contentType contentType config에 있는 message의 content type
+	 * @param ctn sms 수신자
+	 * @return
+	 * @throws Exception
+	 */
+	SmsSendVO addSmsInfo(Map<String, Object> paramMap, String contentType, String ctn) throws Exception;
 	
 	
 	

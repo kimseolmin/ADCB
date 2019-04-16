@@ -181,8 +181,9 @@
 				<otherwise>	<!-- Reverse API -->
 					BALANCE = AMOUNT - #{param.payInfo.AMOUNT},
 					PARTIAL_REFUND_SUM = #{param.payInfo.AMOUNT},
-					REVERSE_DT = #{param.REVERSE_DT},
-					ISSUER_REVERSEID = #{param.issuerReverseId}
+					REVERSE_DT = #{param.reverse_dt},
+					ISSUER_REVERSEID = #{param.issuerReverseId},
+					TRANSACTION_TYPE = #{param.transaction_type}
 				</otherwise>
 			</choose>
 		WHERE

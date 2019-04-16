@@ -34,6 +34,7 @@ import org.springframework.web.client.UnknownHttpStatusCodeException;
 import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.common.vo.SmsSendVO;
 import com.nexgrid.adcb.interworking.rbp.service.RbpClientService;
 import com.nexgrid.adcb.interworking.rbp.util.RbpKeyGenerator;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
@@ -725,12 +726,6 @@ public class CommonServiceImpl implements CommonService{
 	
 	
 	
-	 /**
-	  * 환불 처리 누적 금액 & 환불후 잔액 UPDATE
-	  * @param paramMap
-	  * @param logVO
-	  * @throws Exception
-	  */
 	 public void setBalance(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		 logVO.setFlow("[ADCB] --> [DB]");
 			try {
@@ -747,5 +742,36 @@ public class CommonServiceImpl implements CommonService{
 			}
 			logVO.setFlow("[ADCB] <-- [DB]");
 	 }
+
+
+
+	@Override
+	public SmsSendVO addSmsInfo(Map<String, Object> paramMap, String contentType, String ctn) throws Exception {
+				
+		SmsSendVO smsVO = new SmsSendVO();
+		smsVO.setGubun("01");
+		smsVO.setRequest_id(paramMap.get("requestId").toString());
+		smsVO.setTo_ctn(ctn);
+		
+		switch (contentType) {
+		case "limit_excess":
+			smsVO.setContent(Init.readConfig.getLimit_excess());
+			break;
+			
+		case "limit_excess2":
+			smsVO.setContent(Init.readConfig.getLimit_excess2());
+			break;
+			
+		default:
+			break;
+		}
+		
+		
+		return smsVO;
+	}
+	 
+	 
+	 
+	 
 	
 }

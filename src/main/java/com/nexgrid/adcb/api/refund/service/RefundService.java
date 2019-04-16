@@ -128,7 +128,7 @@ public class RefundService {
 				resMap.put("result", result);
 				
 				paramMap.put("duplicateRes", resMap);
-				paramMap.put("http_status", refundReq.get("http_status"));
+				paramMap.put("http_status", refundReq.get("HTTP_STATUS"));
 				
 				return true;
 			}else {
@@ -273,8 +273,8 @@ public class RefundService {
 		String svc_auth = payInfo.get("SVC_AUTH").toString(); // 부정사용자|장애인부가서비스|65세이상부가서비스
 															// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
 															// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
-		String handicapped = svc_auth.split("|")[1]; // 장애인부가서비스
-		String old = svc_auth.split("|")[2]; // 65세이상부가서비스
+		String handicapped = svc_auth.split("\\|")[1]; // 장애인부가서비스
+		String old = svc_auth.split("\\|")[2]; // 65세이상부가서비스
 		
 		// 취약계층인지 판단하여 취약계층이면 대리인 정보 가져옴
 		if("1".equals(handicapped) || "1".equals(old)) {
@@ -288,7 +288,7 @@ public class RefundService {
 			}
 			paramMap.put("MODE", mode);
 			// ESB 연동
-//			commonService.doEsbCm181(paramMap, logVO);
+			commonService.doEsbCm181(paramMap, logVO);
 		}
 		
 		// 통합한도 연동: 차감취소

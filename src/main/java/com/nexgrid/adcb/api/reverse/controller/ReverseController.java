@@ -140,8 +140,9 @@ public class ReverseController {
 						&& !paramMap.containsKey("duplicateRes")) {
 
 					// charge_info UPDATE
-					paramMap.put("REVERSE_DT", new Date());
+					paramMap.put("reverse_dt", new Date());
 					paramMap.put("issuerReverseId", logVO.getSeqId());
+					paramMap.put("transaction_type", "C");
 					commonService.setBalance(paramMap, logVO);
 					
 					// EAI
