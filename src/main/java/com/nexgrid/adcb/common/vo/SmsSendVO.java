@@ -2,6 +2,8 @@ package com.nexgrid.adcb.common.vo;
 
 import java.util.Date;
 
+import com.nexgrid.adcb.util.StringUtil;
+
 public class SmsSendVO {
 
 	
@@ -46,7 +48,7 @@ public class SmsSendVO {
 	}
 	public void setMsisdn(String msisdn) {
 		this.msisdn = msisdn;
-		this.to_ctn = msisdn;
+		this.to_ctn = StringUtil.getCtn344(msisdn);
 	}
 	public String getOriginator() {
 		return originator;

@@ -68,9 +68,9 @@ public class ReverseController {
 			
 			// 거래가 성공이어서 차감취소를 해야 할 경우 && 중복된 취소요청이 아닐 경우
 			if(chargeResponse && !paramMap.containsKey("duplicateRes")) { 
-				commonService.doRbpCancel(paramMap, logVO);
+				reverseService.reverse(paramMap, logVO);
 				
-				// 취소 성공 시 SMS
+				// 취소 성공 시 SMS 리스트 paramMap에 저장
 				commonService.addCancelSuccessSMS(paramMap);
 			}
 			
@@ -82,21 +82,17 @@ public class ReverseController {
 
 		}catch(CommonException commonEx) {
 			
-
-				logVO.setResultCode(commonEx.getOmsErrCode());
-				logVO.setApiResultCode(commonEx.getResReasonCode());
-				
-				dataMap.put("result", commonEx.sendException());
-				paramMap.put("http_status", commonEx.getStatusCode());
-				response.setStatus(commonEx.getStatusCode());
-				
-				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
-				logger.error("[" + logVO.getSeqId() + "] Error Message : " + commonEx.getLogMsg());
-				logger.error("[" + logVO.getSeqId() + "]", commonEx);
-
+			logVO.setResultCode(commonEx.getOmsErrCode());
+			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
+			dataMap.put("result", commonEx.sendException());
+			paramMap.put("http_status", commonEx.getStatusCode());
+			response.setStatus(commonEx.getStatusCode());
 			
-						
+			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
+			logger.error("[" + logVO.getSeqId() + "] Error Message : " + commonEx.getLogMsg());
+			logger.error("[" + logVO.getSeqId() + "]", commonEx);
+				
 		}
 		catch(Exception ex){
 			
@@ -150,19 +146,25 @@ public class ReverseController {
 					
 					// EAI
 					reverseService.insertEAI(paramMap, logVO);
-					
 				}
 				
 				// SLA Insert
 				commonService.slaInsert(paramMap, logVO);
 				
-				// SMS Insert
-				
-				
 			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
 				logger.error("[" + logVO.getSeqId() + "]" + ex);
 			}finally {
+				
+				// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+				if(paramMap.containsKey("smsList")) {
+					try {
+						commonService.insertSmsList(paramMap, logVO);
+					}catch (Exception ex) {
+						logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
+						logger.error("[" + logVO.getSeqId() + "]" + ex);
+					}
+				}
 				
 				LogUtil.EndServiceLog(dataMap, logVO);
 			}

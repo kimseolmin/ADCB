@@ -750,15 +750,16 @@ public class CommonServiceImpl implements CommonService{
 				
 		SmsSendVO smsVO = new SmsSendVO();
 		smsVO.setGubun("01");
-		smsVO.setRequest_id(paramMap.get("requestId").toString());
 		smsVO.setTo_ctn(to_ctn);
 		
 		
 		if("limit_excess".equals(contentType)) {
 			smsVO.setContent(Init.readConfig.getLimit_excess());
+			smsVO.setRequest_id(paramMap.get("requestId").toString());
 		
 		}else if("limit_excess2".equals(contentType)) {
 			smsVO.setContent(Init.readConfig.getLimit_excess2());
+			smsVO.setRequest_id(paramMap.get("requestId").toString());
 		
 		}else if("charge_complete".equals(contentType)) {
 			Map<String, String> reqCharge = (Map<String, String>)paramMap.get("Req_114");
@@ -780,6 +781,7 @@ public class CommonServiceImpl implements CommonService{
 						.replace("{hour}", start_date.substring(8, 10)).replace("{minute}", start_date.substring(10, 12))
 						.replace("{INFO_CHARGE}", StringUtil.getMsgPrice(price)).replace("{SVC_CTG_AVAIL}", StringUtil.getMsgPrice(svc_ctg_avail));
 			smsVO.setContent(msg);
+			smsVO.setRequest_id(paramMap.get("requestId").toString());
 		
 		}else if("section_excess".equals(contentType)) {
 			Map<String, String> reqCharge = (Map<String, String>)paramMap.get("Req_114");
@@ -790,6 +792,7 @@ public class CommonServiceImpl implements CommonService{
 			String msg = Init.readConfig.getSection_excess();
 			msg = msg.replace("{ctn}", StringUtil.getCtnForPerson(ctn)).replace("{limitAmount}", StringUtil.getMsgPrice(limit));
 			smsVO.setContent(msg);
+			smsVO.setRequest_id(paramMap.get("requestId").toString());
 			
 		}else if("cancel_complete".equals(contentType)) {
 			Map<String, String> reqCancel = (Map<String, String>)(paramMap.containsKey("Req_116") ? paramMap.get("Req_116") : paramMap.get("Req_117"));
@@ -799,13 +802,15 @@ public class CommonServiceImpl implements CommonService{
 			int svc_ctg_avail = Integer.parseInt(resCancel.get("SVC_CTG_AVAIL"));
 			int price = Integer.parseInt(reqCancel.get("PRICE"));
 			
-			
 			// [LG U+ 취소안내]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}원&#10;잔여한도 {SVC_CTG_AVAIL}원
 			String msg = Init.readConfig.getCancel_complete();
 			msg = msg.replace("{month}", start_date.substring(4, 6)).replace("{day}", start_date.substring(6, 8))
 					.replace("{hour}", start_date.substring(8, 10)).replace("{minute}", start_date.substring(10, 12))
 					.replace("{INFO_CHARGE}", StringUtil.getMsgPrice(price)).replace("{SVC_CTG_AVAIL}", StringUtil.getMsgPrice(svc_ctg_avail));
 			smsVO.setContent(msg);
+			
+			// 취소일 경우에는 requestId가 아니라 chargeRequestId (BOKU의 요청 Body)
+			smsVO.setRequest_id(paramMap.containsKey("requestId") ? paramMap.get("requestId").toString() : paramMap.get("chargeRequestId").toString());
 		}
 		
 	
@@ -832,6 +837,30 @@ public class CommonServiceImpl implements CommonService{
 				// 대리인 - 결제취소 SMS
 				smsList.add(addSmsInfo(paramMap, "cancel_complete", esbVO.getHpno()));
 			}
+		}
+		
+		// 결제 취소 SMS 전송 정보 paramMap에 저장.
+		paramMap.put("smsList", smsList);
+	}
+
+
+
+	@Override
+	public void insertSmsList(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+		try {
+			List<SmsSendVO> smsList = (List<SmsSendVO>) paramMap.get("smsList");
+			commonDAO.insertSmsList(smsList);
+		}catch(DataAccessException adcbExc){
+			/*SQLException se = (SQLException) adcbExc.getRootCause();
+			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
+			logVO.setFlow("[ADCB] --> [DB]");
+			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
+			
+		}catch(ConnectException adcbExc) {
+			logVO.setFlow("[ADCB] --> [DB]");
+			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+		}catch (Exception adcbExc) {
+			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 		}
 	}
 	 

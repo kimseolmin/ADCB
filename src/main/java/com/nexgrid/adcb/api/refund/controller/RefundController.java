@@ -71,8 +71,11 @@ public class RefundController {
 				// 부분 환불처리 및 환불 유효기간 체크 & 결제 정보 저장
 				refundService.partialRefundCheck(paramMap, logVO);
 				
-				// refund (RBP 연동) && SMS 저장
-				refundService.refund(paramMap, logVO);	
+				// refund (RBP 연동)
+				refundService.refund(paramMap, logVO);
+				
+				// 취소 성공 시 SMS List paramMap에 저장
+				commonService.addCancelSuccessSMS(paramMap);
 				
 				// 예외없이 왔을 경우 BOKU에게 성공 msg 전송
 				paramMap.put("http_status", HttpStatus.OK.value());
@@ -161,6 +164,11 @@ public class RefundController {
 						// EAI
 						refundService.insertEAI(paramMap, logVO);
 						
+						// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+						if(paramMap.containsKey("smsList")) {
+							commonService.insertSmsList(paramMap, logVO);
+						}
+						
 					}
 					
 					// SLA Insert
@@ -170,11 +178,19 @@ public class RefundController {
 			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
 				logger.error("[" + logVO.getSeqId() + "]" + ex);
-			}
+			}finally {
+				// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+				if(paramMap.containsKey("smsList")) {
+					try {
+						commonService.insertSmsList(paramMap, logVO);
+					}catch (Exception ex) {
+						logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
+						logger.error("[" + logVO.getSeqId() + "]" + ex);
+					}
+				}
 				
-			// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
-			
-			LogUtil.EndServiceLog(logVO);
+				LogUtil.EndServiceLog(logVO);
+			}
 		}
 		return null;
 	}

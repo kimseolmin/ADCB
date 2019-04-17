@@ -288,7 +288,7 @@ public class RefundService {
 			}
 			paramMap.put("MODE", mode);
 			// ESB 연동
-			commonService.doEsbCm181(paramMap, logVO);
+//			commonService.doEsbCm181(paramMap, logVO);
 		}
 		
 		// 통합한도 연동: 차감취소
@@ -301,13 +301,7 @@ public class RefundService {
 		}else { // 부분 환불일 경우
 			doRbpCancelPart(paramMap, logVO);
 		}
-		
-		// 취소 성공 시 SMS
-		commonService.addCancelSuccessSMS(paramMap);
-		
-		
-		
-		
+	
 	}
 	
 	

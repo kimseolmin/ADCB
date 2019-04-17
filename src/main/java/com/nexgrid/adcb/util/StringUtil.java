@@ -255,6 +255,8 @@ public class StringUtil {
 	public static String getCtn344(String ctn) {
 		StringBuffer ctn344 = new StringBuffer();
 
+		// boku가 국가코드를 넣어서 주는 경우
+		ctn = ctn.substring(0, 2).equals("82") ? ctn.replaceFirst("82", "0") : ctn;
 		int len = ctn.length();
 		if (len == 10) {
 			ctn344.append(ctn.substring(0, 3));

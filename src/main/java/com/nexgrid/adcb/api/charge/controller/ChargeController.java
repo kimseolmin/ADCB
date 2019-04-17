@@ -83,6 +83,9 @@ public class ChargeController {
 				// charge
 				chargeService.charge(paramMap, logVO);
 				
+				// 결제 성공 SMS 전송 정보 paramMap에 저장.
+				chargeService.addChargeSuccessSMS(paramMap);
+				
 				// 예외없이 왔을 경우 성공 MSG
 				paramMap.put("http_status", HttpStatus.OK.value());
 				dataMap.put("result", commonService.getSuccessResult());
@@ -179,13 +182,21 @@ public class ChargeController {
 			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
 				logger.error("[" + logVO.getSeqId() + "]" + ex);
-			}
+			}finally {
+				// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+				if(paramMap.containsKey("smsList")) {
+					try {
+						commonService.insertSmsList(paramMap, logVO);
+					}catch (Exception ex) {
+						logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
+						logger.error("[" + logVO.getSeqId() + "]" + ex);
+					}
+				}
 				
-			// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
+				LogUtil.EndServiceLog(logVO);
+			}
 			
-			
-			
-			LogUtil.EndServiceLog(logVO);
+
 			
 			
 			

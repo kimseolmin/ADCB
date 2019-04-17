@@ -154,6 +154,13 @@ public interface CommonService {
 	
 	
 	
+	/**
+	 * SMS 정보 리스트 INSERT
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	void insertSmsList(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
 	
 }
