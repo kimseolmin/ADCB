@@ -39,6 +39,7 @@ import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.StringUtil;
 
+import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsResOutVO;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.BusinessHeader;
 import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.DsInputInVO;
@@ -129,7 +130,6 @@ public class ChargeService {
 		String handicapped = svc_auth.split("\\|")[1]; // 장애인부가서비스
 		String old = svc_auth.split("\\|")[2]; // 65세이상부가서비스
 		
-		
 		// 결제이용동의 정보
 		String terms_deny_yn = "";
     	if(!StringUtil.nullCheck(cust_flag)) {
@@ -165,17 +165,13 @@ public class ChargeService {
     		// RBP 연동
     		doRbpCharge(paramMap, logVO);
     		
-    		// 결제 성공 SMS 전송 정보 paramMap에 저장.
     	}else {
     		// RCSG 연동
     		doRcsgCharge(paramMap, logVO);
-    		
-    		// 결제 성공 SMS 전송 정보 paramMap에 저장.
-    		
     	}
     	
-    	
-    	
+    	// 결제 성공 SMS 전송 정보 paramMap에 저장.
+    	addChargeSuccessSMS(paramMap);
 	}
 	
 	
@@ -352,9 +348,8 @@ public class ChargeService {
 			if(EnAdcbOmsCode.RBP_API.value().equals(firstCode)) {
 				if(EnRbpResultCode.RS_4008.getDefaultValue().equals(rbpRsCode)) { // 한도초과일 경우 
 					
-					
 		    		// 한도초과 SMS 정보 paramMap에 저장
-		    		
+					addChargeFailSMS(paramMap);
 				}
 			}
 			
@@ -389,9 +384,6 @@ public class ChargeService {
 		
 		String br_id = RcsgKeyGenerator.getInstance(Init.readConfig.getRcsg_system_id()).generateKey();
 		String reqCtn = StringUtil.getCtn344(ctn);
-		DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmssSSS");
-		long tempTimeMillis = System.currentTimeMillis();
-		String currentDate = dateFormat.format(new Date(tempTimeMillis));
 		Map<String, Object> purchaseAmount = (HashMap<String, Object>)paramMap.get("purchaseAmount");
 		String price = purchaseAmount.get("amount").toString();
 		
@@ -402,8 +394,8 @@ public class ChargeService {
 		rcsgReqMap.put("BR_ID", br_id); // Business RequestID
 		rcsgReqMap.put("RCVER_CTN", reqCtn); // 수신자의 전화번호
 		rcsgReqMap.put("SERVICE_FILTER", reqCtn); // 발신 번호
-		rcsgReqMap.put("START_USE_TIME", currentDate); 
-		rcsgReqMap.put("END_USE_TIME", currentDate);
+		rcsgReqMap.put("START_USE_TIME", StringUtil.getCurrentTimeMilli()); 
+		rcsgReqMap.put("END_USE_TIME", StringUtil.getCurrentTimeMilli());
 		rcsgReqMap.put("CALLED_NETWORK", Init.readConfig.getRcsg_called_network()); // 착신 사업자 코드
 		rcsgReqMap.put("PRICE", price);
 		rcsgReqMap.put("PID", Init.readConfig.getRcsg_pid()); // Product ID
@@ -425,14 +417,10 @@ public class ChargeService {
 			
 			// RCSG의 RESULT가 "0000"이 아니기 때문에 생겨난 exception일 경우에만
 			if(EnAdcbOmsCode.RCSG_API.value().equals(firstCode)) {
-				
 				if(EnRcsgResultCode.RS_4008.getDefaultValue().equals(rcsgRsCode)) { // 한도초과일 경우 
 					
-					List<SmsSendVO> smsList = new ArrayList<>();
-					smsList.add(commonService.addSmsInfo(paramMap, "limit_excess", StringUtil.getCtn344(ctn)));
-					smsList.add(commonService.addSmsInfo(paramMap, "limit_excess2", StringUtil.getCtn344(ctn)));
-					//한도초과 SMS 전송정보 paramMap에 저장
-					paramMap.put("smsList", smsList);
+					// 한도초과 SMS 정보 paramMap에 저장
+					addChargeFailSMS(paramMap);
 				}
 				
 			}
@@ -443,6 +431,7 @@ public class ChargeService {
 		// 차감 결과 paramMap에 저장
 		paramMap.put("Res_"+opCode, rcsgResMap);
 	}
+	
 	
 	
 	/**
@@ -606,6 +595,127 @@ public class ChargeService {
 			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 		}
 		logVO.setFlow("[ADCB] <-- [DB]");
+	}
+	
+	
+	
+	/**
+	 * 구간한도 체크
+	 * @param paramMap
+	 * @return 0이면 구간한도 SMS X
+	 * @throws Exception
+	 */
+	public int getLimitCharge(Map<String, Object> paramMap) throws Exception{
+		int result = 0;
+		Map<String, String> reqCharge = (Map<String, String>)paramMap.get("Req_114");
+		Map<String, String> resCharge = (Map<String, String>)paramMap.get("Res_114");
+		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
+		int price = Integer.parseInt(reqCharge.get("PRICE"));
+		String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
+															// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
+		
+		int ctgLimt = "N".equals(young_fee_yn) ? 
+						Integer.parseInt(resCharge.get("SVC_CTG_LIMIT")) : Integer.parseInt(resCharge.get("INFO_LIMIT"));
+		int ctgAvail = "N".equals(young_fee_yn) ? 
+						Integer.parseInt(resCharge.get("SVC_CTG_AVAIL")) : Integer.parseInt(resCharge.get("INFO_AVAIL"));
+		
+		// RBP의 경우에는 차감된 데이터가 오고, RCSG의 경우에는 차감되지 않은 데이터가 온다.
+		int preChargeTotal = "N".equals(young_fee_yn) ? ctgLimt - ctgAvail + price : ctgLimt - ctgAvail;
+		int postChargeTotal = preChargeTotal + price;
+		
+		String[] arrLimit = Init.readConfig.getCharge_section_list().split(",");
+		for(String strLimit : arrLimit) {
+			Integer limit = Integer.parseInt(strLimit);
+			if (preChargeTotal <= limit && limit < postChargeTotal) {
+				result = limit;
+				paramMap.put("limit", limit);
+			}
+		}
+		
+		return result;
+	}
+	
+	
+	
+	/**
+	 * 결제 성공시 SMS 발송
+	 * @param paramMap
+	 * @throws Exception
+	 */
+	public void addChargeSuccessSMS(Map<String, Object> paramMap) throws Exception{
+		
+		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
+		String ctn = ncasRes.get("CTN");
+		String law1HomeTelno = StringUtil.checkTrim(ncasRes.get("LAW1_HOME_TELNO")); //법정 대리인 전화번호
+		String sub_birth_pers_id = ncasRes.get("SUB_BIRTH_PERS_ID"); // 명의자 생년월일
+    	String sub_sex_pers_id = ncasRes.get("SUB_SEX_PERS_ID"); // 명의자 성별
+    	// 실사용자 만나이 구하기
+  		int age = 0;
+  		try {
+  			age = StringUtil.calculateManAge(sub_birth_pers_id, sub_sex_pers_id);
+  		} catch (Exception e) {
+  			//에러가 날 경우 차단시킨다
+  			age = 0;
+  		}
+    	
+    	
+		
+		// 결제 성공 SMS 전송 정보 리스트
+		List<SmsSendVO> smsList = new ArrayList<>();
+		
+		// 본인-결제 성공 SMS
+		smsList.add(commonService.addSmsInfo(paramMap, "charge_complete", StringUtil.getCtn344(ctn)));
+		
+		// 만 14세 이상, 만 19세 미만일 경우에만 구간한도 초과 SMS 발송
+		if(age >= 14 && age < 19) {
+			// 구간한도 초과 시
+			if(0 < getLimitCharge(paramMap)) {
+				// 본인-구간한도 SMS
+				smsList.add(commonService.addSmsInfo(paramMap, "section_excess", StringUtil.getCtn344(ctn)));
+				// 법정 대리인이 있을 경우
+				if(!"".equals(law1HomeTelno)) {
+					// 법정대리인의 번호가 010으로 시작할 때만 문자를 보낸다.
+					if("010".equals(law1HomeTelno.substring(0, 3)) ) {
+						// 대리인-구간한도 SMS
+						smsList.add(commonService.addSmsInfo(paramMap, "section_excess", StringUtil.getCtn344(law1HomeTelno.replaceAll("[^0-9]", ""))));
+					}
+				}
+			}
+		}
+		
+		// 취약계층일 경우 대리인에게 성공 SMS 발송
+		if(paramMap.containsKey("esbCm181Res")) {
+			DsResOutVO esbVO = (DsResOutVO)paramMap.get("esbCm181Res");
+			if("Y".equals(esbVO.getAgntRegYn())) {
+				// 대리인 - 결제 성공 SMS
+				smsList.add(commonService.addSmsInfo(paramMap, "charge_complete", esbVO.getHpno()));
+			}
+		}
+		
+		// 결제 성공 SMS 전송 정보 paramMap에 저장.
+		paramMap.put("smsList", smsList);
+	}
+	
+	
+	/**
+	 * 결제 실패시(한도초과) SMS 발송
+	 * @param paramMap
+	 * @throws Exception
+	 */
+	public void addChargeFailSMS(Map<String, Object> paramMap) throws Exception{
+		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
+		String ctn = ncasRes.get("CTN");
+		
+		List<SmsSendVO> smsList = new ArrayList<>();
+		
+		// 본인-이용한도 초과 SMS
+		smsList.add(commonService.addSmsInfo(paramMap, "limit_excess", StringUtil.getCtn344(ctn)));
+		
+		// 본인-고객센터앱 선결제 바로가기 SMS
+		smsList.add(commonService.addSmsInfo(paramMap, "limit_excess2", StringUtil.getCtn344(ctn)));
+		
+		//한도초과 SMS 전송정보 paramMap에 저장
+		paramMap.put("smsList", smsList);
 	}
 	
 }

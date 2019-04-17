@@ -69,6 +69,9 @@ public class ReverseController {
 			// 거래가 성공이어서 차감취소를 해야 할 경우 && 중복된 취소요청이 아닐 경우
 			if(chargeResponse && !paramMap.containsKey("duplicateRes")) { 
 				commonService.doRbpCancel(paramMap, logVO);
+				
+				// 취소 성공 시 SMS
+				commonService.addCancelSuccessSMS(paramMap);
 			}
 			
 			// 예외없이 왔을 경우 성공

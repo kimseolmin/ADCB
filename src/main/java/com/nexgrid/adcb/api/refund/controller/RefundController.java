@@ -71,7 +71,7 @@ public class RefundController {
 				// 부분 환불처리 및 환불 유효기간 체크 & 결제 정보 저장
 				refundService.partialRefundCheck(paramMap, logVO);
 				
-				// refund (RBP 연동)
+				// refund (RBP 연동) && SMS 저장
 				refundService.refund(paramMap, logVO);	
 				
 				// 예외없이 왔을 경우 BOKU에게 성공 msg 전송

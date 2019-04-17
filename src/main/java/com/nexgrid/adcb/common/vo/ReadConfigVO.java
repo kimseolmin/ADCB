@@ -74,6 +74,7 @@ public class ReadConfigVO {
 	private String limit_excess2 = "";
 	private String charge_complete = "";
 	private String section_excess = "";
+	private String cancel_complete = "";
 	
 	
 	private String time_out = "";
@@ -433,6 +434,12 @@ public class ReadConfigVO {
 	}
 	public void setSection_excess(String section_excess) {
 		this.section_excess = section_excess;
+	}
+	public String getCancel_complete() {
+		return cancel_complete;
+	}
+	public void setCancel_complete(String cancel_complete) {
+		this.cancel_complete = cancel_complete;
 	}
 	public String getTime_out() {
 		return time_out;

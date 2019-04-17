@@ -397,5 +397,35 @@ public class StringUtil {
 		DecimalFormat df = new DecimalFormat("###,##0");
 		return df.format(price).toString() + "원";
 	}
+	
+	
+	
+	/**
+	 * 전화번호 사이에 '-' 붙이기
+	 * @param ctn
+	 * @return
+	 */
+	public static String getCtnForPerson(String ctn) {
+		String ctnForPerson = "";
+		int leng = ctn.length();
+		switch (leng) {
+			case 10:
+				// 010-123-4567
+				ctnForPerson = ctn.substring(0, 3)+"-"+ ctn.substring(3, 6) + "-" + ctn.substring(6, 10);
+				break;
+			case 11:
+				// 010-1234-5678
+				ctnForPerson = ctn.substring(0, 3)+"-"+ ctn.substring(3, 7) + "-" + ctn.substring(7, 11);
+				break;
+			case 12:
+				// 0100-1234-5678
+				ctnForPerson = ctn.substring(0, 3)+"-"+ ctn.substring(4, 8) + "-" + ctn.substring(8, 12);
+				break;
+			default:
+				ctnForPerson = ctn;
+				break;
+		}
+		return ctnForPerson;
+	}
 
 }

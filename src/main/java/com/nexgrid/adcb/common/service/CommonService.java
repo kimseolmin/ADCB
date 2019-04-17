@@ -145,6 +145,15 @@ public interface CommonService {
 	
 	
 	
+	/**
+	 * 결제 취소 시 SMS 발송
+	 * @param paramMap
+	 * @throws Exception
+	 */
+	void addCancelSuccessSMS(Map<String, Object> paramMap) throws Exception;
+	
+	
+	
 	
 	
 }

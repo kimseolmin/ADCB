@@ -302,6 +302,9 @@ public class RefundService {
 			doRbpCancelPart(paramMap, logVO);
 		}
 		
+		// 취소 성공 시 SMS
+		commonService.addCancelSuccessSMS(paramMap);
+		
 		
 		
 		
@@ -380,9 +383,6 @@ public class RefundService {
 		
 		// 즉시차감 결과 paramMap에 저장
 		paramMap.put("Res_"+opCode, rbpResMap);
-		
-		// 환불 성공 SMS 정보 paramMap에 저장
-		
 	 }
 	 
 	 

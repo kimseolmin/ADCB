@@ -5,8 +5,10 @@ import java.net.URLDecoder;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.StringTokenizer;
@@ -720,8 +722,6 @@ public class CommonServiceImpl implements CommonService{
 		
 		// 즉시차감 결과 paramMap에 저장
 		paramMap.put("Res_"+opCode, rbpResMap);
-		
-		// 환불 성공 SMS 정보 paramMap에 저장
 	}
 	
 	
@@ -746,32 +746,99 @@ public class CommonServiceImpl implements CommonService{
 
 
 	@Override
-	public SmsSendVO addSmsInfo(Map<String, Object> paramMap, String contentType, String ctn) throws Exception {
+	public SmsSendVO addSmsInfo(Map<String, Object> paramMap, String contentType, String to_ctn) throws Exception {
 				
 		SmsSendVO smsVO = new SmsSendVO();
 		smsVO.setGubun("01");
 		smsVO.setRequest_id(paramMap.get("requestId").toString());
-		smsVO.setTo_ctn(ctn);
+		smsVO.setTo_ctn(to_ctn);
 		
-		switch (contentType) {
-		case "limit_excess":
+		
+		if("limit_excess".equals(contentType)) {
 			smsVO.setContent(Init.readConfig.getLimit_excess());
-			break;
-			
-		case "limit_excess2":
+		
+		}else if("limit_excess2".equals(contentType)) {
 			smsVO.setContent(Init.readConfig.getLimit_excess2());
-			break;
+		
+		}else if("charge_complete".equals(contentType)) {
+			Map<String, String> reqCharge = (Map<String, String>)paramMap.get("Req_114");
+			Map<String, String> resCharge = (Map<String, String>)paramMap.get("Res_114");
+			Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
+			String young_fee_yn = ncasRes.get("YOUNG_FEE_YN"); // 실시간과금대상요금제(RCSG연동대상)
+																// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
 			
-		default:
-			break;
+			String start_date = reqCharge.get("START_USE_TIME"); // yyyyMMddHHmmssSSS
+			int price = Integer.parseInt(reqCharge.get("PRICE"));
+			// RBP의 경우에는 차감된 데이터가 오고, RCSG의 경우에는 차감되지 않은 데이터가 온다.
+			int svc_ctg_avail = "N".equals(young_fee_yn) ? 
+										Integer.parseInt(resCharge.get("SVC_CTG_AVAIL")) : Integer.parseInt(resCharge.get("INFO_AVAIL")) - price ;
+			
+			
+			// [LG U+ 휴대폰결제]&#10;{month}/{day} {hour}:{minute}&#10;구글Play스토어&#10;{INFO_CHARGE}원&#10;잔여한도 {SVC_CTG_AVAIL}
+			String msg = Init.readConfig.getCharge_complete();
+			msg = msg.replace("{month}", start_date.substring(4, 6)).replace("{day}", start_date.substring(6, 8))
+						.replace("{hour}", start_date.substring(8, 10)).replace("{minute}", start_date.substring(10, 12))
+						.replace("{INFO_CHARGE}", StringUtil.getMsgPrice(price)).replace("{SVC_CTG_AVAIL}", StringUtil.getMsgPrice(svc_ctg_avail));
+			smsVO.setContent(msg);
+		
+		}else if("section_excess".equals(contentType)) {
+			Map<String, String> reqCharge = (Map<String, String>)paramMap.get("Req_114");
+			String ctn = reqCharge.get("CTN");
+			int limit = (Integer)paramMap.get("limit");
+			
+			// [LG U+ 안내]&#10;{ctn} 님이&#10;사용하신 정보이용료가&#10;{limitAmount}원을 초과하였습니다.
+			String msg = Init.readConfig.getSection_excess();
+			msg = msg.replace("{ctn}", StringUtil.getCtnForPerson(ctn)).replace("{limitAmount}", StringUtil.getMsgPrice(limit));
+			smsVO.setContent(msg);
+			
+		}else if("cancel_complete".equals(contentType)) {
+			Map<String, String> reqCancel = (Map<String, String>)(paramMap.containsKey("Req_116") ? paramMap.get("Req_116") : paramMap.get("Req_117"));
+			Map<String, String> resCancel = (Map<String, String>)(paramMap.containsKey("Res_116") ? paramMap.get("Res_116") : paramMap.get("Res_117"));
+			
+			String start_date = reqCancel.get("END_USE_TIME"); // yyyyMMddHHmmssSSS
+			int svc_ctg_avail = Integer.parseInt(resCancel.get("SVC_CTG_AVAIL"));
+			int price = Integer.parseInt(reqCancel.get("PRICE"));
+			
+			
+			// [LG U+ 취소안내]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}원&#10;잔여한도 {SVC_CTG_AVAIL}원
+			String msg = Init.readConfig.getCancel_complete();
+			msg = msg.replace("{month}", start_date.substring(4, 6)).replace("{day}", start_date.substring(6, 8))
+					.replace("{hour}", start_date.substring(8, 10)).replace("{minute}", start_date.substring(10, 12))
+					.replace("{INFO_CHARGE}", StringUtil.getMsgPrice(price)).replace("{SVC_CTG_AVAIL}", StringUtil.getMsgPrice(svc_ctg_avail));
+			smsVO.setContent(msg);
 		}
+		
+	
 		
 		
 		return smsVO;
 	}
+
+
+
+	@Override
+	public void addCancelSuccessSMS(Map<String, Object> paramMap) throws Exception {
+		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
+		String ctn = ncasRes.get("CTN");
+		
+		List<SmsSendVO> smsList = new ArrayList<>();
+		// 본인-결제취소 SMS
+		smsList.add(addSmsInfo(paramMap, "cancel_complete", StringUtil.getCtn344(ctn)));
+		
+		// 취약계층일 경우 대리인에게 결제취소 SMS 발송
+		if(paramMap.containsKey("esbCm181Res")) {
+			DsResOutVO esbVO = (DsResOutVO)paramMap.get("esbCm181Res");
+			if("Y".equals(esbVO.getAgntRegYn())) {
+				// 대리인 - 결제취소 SMS
+				smsList.add(addSmsInfo(paramMap, "cancel_complete", esbVO.getHpno()));
+			}
+		}
+	}
 	 
 	 
 	 
+	
+	
 	 
 	
 }
