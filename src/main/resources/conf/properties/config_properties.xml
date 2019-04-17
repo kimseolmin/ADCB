@@ -44,7 +44,7 @@
 	<entry key="RCSG_SECONDARY_IP">127.0.0.1</entry>
 	<entry key="RCSG_SECONDARY_PORT">8000</entry>
 	<entry key="RCSG_CONNECT_TIME_OUT">5000</entry>
-	<entry key="RCSG_RECEIVE_TIME_OUT">1000</entry>
+	<entry key="RCSG_RECEIVE_TIME_OUT">60000000</entry>
 	<entry key="RCSG_RECONNECT_SLEEP_TIME">1000</entry>
 	<entry key="RCSG_SYSTEM_ID">ADCB01</entry>
 	<entry key="RCSG_CDRDATA">1000</entry> <!-- VERSION(10) + TYPE(00) (TYPE: CMS-00, SMS-01, MMS-02, WAP-03)  -->
