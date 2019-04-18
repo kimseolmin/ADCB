@@ -242,21 +242,19 @@
 	
 	
 	<!-- SMS 정보 리스트 INSERT -->
-	<insert id="insertSmsList">
-		<foreach collection="smsList" item="sms" separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
-			INTO TB_SMS_SEND_INFO (
-    			GUBUN,
-		     	TO_CTN,
-		     	REQUEST_ID,
-		     	CONTENT
-			    )
-			   VALUES (
-		  		#{sms.gubun},
-		  		#{sms.to_ctn},
-		  		#{sms.request_id},
-		  		#{sms.content}
-			   	)
-		</foreach>
+	<insert id="insertSmsList" parameterType="com.nexgrid.adcb.common.vo.SmsSendVO">
+		INSERT INTO TB_SMS_SEND_INFO (
+   			GUBUN,
+	     	TO_CTN,
+	     	REQUEST_ID,
+	     	CONTENT
+		    )
+		   VALUES (
+	  		#{gubun},
+	  		#{to_ctn},
+	  		#{request_id},
+	  		#{content}
+		   	)
 	</insert>
 	
  </mapper>

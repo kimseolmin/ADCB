@@ -37,6 +37,7 @@ import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.common.vo.SmsSendVO;
+import com.nexgrid.adcb.interworking.rbp.message.EnRbpResultCode;
 import com.nexgrid.adcb.interworking.rbp.service.RbpClientService;
 import com.nexgrid.adcb.interworking.rbp.util.RbpKeyGenerator;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
@@ -213,7 +214,7 @@ public class CommonServiceImpl implements CommonService{
 		    	}
 		    	if(blockctn != 0 ) {
 		    		logVO.setFlow("[ADCB] <-- [DB]");
-		    		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CTN);
+		    		throw new CommonException(EnAdcbOmsCode.DB_BLOCK_CTN);
 		    	}
 		    	
 		    	//정상 요금제가 아니면 차단
@@ -225,7 +226,7 @@ public class CommonServiceImpl implements CommonService{
 		    	}
 		    	if(blockfeetype != 0) {
 		    		logVO.setFlow("[ADCB] <-- [DB]");
-		    		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_FEETYPE);
+		    		throw new CommonException(EnAdcbOmsCode.DB_BLOCK_FEETYPE);
 		    	}
 			}catch(DataAccessException adcbExc){
 				/*SQLException se = (SQLException) adcbExc.getRootCause();
@@ -512,7 +513,7 @@ public class CommonServiceImpl implements CommonService{
 		rbpReqMap.put("DBID", Init.readConfig.getRbp_dbid()); // DETAIL BILLING ID
 		rbpReqMap.put("SVC_CTG", Init.readConfig.getRbp_svc_ctg());
 		
-		if(paramMap.containsKey("purchaseAmount")) {
+		/*if(paramMap.containsKey("purchaseAmount")) {
 			Map<String, Object> purchaseAmount = (HashMap<String, Object>)paramMap.get("purchaseAmount");
 			String price = purchaseAmount.get("amount").toString();
 			rbpReqMap.put("PRICE", price);
@@ -524,7 +525,7 @@ public class CommonServiceImpl implements CommonService{
 			String price = refundAmount.get("amount").toString();
 			rbpReqMap.put("PRICE", price);
 			rbpReqMap.put("AMOUNT", "1");
-		}
+		}*/
 		
 		// 한도조회 요청 paramMap에 저장
 		String opCode = Init.readConfig.getRbp_opcode_select();
@@ -533,6 +534,7 @@ public class CommonServiceImpl implements CommonService{
 		// RBP 연동
 		logVO.setFlow("[ADCB] --> [RBP]");
 		rbpResMap = rbpClientService.doRequest(logVO, opCode, paramMap);
+	
 		
 		// 한도조회 결과 paramMap에 저장
 		paramMap.put("Res_"+opCode, rbpResMap);
@@ -540,7 +542,7 @@ public class CommonServiceImpl implements CommonService{
 		if(!rbpResMap.get("CUST_GRD_CD").equals("7")) {
 			return true;
 		}else { // 7등급 차단
-			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_GRADE);
+			throw new CommonException(EnAdcbOmsCode.RBP_BLOCK_GRADE);
 		}
 		
 	}
@@ -823,8 +825,8 @@ public class CommonServiceImpl implements CommonService{
 
 	@Override
 	public void addCancelSuccessSMS(Map<String, Object> paramMap) throws Exception {
-		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
-		String ctn = ncasRes.get("CTN");
+		Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
+		String ctn = payInfo.get("CTN").toString();
 		
 		List<SmsSendVO> smsList = new ArrayList<>();
 		// 본인-결제취소 SMS
@@ -849,7 +851,10 @@ public class CommonServiceImpl implements CommonService{
 	public void insertSmsList(Map<String, Object> paramMap, LogVO logVO) throws Exception {
 		try {
 			List<SmsSendVO> smsList = (List<SmsSendVO>) paramMap.get("smsList");
-			commonDAO.insertSmsList(smsList);
+			for(int i=0; i<smsList.size(); i++) {
+				commonDAO.insertSmsList(smsList.get(i));
+			}
+			
 		}catch(DataAccessException adcbExc){
 			/*SQLException se = (SQLException) adcbExc.getRootCause();
 			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/

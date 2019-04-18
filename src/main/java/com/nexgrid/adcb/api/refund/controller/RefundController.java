@@ -164,11 +164,6 @@ public class RefundController {
 						// EAI
 						refundService.insertEAI(paramMap, logVO);
 						
-						// SMS : paramMap에 SMS 정보가 저장이 되어 있으면 전송.
-						if(paramMap.containsKey("smsList")) {
-							commonService.insertSmsList(paramMap, logVO);
-						}
-						
 					}
 					
 					// SLA Insert

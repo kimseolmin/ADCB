@@ -148,7 +148,7 @@ public class RcsgClientService {
 			throw new CommonException(EnAdcbOmsCode.RCSG_RES_TIMEOUT);
 		}
 		
-		return null;
+		return resMap;
 	}
 	
 }

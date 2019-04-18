@@ -141,7 +141,7 @@ public class ChargeService {
     	// 약관동의가 필요한 경우 ESB 연동
     	if("Y".equals(terms_deny_yn)) {
     		// ESB 연동
-//    		doEsbMps208(paramMap, logVO);
+    		doEsbMps208(paramMap, logVO);
     	}
     	
     	//청소년요금제와 일반 구분
@@ -158,7 +158,7 @@ public class ChargeService {
     				mode = "2";
     			}
     			paramMap.put("MODE", mode);
-//    			commonService.doEsbCm181(paramMap, logVO);
+    			commonService.doEsbCm181(paramMap, logVO);
     		}
     		
     		
@@ -407,7 +407,7 @@ public class ChargeService {
 		// RCSG 연동
 		logVO.setFlow("[ADCB] --> [RCSG]");
 		try {
-			rcsgReqMap = rcsgClientService.doRequest(logVO, opCode, paramMap);
+			rcsgResMap = rcsgClientService.doRequest(logVO, opCode, paramMap);
 		}catch (CommonException common) {
 			
 			String firstCode = common.getOmsErrCode().substring(0, 4);
@@ -618,7 +618,7 @@ public class ChargeService {
 						Integer.parseInt(resCharge.get("SVC_CTG_AVAIL")) : Integer.parseInt(resCharge.get("INFO_AVAIL"));
 		
 		// RBP의 경우에는 차감된 데이터가 오고, RCSG의 경우에는 차감되지 않은 데이터가 온다.
-		int preChargeTotal = "N".equals(young_fee_yn) ? ctgLimt - ctgAvail + price : ctgLimt - ctgAvail;
+		int preChargeTotal = "N".equals(young_fee_yn) ? ctgLimt - ctgAvail - price : ctgLimt - ctgAvail;
 		int postChargeTotal = preChargeTotal + price;
 		
 		String[] arrLimit = Init.readConfig.getCharge_section_list().split(",");

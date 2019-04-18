@@ -98,6 +98,6 @@ public interface CommonDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	int insertSmsList(@Param("smsList") List<SmsSendVO> smsList) throws Exception;
+	int insertSmsList(SmsSendVO smsVO) throws Exception;
 	
 }

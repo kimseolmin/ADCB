@@ -6,6 +6,5 @@ public enum EnRbpReturnCharge {
 	, BR_ID
 	, RESULT
 	, SVC_CTG
-	, REFUNDINFO
 	;
 }

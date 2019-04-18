@@ -67,9 +67,9 @@
 	<!-- SMS format -->
 	<entry key="CHARGE_SECTION_LIST">5000,10000,20000,30000,40000,50000,60000,80000,100000</entry>
 	<entry key="LIMIT_EXCESS">[LG U+ 휴대폰결제]&#10;이용한도를 초과했습니다.&#10;한도상향 및 선결제 신청&#10;019-114</entry>
-	<entry key="CHARGE_COMPLETE">[LG U+ 휴대폰결제]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}원&#10;잔여한도 {SVC_CTG_AVAIL}원</entry>
-	<entry key="SECTION_EXCESS">[LG U+ 결제안내]&#10;{ctn}님이&#10;사용하신 정보이용료가&#10;{limitAmount}원을 초과하였습니다.</entry>
+	<entry key="CHARGE_COMPLETE">[LG U+ 휴대폰결제]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}&#10;잔여한도 {SVC_CTG_AVAIL}</entry>
+	<entry key="SECTION_EXCESS">[LG U+ 결제안내]&#10;{ctn}님이&#10;사용하신 정보이용료가&#10;{limitAmount}을 초과하였습니다.</entry>
 	<entry key="LIMIT_EXCESS2">▶ U+고객센터앱 선결제 바로가기&#10;☞ http://cv.uplus.kr/195.html</entry>
-	<entry key="CANCEL_COMPLETE">[LG U+ 취소안내]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}원&#10;잔여한도 {SVC_CTG_AVAIL}원</entry>
+	<entry key="CANCEL_COMPLETE">[LG U+ 취소안내]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}&#10;잔여한도 {SVC_CTG_AVAIL}</entry>
 	
 </properties>
