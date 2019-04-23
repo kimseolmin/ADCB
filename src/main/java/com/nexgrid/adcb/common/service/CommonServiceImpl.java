@@ -341,23 +341,29 @@ public class CommonServiceImpl implements CommonService{
 			
 
 			sb.append("API_TYPE=").append(logVO.getApiType()).append("|");
-			sb.append("API_RST_CODE=").append(logVO.getApiResultCode() == null ? "" : logVO.getApiResultCode()).append("|");
-			sb.append("RS_CODE=").append(logVO.getRsCode() == null ? "" : logVO.getRsCode());
+			sb.append("API_RESULT=").append(logVO.getApiResultCode()).append("|");
 			
+			sb.append("NCAS_REQ_TIME=").append(logVO.getNcasReqTime()).append("|");
+			sb.append("NCAS_RES_TIME=").append(logVO.getNcasResTime()).append("|");
+			sb.append("NCAS_RESULT_CODE=").append(logVO.getNcasResultCode()).append("|");
 			
-			sb.append("NCAS_REQ_TIME=").append(logVO.getNcasReqTime() == null ? "" : logVO.getNcasReqTime()).append("|");
-			sb.append("NCAS_RES_TIME=").append(logVO.getNcasResTime() == null ? "" : logVO.getNcasResTime()).append("|");
-			sb.append("NCAS_RESULT_CODE=").append(logVO.getNcasResultCode() == null ? "" : logVO.getNcasResultCode()).append("|");
+			sb.append("RCSG_REQ_TIME=").append(logVO.getRcsgReqTime()).append("|");
+			sb.append("RCSG_RES_TIME=").append(logVO.getRcsgResTime()).append("|");
+			sb.append("RCSG_RESULT_CODE=").append(logVO.getRcsgResultCode()).append("|");
 			
+			sb.append("RBP_REQ_TIME=").append(logVO.getRbpReqTime()).append("|");
+			sb.append("RBP_RES_TIME=").append(logVO.getRbpResTime()).append("|");
+			sb.append("RBP_RESULT_CODE=").append(logVO.getRbpResultCode()).append("|");
 			
-			sb.append("RBP_REQ_TIME=").append(logVO.getRbpReqTime() == null ? "" : logVO.getRbpReqTime()).append("|");
-			sb.append("RBP_RES_TIME=").append(logVO.getRbpResTime() == null ? "" : logVO.getRbpResTime()).append("|");
-			sb.append("RBP_RESULT_CODE=").append(logVO.getRbpResultCode() == null ? "" : logVO.getRbpResultCode()).append("|");
+			sb.append("ESB_MPS208_REQ_TIME=").append(logVO.getEsbMps208ReqTime()).append("|");
+			sb.append("ESB_MPS208_RES_TIME=").append(logVO.getEsbMps208ResTime()).append("|");
+			sb.append("ESB_MPS208_RESULT_CODE=").append(logVO.getEsbMps208ResultCode()).append("|");
+			
+			sb.append("ESB_CM181_REQ_TIME=").append(logVO.getEsbCm181ReqTime()).append("|");
+			sb.append("ESB_CM181_RES_TIME=").append(logVO.getEsbCm181ResTime()).append("|");
+			sb.append("ESB_CM181_RESULT_CODE=").append(logVO.getEsbCm181ResultCode());
 				
-			sb.append("RCSG_REQ_TIME=").append(logVO.getRcsgReqTime() == null ? "" : logVO.getRcsgReqTime()).append("|");
-			sb.append("RCSG_RES_TIME=").append(logVO.getRcsgResTime() == null ? "" : logVO.getRcsgResTime()).append("|");
-			sb.append("RCSG_RESULT_CODE=").append(logVO.getRcsgResultCode() == null ? "" : logVO.getRcsgResultCode());
-			
+
 			
 			Logger log = LogManager.getLogger("oms");
 			log.info(sb);
@@ -539,11 +545,14 @@ public class CommonServiceImpl implements CommonService{
 		// 한도조회 결과 paramMap에 저장
 		paramMap.put("Res_"+opCode, rbpResMap);
 		
-		if(!rbpResMap.get("CUST_GRD_CD").equals("7")) {
-			return true;
-		}else { // 7등급 차단
-			throw new CommonException(EnAdcbOmsCode.RBP_BLOCK_GRADE);
+		if(rbpResMap.containsKey("CUST_GRD_CD")) {
+			if(rbpResMap.get("CUST_GRD_CD").equals("7")) { // 7등급 차단
+				throw new CommonException(EnAdcbOmsCode.RBP_BLOCK_GRADE);
+			}
 		}
+		
+		return true;
+
 		
 	}
 	
@@ -560,6 +569,8 @@ public class CommonServiceImpl implements CommonService{
 		if( "".equals(msisdn) || StringUtil.hasSpecialCharacter(msisdn) || StringUtil.spaceCheck(msisdn) || StringUtil.maxCheck(msisdn, 15) ) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
+		
+		logVO.setSid(paramMap.get("msisdn").toString());
 	}
 	
 	
@@ -623,6 +634,7 @@ public class CommonServiceImpl implements CommonService{
 		String seq = "[" + logVO.getSeqId() + "] ";
 		try {
 			
+			logVO.setEsbCm181ReqTime();
 			serviceLog.info(seq + "---------------------------- ESB(CM181) START ----------------------------");
 			serviceLog.info(seq + "ESB(CM181) Request Url : " + esbUrl);
 			serviceLog.info(seq + "ESB(CM181) Request Header : " + header.toString());
@@ -639,6 +651,7 @@ public class CommonServiceImpl implements CommonService{
 			// ESB 호출 응답
 			RetrieveMobilePayArmPsblYnResponse esbRes = stub.retrieveMobilePayArmPsblYn(reqIn);
 			logVO.setFlow("[ADCB] <-- [ESB]");
+			logVO.setEsbCm181ResTime();
 			
 			resRecord = esbRes.getResponseRecord();
 			header = resRecord.getESBHeader();

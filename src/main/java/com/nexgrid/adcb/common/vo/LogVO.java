@@ -29,7 +29,6 @@ public class LogVO {
 	private String apiType = "";					// ADCB 서비스 코드
 	private String connectionFlow = "";				// 접속 API 및 DB 호출 순서(-로 구분)
 	private String apiResultCode = "";				// ADCB API 결과 코드
-	private String rsCode = "";						// DB 에러 코드
 	
 	private String ncasReqTime = "";				// NCAS 접속 요청 발생 시간			
 	private String ncasResTime = "";				// NCAS 접속 응답 발생 시간
@@ -44,6 +43,15 @@ public class LogVO {
 	private String rcsgReqTime = "";					// RCSG 접속 요청 발생 시간
 	private String rcsgResTime = "";					// RCSG 접속 요청 발생 시간
 	private String rcsgResultCode = "";					// RCSG 결과 코드
+	
+	private String esbMps208ReqTime = "";					// 약관동의 ESB 접속 요청 발생 시간
+	private String esbMps208ResTime = "";					// 약관동의 ESB 접속 요청 발생 시간
+	private String esbMps208ResultCode = "";				// 약관동의 ESB 결과 코드
+	
+	
+	private String esbCm181ReqTime = "";					// 약관동의 ESB 접속 요청 발생 시간
+	private String esbCm181ResTime = "";					// 약관동의 ESB 접속 요청 발생 시간
+	private String esbCm181ResultCode = "";				// 약관동의 ESB 결과 코드
 	
 	
 	
@@ -216,14 +224,6 @@ public class LogVO {
 	public void setApiResultCode(String apiResultCode) {
 		this.apiResultCode = apiResultCode;
 	}
-	
-	public String getRsCode() {
-		return rsCode;
-	}
-
-	public void setRsCode(String rsCode) {
-		this.rsCode = rsCode;
-	}
 
 	public String getNcasReqTime() {
 		return ncasReqTime;
@@ -330,6 +330,66 @@ public class LogVO {
 
 	public void setConApi(String conApi) {
 		this.conApi = conApi;
+	}
+
+
+	public String getEsbMps208ReqTime() {
+		return esbMps208ReqTime;
+	}
+
+
+	public void setEsbMps208ReqTime() {
+		this.esbMps208ReqTime = StringUtil.getCurrentTimeMilli();
+	}
+
+
+	public String getEsbMps208ResTime() {
+		return esbMps208ResTime;
+	}
+
+
+	public void setEsbMps208ResTime() {
+		this.esbMps208ResTime = StringUtil.getCurrentTimeMilli();
+	}
+
+
+	public String getEsbMps208ResultCode() {
+		return esbMps208ResultCode;
+	}
+
+
+	public void setEsbMps208ResultCode(String esbMps208ResultCode) {
+		this.esbMps208ResultCode = esbMps208ResultCode;
+	}
+
+
+	public String getEsbCm181ReqTime() {
+		return esbCm181ReqTime;
+	}
+
+
+	public void setEsbCm181ReqTime() {
+		this.esbCm181ReqTime = StringUtil.getCurrentTimeMilli();
+	}
+
+
+	public String getEsbCm181ResTime() {
+		return esbCm181ResTime;
+	}
+
+
+	public void setEsbCm181ResTime() {
+		this.esbCm181ResTime = StringUtil.getCurrentTimeMilli();
+	}
+
+
+	public String getEsbCm181ResultCode() {
+		return esbCm181ResultCode;
+	}
+
+
+	public void setEsbCm181ResultCode(String esbCm181ResultCode) {
+		this.esbCm181ResultCode = esbCm181ResultCode;
 	}
 	
 

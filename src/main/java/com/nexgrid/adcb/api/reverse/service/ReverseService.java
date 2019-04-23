@@ -48,6 +48,8 @@ public class ReverseService {
 		if( "".equals(chargeRequestId) || StringUtil.hasSpecialCharacter(chargeRequestId) || StringUtil.spaceCheck(chargeRequestId) || StringUtil.maxCheck(chargeRequestId, 50) ) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
+		
+		logVO.setSid(chargeRequestId);
 	}
 	
 	
@@ -221,7 +223,7 @@ public class ReverseService {
 			}
 			paramMap.put("MODE", mode);
 			// ESB 연동
-			commonService.doEsbCm181(paramMap, logVO);
+//			commonService.doEsbCm181(paramMap, logVO);
 		}
 		
 		// 통합한도 연동: 차감취소

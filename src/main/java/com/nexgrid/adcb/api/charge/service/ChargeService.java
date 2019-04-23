@@ -105,6 +105,8 @@ public class ChargeService {
 				||  "".equals(productDescription) || StringUtil.maxCheck(productDescription, 255)) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
+		
+		logVO.setSid(requestId);
 	}
 	
 	
@@ -141,7 +143,7 @@ public class ChargeService {
     	// 약관동의가 필요한 경우 ESB 연동
     	if("Y".equals(terms_deny_yn)) {
     		// ESB 연동
-    		doEsbMps208(paramMap, logVO);
+//    		doEsbMps208(paramMap, logVO);
     	}
     	
     	//청소년요금제와 일반 구분
@@ -158,7 +160,7 @@ public class ChargeService {
     				mode = "2";
     			}
     			paramMap.put("MODE", mode);
-    			commonService.doEsbCm181(paramMap, logVO);
+//    			commonService.doEsbCm181(paramMap, logVO);
     		}
     		
     		
@@ -220,7 +222,7 @@ public class ChargeService {
 		String seq = "[" + logVO.getSeqId() + "] ";
 		
 		try {
-			
+			logVO.setEsbMps208ReqTime();
 			logger.info(seq + "---------------------------- ESB(MPS208) START ----------------------------");
 			logger.info(seq + "ESB(MPS208) Request Url : " + esbUrl);
 			logger.info(seq + "ESB(MPS208) Request Header : " + header.toString());
@@ -238,6 +240,7 @@ public class ChargeService {
 			UpdateLmtStlmUseDenyYnResponse esbRes = stub.updateLmtStlmUseDenyYn(reqIn);
 			
 			logVO.setFlow("[ADCB] <-- [ESB]");
+			logVO.setEsbMps208ResTime();
 			
 			resRecord = esbRes.getResponseRecord();
 			header = resRecord.getESBHeader();

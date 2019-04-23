@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -150,7 +151,6 @@ public class ChargeController {
 					//Test일때만
 					response.setStatus(200);
 					
-					LogUtil.EndServiceLog(logVO);
 					return dataMap;
 					
 				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  SMS, EAI, SLA를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
@@ -204,6 +204,25 @@ public class ChargeController {
 		
 		
 		return null;
+	}
+	
+	
+	
+	@RequestMapping(value="/ASCN/{msisdn}", method = RequestMethod.DELETE)
+	public Map<String ,Object> test(HttpServletRequest request, HttpServletResponse response, @PathVariable("msisdn") String msisdn){
+		
+		//Return Value
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		
+		try {
+			dataMap.put("result", commonService.getSuccessResult());
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		return dataMap;
+	
 	}
 	
 }

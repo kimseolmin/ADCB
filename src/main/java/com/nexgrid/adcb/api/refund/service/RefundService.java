@@ -78,6 +78,8 @@ public class RefundService {
 				||  amount == 0 || !"KRW".equals(currency)) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
+		
+		logVO.setSid(requestId);
 	}
 	
 	
@@ -288,7 +290,7 @@ public class RefundService {
 			}
 			paramMap.put("MODE", mode);
 			// ESB 연동
-			commonService.doEsbCm181(paramMap, logVO);
+//			commonService.doEsbCm181(paramMap, logVO);
 		}
 		
 		// 통합한도 연동: 차감취소
