@@ -225,4 +225,34 @@ public class ChargeController {
 	
 	}
 	
+	
+	
+	@RequestMapping(value="/testESB/{msisdn}", method = RequestMethod.GET)
+	public Map<String ,Object> test2(HttpServletRequest request, HttpServletResponse response, @PathVariable("msisdn") String msisdn){
+		
+		//Parameter Value
+		Map<String, Object> paramMap = new HashMap<String, Object>();
+		paramMap.put("msisdn", msisdn);
+		LogVO logVO = new LogVO("testESB");
+		
+		//Return Value
+		Map<String, Object> dataMap = new HashMap<String, Object>();
+		
+		try {
+			
+			// NCAS 연동
+			commonService.getNcasGetMethod(paramMap, logVO);
+			chargeService.doEsbMps208(paramMap, logVO);
+			dataMap.put("result", commonService.getSuccessResult());
+			
+			
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		return dataMap;
+	
+	}
+	
 }
