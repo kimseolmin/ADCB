@@ -122,9 +122,6 @@ public class ReverseController {
 					dataMap.put("issuerReverseId", logVO.getSeqId());
 				}
 				
-				
-				//Test일때만
-				response.setStatus(200);
 				response.setContentType("application/json");
 				response.getWriter().print(new ObjectMapper().writeValueAsString(dataMap));
 				response.getWriter().flush();

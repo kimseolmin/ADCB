@@ -116,8 +116,6 @@ public class AccountProfileController {
 			
 			
 			try {
-				//Test일때만
-				response.setStatus(200);
 				response.setContentType("application/json");
 				response.getWriter().print(new ObjectMapper().writeValueAsString(dataMap));
 				response.getWriter().flush();

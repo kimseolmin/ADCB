@@ -134,15 +134,11 @@ public class RefundController {
 					if(paramMap.containsKey("http_status")) {
 						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
 					}
-					//Test일때만
-					response.setStatus(200);
 					return dataMap;
 					
 				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  EAI, SLA, SMS를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
 					dataMap.put("issuerRefundId", logVO.getSeqId());
 					
-					//Test일때만
-					response.setStatus(200);
 					response.setContentType("application/json");
 					response.getWriter().print(new ObjectMapper().writeValueAsString(dataMap));
 					response.getWriter().flush();

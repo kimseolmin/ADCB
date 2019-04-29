@@ -11,7 +11,7 @@
  		FROM 
  			TB_CHARGE_INFO
 		WHERE 
-			TO_CHAR (REG_DT, 'yyyymm') IN (#{param.current_month}, #{param.last_month})
+			INIT_DATE IN (#{param.current_month}, #{param.last_month})
 			AND CTN = #{param.ncasRes.CTN}
 			AND TO_CHAR (REG_DT, 'yyyymmdd') >= #{param.before_30}
  	</select>

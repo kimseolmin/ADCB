@@ -411,6 +411,7 @@ public class CommonServiceImpl implements CommonService{
     											// 1번째 byte: 결제차단여부 ('Y':결제차단->결제이용동의 필요, 'N':결제가능->결제이용동의 완료)
     											// 2번째 byte: PIN번호 설정여부 ('Y':PIN번호사용, 'N':PIN번호사용안함, '0'(숫자):PIN번호미설정, 'L':5회실패로 잠금상태)
     	String dual_ctn = ncasRes.get("DUAL_CTN"); // 듀얼넘버 확인, 듀얼넘버가 아니면 NULL
+    	String ref_type_code = ncasRes.get("REF_TYPE_CODE"); // mvno: LGT가 아니면 차단
 		
     	// test phone은 통과!
     	int testPhoneCnt = 0;
@@ -460,6 +461,11 @@ public class CommonServiceImpl implements CommonService{
         	  svc_auth = svc_auth.substring(0, 1);
         	  if(!"0".equals(svc_auth)) {
         		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_IRREG);
+        	  }
+        	  
+        	// REF_TYPE_CODE: LGT가 아니면 차단
+        	  if(!"LGT".equals(ref_type_code)) {
+        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_MVNO);
         	  }
         	  
         	  

@@ -64,12 +64,13 @@ public class SubmitMTController {
 			// reqBody check
 			submitMTService.reqBodyCheck(smsVO, logVO);
 			paramMap.put("msisdn", smsVO.getMsisdn());
+			paramMap.put("smsVO", smsVO);
 			
 			// NCAS 연동
 			commonService.getNcasGetMethod(paramMap, logVO);
 			
 			// SMS 저장 
-			submitMTService.insertSmsInfo(smsVO, logVO);
+			submitMTService.insertSmsInfo(paramMap, logVO);
 			
 			dataMap.put("correlatorId", smsVO.getSeq());
 			dataMap.put("result", commonService.getSuccessResult());
@@ -117,8 +118,6 @@ public class SubmitMTController {
 			
 			
 			try {
-				//Test일때만
-				response.setStatus(200);
 				response.setContentType("application/json");
 				response.getWriter().print(new ObjectMapper().writeValueAsString(dataMap));
 				response.getWriter().flush();

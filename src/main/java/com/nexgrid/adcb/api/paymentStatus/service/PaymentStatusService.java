@@ -42,6 +42,8 @@ public class PaymentStatusService {
 		if( "".equals(paymentRequestId) || StringUtil.hasSpecialCharacter(paymentRequestId) || StringUtil.spaceCheck(paymentRequestId) || StringUtil.maxCheck(paymentRequestId, 50) ) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
+		
+		logVO.setSid(paymentRequestId);
 	}
 	
 	
