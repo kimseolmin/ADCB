@@ -290,7 +290,7 @@ public class RefundService {
 			}
 			paramMap.put("MODE", mode);
 			// ESB 연동
-//			commonService.doEsbCm181(paramMap, logVO);
+			commonService.doEsbCm181(paramMap, logVO);
 		}
 		
 		// 통합한도 연동: 차감취소
@@ -400,7 +400,7 @@ public class RefundService {
 		EaiVO eaiVO = new EaiVO();
 		eaiVO.setNew_request_type("0");
 		eaiVO.setNew_ban_unpaid_yn_code(payInfo.get("BAN_UNPAID_YN_CODE").toString());
-		eaiVO.setNew_account_type("03");
+		eaiVO.setNew_account_type(paramMap.containsKey("Req_116") ? "03" : "05");	// 전체환불: 03, 부분환불: 05
 		eaiVO.setNew_cust_grd_cd(payInfo.get("CUST_GRD_CD") == null ? "" : payInfo.get("CUST_GRD_CD").toString());
 		eaiVO.setNew_prss_yymm(payInfo.get("START_USE_TIME").toString().substring(0, 6));
 		eaiVO.setNew_request_date(new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(reqCancel.get("END_USE_TIME")));

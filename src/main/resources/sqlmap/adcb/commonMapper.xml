@@ -58,8 +58,11 @@
 				<when test="param.purchaseAmount != null">
 					#{param.purchaseAmount.amount},	<!-- Charge API -->
 				</when>
-				<otherwise>
+				<when test="param.refundAmount != null">
 					#{param.refundAmount.amount},	<!-- Refund API -->
+				</when>
+				<otherwise>
+					#{param.payInfo.AMOUNT},		<!-- Reverse API -->
 				</otherwise>
 			</choose>
 			#{param.msisdn},

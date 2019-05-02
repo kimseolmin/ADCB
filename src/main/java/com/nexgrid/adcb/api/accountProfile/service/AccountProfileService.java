@@ -43,7 +43,7 @@ public class AccountProfileService {
 		
 		Map<String, String> ncasRes = (Map<String, String>) paramMap.get("ncasRes");
 		
-		String msisdn = StringUtil.getCtn344(ncasRes.get("CTN")); // 소비자의 전체 MSISDN
+		String msisdn = paramMap.get("msisdn").toString(); // 소비자의 전체 MSISDN
 		String account_type = ""; // 계정 유형(선불, 후불 또는 기업 계정)
 		if("I".equals(ncasRes.get("CUST_TYPE_CODE"))) {	// 개인 계정
 			if("".equals(ncasRes.get("PRE_PAY_CODE"))) { // ""일 경우 후불

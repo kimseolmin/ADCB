@@ -143,7 +143,7 @@ public class ChargeService {
     	// 약관동의가 필요한 경우 ESB 연동
     	if("Y".equals(terms_deny_yn)) {
     		// ESB 연동
-//    		doEsbMps208(paramMap, logVO);
+    		doEsbMps208(paramMap, logVO);
     	}
     	
     	//청소년요금제와 일반 구분
@@ -160,7 +160,7 @@ public class ChargeService {
     				mode = "2";
     			}
     			paramMap.put("MODE", mode);
-//    			commonService.doEsbCm181(paramMap, logVO);
+    			commonService.doEsbCm181(paramMap, logVO);
     		}
     		
     		
@@ -306,8 +306,8 @@ public class ChargeService {
 		String ctn = ncasRes.get("CTN");
     	String fee_type = ncasRes.get("FEE_TYPE"); //요금제 타입
     	String svc_auth = ncasRes.get("SVC_AUTH"); // 장애인부가서비스|65세이상부가서비스
-		// 입력정보: LRZ0003849|LRZ0003850
-		// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
+													// 입력정보: LRZ0003849|LRZ0003850
+													// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
     	
     	Map<String, String> rbpReqMap = new HashMap<String, String>();	// RBP 요청
 		Map<String, String> rbpResMap = null;	// RBP 응답
