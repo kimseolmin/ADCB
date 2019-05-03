@@ -115,7 +115,7 @@ public class SubscriberLookupController {
 				commonService.omsLogWrite(logVO);
 				
 				// SLA Insert
-				commonService.slaInsert(paramMap, logVO);
+				commonService.insertSLA(paramMap, logVO);
 				
 			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());

@@ -162,7 +162,7 @@ public class RefundController {
 					}
 					
 					// SLA Insert
-					commonService.slaInsert(paramMap, logVO);
+					commonService.insertSLA(paramMap, logVO);
 				}
 				
 			}catch (Exception ex) {

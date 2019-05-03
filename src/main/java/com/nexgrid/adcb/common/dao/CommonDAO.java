@@ -40,7 +40,7 @@ public interface CommonDAO {
 	 * @return
 	 * @throws Exception
 	 */
-	public int slaInsert(@Param("param") Map<String, Object> paramMap, @Param("logVO") LogVO logVO) throws Exception;
+	public int insertSLA(@Param("param") Map<String, Object> paramMap, @Param("logVO") LogVO logVO) throws Exception;
 	
 	
 	/**

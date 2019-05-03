@@ -131,22 +131,26 @@ public class ReverseController {
 				commonService.omsLogWrite(logVO);
 				
 				
-				// RBP연동-차감취소 성공 시
-				if(chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())  
-						&& !paramMap.containsKey("duplicateRes")) {
-
-					// charge_info UPDATE
-					paramMap.put("reverse_dt", new Date());
-					paramMap.put("issuerReverseId", logVO.getSeqId());
-					paramMap.put("transaction_type", "C");
-					commonService.setBalance(paramMap, logVO);
+				// 중복응답이 아니고, Transaction이 존재할 경우
+				if(!paramMap.containsKey("duplicateRes") && paramMap.containsKey("payInfo")) {
+					// SLA Insert
+					commonService.insertSLA(paramMap, logVO);
 					
-					// EAI
-					reverseService.insertEAI(paramMap, logVO);
+					// RBP연동-차감취소 성공 시
+					if(chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
+						// charge_info UPDATE
+						paramMap.put("reverse_dt", new Date());
+						paramMap.put("issuerReverseId", logVO.getSeqId());
+						paramMap.put("transaction_type", "C");
+						commonService.setBalance(paramMap, logVO);
+						
+						// EAI
+						reverseService.insertEAI(paramMap, logVO);
+					}
+
 				}
 				
-				// SLA Insert
-				commonService.slaInsert(paramMap, logVO);
+
 				
 			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());

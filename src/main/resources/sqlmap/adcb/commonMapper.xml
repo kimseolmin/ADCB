@@ -29,7 +29,7 @@
  	
  	
  	<!-- SLA INSERT -->
- 	<insert id="slaInsert">
+ 	<insert id="insertSLA">
  		INSERT INTO TB_API_LOGS (
 	 		SEQ_ID,
 	        RESULT_CODE,
@@ -75,7 +75,14 @@
 				</otherwise>
 			</choose>
 			#{param.merchantId},
-			#{param.requestId},
+			<choose>
+				<when test="param.requestId != null">
+					#{param.requestId},		<!-- Charge, Refund API -->
+				</when>
+				<otherwise>
+					#{param.chargeRequestId},	<!-- Reverse API -->				
+				</otherwise>
+			</choose>
 			<choose>
 				<when test="param.ncasRes != null">
 					#{param.ncasRes.BAN_UNPAID_YN_CODE},

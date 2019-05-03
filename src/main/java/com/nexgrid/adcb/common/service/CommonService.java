@@ -92,7 +92,7 @@ public interface CommonService {
 	 * @return
 	 * @throws Exception
 	 */
-	void slaInsert(Map<String, Object> paramMap, LogVO logVO) throws Exception;
+	void insertSLA(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
 	
 	

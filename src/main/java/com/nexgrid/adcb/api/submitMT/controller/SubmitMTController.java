@@ -127,7 +127,7 @@ public class SubmitMTController {
 				commonService.omsLogWrite(logVO);
 				
 				// SLA Insert
-				commonService.slaInsert(paramMap, logVO);
+				commonService.insertSLA(paramMap, logVO);
 				
 				
 			}catch (Exception ex) {

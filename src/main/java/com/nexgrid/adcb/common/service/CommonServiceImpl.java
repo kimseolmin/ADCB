@@ -581,9 +581,9 @@ public class CommonServiceImpl implements CommonService{
 	
 	
 	@Override
-	public void slaInsert(Map<String, Object> paramMap, LogVO logVO) throws Exception{
+	public void insertSLA(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		try {
-			commonDAO.slaInsert(paramMap, logVO);
+			commonDAO.insertSLA(paramMap, logVO);
 		}catch(DataAccessException adcbExc){
 			/*SQLException se = (SQLException) adcbExc.getRootCause();
 			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
