@@ -65,7 +65,15 @@
 					#{param.payInfo.AMOUNT},		<!-- Reverse API -->
 				</otherwise>
 			</choose>
-			#{param.msisdn},
+			<choose>
+				<when test="param.msisdn != null">
+					#{param.msisdn},
+				</when>
+				<otherwise>
+					#{param.payInfo.MSISDN},
+				</otherwise>
+			</choose>
+			
 			<choose>
 				<when test="param.clientTransactionId != null">
 					#{param.clientTransactionId},	<!-- Charge API -->
@@ -161,7 +169,8 @@
  			BAN,
  			ACE_NO,
  			MERCHANT_ID,
- 			PRODUCT_DESCRIPTION
+ 			PRODUCT_DESCRIPTION,
+ 			MSISDN
 		FROM 
 			TB_CHARGE_INFO
 		WHERE
