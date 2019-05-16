@@ -48,7 +48,7 @@ public class SubmitMTController {
 		LogVO logVO = new LogVO("SubmitMT");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, smsVO.toString());
+		LogUtil.startServiceLog(logVO, request, smsVO == null ? null : smsVO.toString());
 		
 		//Usage Data in Source
 		Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -60,6 +60,9 @@ public class SubmitMTController {
 		logVO.setFlow("[SVC] --> [ADCB]");
 		
 		try {
+			
+			// header check
+			commonService.contentTypeCheck(request, logVO);
 			
 			// reqBody check
 			submitMTService.reqBodyCheck(smsVO, logVO);
@@ -87,6 +90,7 @@ public class SubmitMTController {
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
 			dataMap.put("result", commonEx.sendException());
+
 			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			

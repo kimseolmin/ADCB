@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.nexgrid.adcb.api.subscriberLookup.service.SubscriberLookupService;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
 import com.nexgrid.adcb.common.vo.LogVO;
@@ -27,6 +28,9 @@ public class SubscriberLookupController {
 
 	@Autowired
 	private CommonService commonService;
+	
+	@Autowired
+	private SubscriberLookupService subscriberLookupService;
 	
 	private Logger logger = LoggerFactory.getLogger(SubscriberLookupController.class);
 	
@@ -44,7 +48,7 @@ public class SubscriberLookupController {
 		LogVO logVO = new LogVO("SubscriberLookup");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap.toString());
+		LogUtil.startServiceLog(logVO, request, paramMap == null ? null : paramMap.toString());
 		
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -54,11 +58,14 @@ public class SubscriberLookupController {
 		
 		try {
 			
+			// header check
+			commonService.contentTypeCheck(request, logVO);
+			
 			// reqBody check
 			commonService.reqBodyCheck(paramMap, logVO);
 			
 			// NCAS 연동
-			commonService.getNcasGetMethod(paramMap, logVO);
+			subscriberLookupService.doSubscriberLookup(paramMap, logVO);
 			
 			//NCAS 연동이 예외 없이 돌아왔을 경우
 			dataMap.put("result", commonService.getSuccessResult());
@@ -72,7 +79,13 @@ public class SubscriberLookupController {
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
-			dataMap.put("msisdn", paramMap.get("msisdn"));
+			// body값이 없는 상태로 요청이 온 경우
+			if(paramMap == null) {
+				paramMap = new HashMap<String, Object>();
+			}else {
+				dataMap.put("msisdn", paramMap.get("msisdn"));
+			}
+			
 			dataMap.put("result", commonEx.sendException());
 			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());

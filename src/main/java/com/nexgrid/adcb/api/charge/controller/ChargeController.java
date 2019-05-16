@@ -51,7 +51,7 @@ public class ChargeController {
 		LogVO logVO = new LogVO("Charge");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap.toString());
+		LogUtil.startServiceLog(logVO, request, paramMap == null ? null : paramMap.toString());
 		
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -60,6 +60,9 @@ public class ChargeController {
 		logVO.setFlow("[SVC] --> [ADCB]");
 		
 		try {
+			
+			// header check
+			commonService.contentTypeCheck(request, logVO);
 			
 			// reqBody check
 			chargeService.reqBodyCheck(paramMap, logVO);
@@ -104,7 +107,13 @@ public class ChargeController {
 			
 			dataMap.put("issuerPaymentId", logVO.getSeqId());
 			dataMap.put("result", commonEx.sendException());
+			
+			// body값이 없는 상태로 요청이 온 경우
+			if(paramMap == null) {
+				paramMap = new HashMap<String, Object>();
+			}
 			paramMap.put("http_status", commonEx.getStatusCode());
+			
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());
@@ -142,7 +151,7 @@ public class ChargeController {
 				
 				// BOKU에게 응답
 				logVO.setFlow("[ADCB] --> [SVC]");
-				if(paramMap.containsKey("duplicateRes") || EnAdcbOmsCode.CHARGE_DUPLICATE_REQ.value().equals(logVO.getResultCode())) { // 중복 요청일 경우
+				if((paramMap != null && paramMap.containsKey("duplicateRes")) || EnAdcbOmsCode.CHARGE_DUPLICATE_REQ.value().equals(logVO.getResultCode())) { // 중복 요청일 경우
 					if(paramMap.containsKey("http_status")) {
 						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
 					}

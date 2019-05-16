@@ -50,7 +50,7 @@ public class AccountProfileController {
 		LogVO logVO = new LogVO("AccountProfile");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap.toString());
+		LogUtil.startServiceLog(logVO, request, paramMap == null ? null : paramMap.toString());
 		
 		//Usage Data in Source
 		//Map<String, Object> paramMap = new HashMap<String, Object>();
@@ -63,13 +63,14 @@ public class AccountProfileController {
 		
 		try {
 			
+			// header check
+			commonService.contentTypeCheck(request, logVO);
+			
 			// reqBody check
 			commonService.reqBodyCheck(paramMap, logVO);
 			
-			// NCAS 연동
-			commonService.getNcasGetMethod(paramMap, logVO);
 			
-			// NCAS 연동 값 -> boku 결과 값
+			// NCAS 연동 후 -> boku 결과 값
 			dataMap = accountProfileService.getAccountProfile(paramMap, logVO);
 			paramMap.put("http_status", HttpStatus.OK.value());
 			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
@@ -81,9 +82,17 @@ public class AccountProfileController {
 			logVO.setResultCode(commonEx.getOmsErrCode());
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
-			dataMap.put("msisdn", paramMap.get("msisdn"));
-			dataMap.put("result", commonEx.sendException());
+			// body값이 없는 상태로 요청이 온 경우
+			if(paramMap == null) {
+				paramMap = new HashMap<String, Object>();
+			}else {
+				dataMap.put("msisdn", paramMap.get("msisdn"));
+			}
 			paramMap.put("http_status", commonEx.getStatusCode());
+			
+			
+			dataMap.put("result", commonEx.sendException());
+			
 			response.setStatus(commonEx.getStatusCode());
 			
 			logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());

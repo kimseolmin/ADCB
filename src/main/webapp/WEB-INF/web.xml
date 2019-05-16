@@ -79,7 +79,7 @@
     
    <error-page>
         <error-code>415</error-code>
-        <location>/error/415</location>
+        <location>/errors/415</location>
     </error-page>
     
     <error-page>

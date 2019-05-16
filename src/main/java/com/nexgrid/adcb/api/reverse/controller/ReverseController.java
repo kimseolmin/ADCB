@@ -43,7 +43,7 @@ public class ReverseController {
 		LogVO logVO = new LogVO("Reverse");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap.toString());
+		LogUtil.startServiceLog(logVO, request, paramMap == null ? null : paramMap.toString());
 		
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -54,6 +54,9 @@ public class ReverseController {
 		boolean chargeResponse = false;
 		
 		try {
+			
+			// header check
+			commonService.contentTypeCheck(request, logVO);
 			
 			// reqBody check
 			reverseService.reqBodyCheck(paramMap, logVO);
@@ -86,6 +89,10 @@ public class ReverseController {
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
 			dataMap.put("result", commonEx.sendException());
+			// body값이 없는 상태로 요청이 온 경우
+			if(paramMap == null) {
+				paramMap = new HashMap<String, Object>();
+			}
 			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
@@ -119,6 +126,20 @@ public class ReverseController {
 				if(paramMap.containsKey("duplicateRes")) { // 중복된 취소요청일 경우
 					dataMap.putAll((Map<String, Object>) paramMap.get("duplicateRes"));
 				}else{
+					
+					// RPP 연동 관련 에러의 경우
+					if(EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
+						
+						// RPP 연동 관련 에러의 경우에는 BOKU에게는 성공으로 줘야 함.
+						dataMap = new HashMap<>();
+						dataMap.put("result", commonService.getSuccessResult());
+						dataMap.put("paymentResponse", paramMap.get("paymentResponse"));
+						
+						// RPP 연동 관련 에러의 경우에는 BOKU에게는 성공으로 주기 때문에  OMS ResultCode도 성공으로 남긴다.
+						logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
+						logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
+					}
+					
 					dataMap.put("issuerReverseId", logVO.getSeqId());
 				}
 				
@@ -136,8 +157,9 @@ public class ReverseController {
 					// SLA Insert
 					commonService.insertSLA(paramMap, logVO);
 					
-					// RBP연동-차감취소 성공 시
-					if(chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
+					// RBP연동-차감취소 성공이거나 RBP연동 관련 에러가 났을 경우 
+					if((chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode()))
+							|| EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
 						// charge_info UPDATE
 						paramMap.put("reverse_dt", new Date());
 						paramMap.put("issuerReverseId", logVO.getSeqId());

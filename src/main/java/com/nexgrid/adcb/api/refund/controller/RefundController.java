@@ -43,7 +43,7 @@ public class RefundController {
 		LogVO logVO = new LogVO("Refund");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap.toString());
+		LogUtil.startServiceLog(logVO, request, paramMap == null ? null : paramMap.toString());
 		
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -52,6 +52,8 @@ public class RefundController {
 		logVO.setFlow("[SVC] --> [ADCB]");
 		
 		try {
+			// header check
+			commonService.contentTypeCheck(request, logVO);
 			
 			// reqBody check
 			refundService.reqBodyCheck(paramMap, logVO);
@@ -92,6 +94,11 @@ public class RefundController {
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
 			dataMap.put("result", commonEx.sendException());
+			
+			// body값이 없는 상태로 요청이 온 경우
+			if(paramMap == null) {
+				paramMap = new HashMap<String, Object>();
+			}
 			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			
@@ -122,27 +129,41 @@ public class RefundController {
 		}finally {
 			
 			try {
-				logVO.setResTime();
-				logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
-				
-				// OMS Write
-				commonService.omsLogWrite(logVO);
-				
 				// BOKU에게 응답
 				logVO.setFlow("[ADCB] --> [SVC]");
 				if(paramMap.containsKey("duplicateRes") || EnAdcbOmsCode.CHARGE_DUPLICATE_REQ.value().equals(logVO.getResultCode())) { // 중복 요청일 경우
 					if(paramMap.containsKey("http_status")) {
 						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
 					}
+					
+					logVO.setResTime();
+					logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
 					return dataMap;
 					
 				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  EAI, SLA, SMS를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
+					
+					// RPP 연동 관련 에러의 경우
+					if(EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
+						
+						// RPP 연동 관련 에러의 경우에는 BOKU에게는 성공으로 줘야 함.
+						dataMap = new HashMap<>();
+						dataMap.put("result", commonService.getSuccessResult());
+						
+						// RPP 연동 관련 에러의 경우에는 BOKU에게는 성공으로 주기 때문에  OMS ResultCode도 성공으로 남긴다.
+						logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
+						logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
+					}
+					
 					dataMap.put("issuerRefundId", logVO.getSeqId());
+					logVO.setResTime();
+					logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
 					
 					response.setContentType("application/json");
 					response.getWriter().print(new ObjectMapper().writeValueAsString(dataMap));
 					response.getWriter().flush();
 					response.getWriter().close();
+					
+
 					
 					// paramMap에 BOKU에게 준 응답값 저장
 					paramMap.put("bokuRes", dataMap);
@@ -150,20 +171,23 @@ public class RefundController {
 					// BOKU에게 응답준 결과 DB update
 					refundService.updateRefundInfo(paramMap, logVO);
 					
-					// Refund API가 성공일 경우에만  
-					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
+					// Refund API가 성공이거나 RBP연동 관련 에러가 났을 경우  
+					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode()) 
+							|| EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
 						
 						// 환불 처리 누적 금액 & 환불후 잔액 UPDATE
 						commonService.setBalance(paramMap, logVO);
 						
 						// EAI
 						refundService.insertEAI(paramMap, logVO);
-						
 					}
 					
 					// SLA Insert
 					commonService.insertSLA(paramMap, logVO);
 				}
+				
+				// OMS Write
+				commonService.omsLogWrite(logVO);
 				
 			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());

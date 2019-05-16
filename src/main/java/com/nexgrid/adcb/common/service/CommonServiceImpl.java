@@ -117,7 +117,7 @@ public class CommonServiceImpl implements CommonService{
 		}
 		
 		if(!(content_type.equals("application/json"))){
-			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
+			throw new CommonException(EnAdcbOmsCode.INVALID_HEADER_VALUE);
 		}
 		
 	}
@@ -237,6 +237,8 @@ public class CommonServiceImpl implements CommonService{
 			}catch(ConnectException adcbExc) {
 				logVO.setFlow("[ADCB] --> [DB]");
 				throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+			}catch(CommonException common) {
+				throw common;
 			}catch (Exception adcbExc) {
 				throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 			}
@@ -432,40 +434,77 @@ public class CommonServiceImpl implements CommonService{
     	if(testPhoneCnt == 0) {
     		// CUST_TYPE_CODE : 개인,법인구분(I : 개인 / G : 법인) - 법인폰 차단
         	if(!"I".equals(cust_type_code)) {
-        		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CORP);
+        		if("AccountProfile".equals(logVO.getApiType())) {
+        			return false;
+        		}else {
+        			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CORP);
+        		}
+        		
         	}
         	
         	// CTN_STUS_CODE : CTN 상태 코드 (A : 정상 / S : 일시 중지) - 일시중지폰 차단
         	  if(!"A".equals(ctn_stus_code)){
-        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PAUSE);
+        		  if("AccountProfile".equals(logVO.getApiType())) {
+        			  return false;
+        		  }else {
+        			  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PAUSE);  
+        		  }
         	  }
         	  
         	  // UNIT_LOSS_YN_CODE : 분실여부(Y,N) - 분실등록폰 차단
         	  if(!"N".equals(unit_loss_yn_code)) {
-        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_LOSS);
+        		  if("AccountProfile".equals(logVO.getApiType())) {
+        			  return false;
+        		  }else {
+        			  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_LOSS);
+        		  }
+        		  
+        		  
         	  }
         	  
         	  
         	  // PRE_PAY_CODE : NULL이 아닌 경우 선불가입자이며, NULL인 경우 선불가입자 아님. - 선불가입자 차단
         	  if(!"".equals(pre_pay_code)) {
-        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PREPAY);
+        		  if("AccountProfile".equals(logVO.getApiType())) {
+        			  return false;
+        		  }else {
+        			  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_PREPAY);  
+        		  }
+        		  
+        		  
         	  }
         	  
         	  // 듀얼 넘버 확인, NULL인 경우 듀얼넘버 아님. - 듀얼넘버 차단
         	  if(!"".equals(dual_ctn)) {
-        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_DUAL);
+        		  if("AccountProfile".equals(logVO.getApiType())) {
+        			  return false;
+        		  }else {
+        			  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_DUAL);  
+        		  }
+        		  
         	  }
         	  
         	  
         	  // SVC_AUTH : LRZ0001705(부정사용자 코드) 부가서비스 가입여부 - 부정사용자 차단 (가입은'1' 미가입은'0')
         	  svc_auth = svc_auth.substring(0, 1);
         	  if(!"0".equals(svc_auth)) {
-        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_IRREG);
+        		  if("AccountProfile".equals(logVO.getApiType())) {
+        			  return false;
+        		  }else {
+        			  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_IRREG);  
+        		  }
+        		  
         	  }
         	  
         	// REF_TYPE_CODE: LGT가 아니면 차단
         	  if(!"LGT".equals(ref_type_code)) {
-        		  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_MVNO);
+        		  if("AccountProfile".equals(logVO.getApiType())) {
+        			  return false;
+        		  }else {
+        			  throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_MVNO);
+        		  }
+        		  
+        		  
         	  }
         	  
         	  
@@ -479,7 +518,12 @@ public class CommonServiceImpl implements CommonService{
       		}
     		// 만 14세 미만 차단
     		if(age < 14 ) {
-    			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_14);
+    			if("AccountProfile".equals(logVO.getApiType())) {
+      			  return false;
+      		  	}else {
+      		  		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_14);
+      		  	}
+    			
     		}else {
     			// 14세 이상 중에 청소년요금제가 아닌 경우
     			if("N".equals(young_fee_yn)){

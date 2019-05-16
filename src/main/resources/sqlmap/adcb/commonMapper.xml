@@ -51,7 +51,7 @@
 			#{logVO.resultCode},
 			#{logVO.reqTime},
 			#{logVO.resTime},
-			#{logVO.apiType},
+			#{logVO.apiType2},
 			#{logVO.apiResultCode},
 			#{param.http_status},
 			<choose>

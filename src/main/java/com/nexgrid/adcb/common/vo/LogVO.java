@@ -204,6 +204,11 @@ public class LogVO {
 		return apiType;
 	}
 	
+	public String getApiType2() {
+		return  "Reverse".equals(apiType) ? "reversal" : apiType.toLowerCase();
+				
+	}
+	
 	public void setApiType(String apiType) {
 		this.apiType = apiType;
 	}

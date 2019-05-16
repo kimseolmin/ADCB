@@ -41,7 +41,7 @@ public class PaymentStatusController {
 		LogVO logVO = new LogVO("PaymentStatus");
 		
 		//Service Start Log Print
-		LogUtil.startServiceLog(logVO, request, paramMap.toString());
+		LogUtil.startServiceLog(logVO, request, paramMap == null ? null : paramMap.toString());
 		
 		//Return Value
 		Map<String, Object> dataMap = new HashMap<String, Object>();
@@ -50,6 +50,9 @@ public class PaymentStatusController {
 		logVO.setFlow("[SVC] --> [ADCB]");
 		
 		try {
+			
+			// header check
+			commonService.contentTypeCheck(request, logVO);
 			
 			// reqBody check
 			paymentStatusService.reqBodyCheck(paramMap, logVO);
@@ -71,6 +74,10 @@ public class PaymentStatusController {
 			logVO.setApiResultCode(commonEx.getResReasonCode());
 			
 			dataMap.put("result", commonEx.sendException());
+			// body값이 없는 상태로 요청이 온 경우
+			if(paramMap == null) {
+				paramMap = new HashMap<String, Object>();
+			}
 			paramMap.put("http_status", commonEx.getStatusCode());
 			response.setStatus(commonEx.getStatusCode());
 			

@@ -16,7 +16,7 @@ public enum EnRcsgResultCode {
 	, RS_4004("4004", "105", "존재하지 않는 고객", HttpStatus.OK)
 	, RS_4005("4005", "118", "정보료 상한 부가 서비스 미가입", HttpStatus.OK)
 	, RS_4006("4006", "4", "PID 없음", HttpStatus.OK)
-	, RS_4008("4008", "108", "잔여한도 부족", HttpStatus.OK)
+	, RS_4008("4008", "109", "잔여한도 부족", HttpStatus.OK)
 	, RS_4009("4009", "123", "중복된 Request", HttpStatus.OK)
 	, RS_4010("4010", "4", "해당 BR_ID 정보 없음.", HttpStatus.OK)
 	, RS_4011_CHARGE("4011", "106", "완료된 건에 대한 요청", Init.readConfig.getRcsg_opcode_charge(), HttpStatus.OK)
@@ -42,7 +42,7 @@ public enum EnRcsgResultCode {
 	, RS_1007("1007", "4", "DB 처리 중 발생한 에러", HttpStatus.OK)
 	, RS_1008("1008", "4", "Session이 없는 경우", HttpStatus.OK)
 	, RS_1009("1009", "4", "SCP connection fail", HttpStatus.OK)
-	, RS_1010("1010", "108", "잔액 부족", HttpStatus.OK)
+	, RS_1010("1010", "109", "잔액 부족", HttpStatus.OK)
 	, RS_2000("2000", "4", "기타 에러", HttpStatus.OK)
 	, RS_INVALID("4", "정의되지 않은 RESULT", HttpStatus.OK);
 	
