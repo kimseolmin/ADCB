@@ -44,7 +44,8 @@
          	MERCHANT_ID,
          	REQUEST_ID,
          	BAN_UNPAID_YN_CODE,
-         	CUST_GRD_CD
+         	CUST_GRD_CD,
+         	ISSUER_ID
          	)
 	     VALUES (
 	     	#{logVO.seqId},
@@ -101,13 +102,13 @@
 			</choose>
 			<choose>
 				<when test="param.Res_111 != null">
-					#{param.Res_111.CUST_GRD_CD}
+					#{param.Res_111.CUST_GRD_CD},
 				</when>
 				<otherwise>
-					#{param.payInfo.CUST_GRD_CD}
+					#{param.payInfo.CUST_GRD_CD},
 				</otherwise>
 			</choose>
-			
+			#{param.issuerPaymentId}
 			)
  	</insert>
  	
