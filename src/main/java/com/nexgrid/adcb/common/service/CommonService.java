@@ -163,4 +163,12 @@ public interface CommonService {
 	void insertSmsList(Map<String, Object> paramMap, LogVO logVO) throws Exception;
 	
 	
+	
+	/**
+	 * 작업공지 체크
+	 * @throws Exception
+	 */
+	void maintenanceCheck() throws Exception;
+	
+	
 }

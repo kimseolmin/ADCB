@@ -12,7 +12,8 @@
 
 	<!-- NCAS 연동 -->
 	<!-- <entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_netflix&amp;CPPWD=05WbD6MQR6lVtq57V2o/HA==&amp;CPTYPE=I&amp;CASECODE=TF1306&amp;SUB_NO=</entry> -->
-	<entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_adcb&amp;CPPWD=1q2w3e4r!1&amp;CPTYPE=I&amp;CASECODE=TF1395&amp;CTN=</entry>
+	<!-- <entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_adcb&amp;CPPWD=1q2w3e4r!1&amp;CPTYPE=I&amp;CASECODE=TF1395&amp;CTN=</entry> -->
+	<entry key="NCAS_URL">http://192.168.10.251:8090/test?CPID=mdu_adcb&amp;CPPWD=1q2w3e4r!1&amp;CPTYPE=I&amp;CASECODE=TF1395&amp;CTN=</entry>
 	<!-- <entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_lgudcb&amp;CPPWD=lgudcb!01&amp;CPTYPE=I&amp;CASECODE=TF1226&amp;CTN=</entry> -->
 	<entry key="NCAS_CHARSET">UTF-8</entry>
 	<entry key="NCAS_CONNECT_TIME_OUT">5000</entry>
@@ -23,9 +24,9 @@
 
 	<!-- RBP(통합한도) 연동 -->
 	<entry key="RBP_PRIMARY_IP">127.0.0.1</entry>
-	<entry key="RBP_PRIMARY_PORT">5000</entry>
+	<entry key="RBP_PRIMARY_PORT">40000</entry>
 	<entry key="RBP_SECONDARY_IP">127.0.0.1</entry>
-	<entry key="RBP_SECONDARY_PORT">6000</entry>
+	<entry key="RBP_SECONDARY_PORT">40001</entry>
 	<entry key="RBP_CONNECT_TIME_OUT">5000</entry>
 	<entry key="RBP_RECEIVE_TIME_OUT">60000000</entry>
 	<entry key="RBP_RECONNECT_SLEEP_TIME">1000</entry>
@@ -40,9 +41,9 @@
 	
 	<!-- RCSG 연동 -->
 	<entry key="RCSG_PRIMARY_IP">127.0.0.1</entry>
-	<entry key="RCSG_PRIMARY_PORT">7000</entry>
+	<entry key="RCSG_PRIMARY_PORT">40002</entry>
 	<entry key="RCSG_SECONDARY_IP">127.0.0.1</entry>
-	<entry key="RCSG_SECONDARY_PORT">8000</entry>
+	<entry key="RCSG_SECONDARY_PORT">40003</entry>
 	<entry key="RCSG_CONNECT_TIME_OUT">5000</entry>
 	<entry key="RCSG_RECEIVE_TIME_OUT">60000000</entry>
 	<entry key="RCSG_RECONNECT_SLEEP_TIME">1000</entry>
@@ -60,9 +61,6 @@
 	<entry key="ESB_CM181_URL">http://172.22.14.79:15011/CSSI/CM/RetrieveMobilePayArmPsblYn</entry>
 	<entry key="ESB_TIME_OUT">5000</entry>
 	
-	<!-- das,ags timeout -->
-	<entry key="time_out">15</entry>
-	
 	
 	<!-- SMS format -->
 	<entry key="CHARGE_SECTION_LIST">5000,10000,20000,30000,40000,50000,60000,80000,100000</entry>
@@ -71,5 +69,8 @@
 	<entry key="SECTION_EXCESS">[LG U+ 결제안내]&#10;{ctn}님이&#10;사용하신 정보이용료가&#10;{limitAmount}을 초과하였습니다.</entry>
 	<entry key="LIMIT_EXCESS2">▶ U+고객센터앱 선결제 바로가기&#10;☞ http://cv.uplus.kr/195.html</entry>
 	<entry key="CANCEL_COMPLETE">[LG U+ 취소안내]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}&#10;잔여한도 {SVC_CTG_AVAIL}</entry>
+	
+	<!-- 작업공지 -->
+	<entry key="Maintenance_YN">N</entry>
 	
 </properties>

@@ -931,9 +931,20 @@ public class CommonServiceImpl implements CommonService{
 			throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
 		}
 	}
+
+
+
+	@Override
+	public void maintenanceCheck() throws Exception {
+
+		if("Y".equals(Init.readConfig.getMaintenance_yn())) {
+			throw new CommonException(EnAdcbOmsCode.MAINTENANCE);
+		}
+	}
 	 
 	 
 	 
+	
 	
 	
 	 

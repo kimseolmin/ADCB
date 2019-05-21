@@ -52,6 +52,10 @@ public class RefundController {
 		logVO.setFlow("[SVC] --> [ADCB]");
 		
 		try {
+			
+			// 작업공지
+			commonService.maintenanceCheck();
+			
 			// header check
 			commonService.contentTypeCheck(request, logVO);
 			

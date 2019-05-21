@@ -34,6 +34,7 @@ public enum EnAdcbOmsCode {
 	, DB_BLOCK_CTN("41000001", "121", "Block CTN", HttpStatus.OK)
 	, DB_INVALID_ERROR("49999999", "4", HttpStatus.OK)
 	, DB_BLOCK_FEETYPE("41000002", "121", "Block FeeType", HttpStatus.OK)
+	, MAINTENANCE("41000003", "300", "작업공지", HttpStatus.OK)
 	
 	, NCAS_70("51100070", "105", HttpStatus.OK) // 고객정보가 없거나 번호 이동된  사용자 차단 - 해지된 사용자는 고객정보 없음으로 나옴
 	, NCAS_71("51100071", "104", HttpStatus.OK) // 71 : SKT로 번호이동

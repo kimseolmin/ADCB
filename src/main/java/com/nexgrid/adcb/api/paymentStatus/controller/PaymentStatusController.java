@@ -51,6 +51,9 @@ public class PaymentStatusController {
 		
 		try {
 			
+			// 작업공지
+			commonService.maintenanceCheck();
+			
 			// header check
 			commonService.contentTypeCheck(request, logVO);
 			

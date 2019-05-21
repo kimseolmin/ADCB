@@ -96,7 +96,8 @@ public class Init{
 		    	readConfig.setSection_excess(props.getProperty("SECTION_EXCESS"));
 		    	readConfig.setCancel_complete(props.getProperty("CANCEL_COMPLETE"));
 		    	
-		    	readConfig.setTime_out(props.getProperty("time_out"));
+		    	//작업공지
+		    	readConfig.setMaintenance_yn(props.getProperty("Maintenance_YN"));
 		    	
 		    	
 		    } catch (Exception e) {

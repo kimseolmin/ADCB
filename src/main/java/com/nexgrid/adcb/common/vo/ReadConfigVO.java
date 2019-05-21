@@ -76,10 +76,9 @@ public class ReadConfigVO {
 	private String section_excess = "";
 	private String cancel_complete = "";
 	
+	// 작업공지
+	private String maintenance_yn = "";
 	
-	private String time_out = "";
-	
-
 	
 	
 	
@@ -441,12 +440,13 @@ public class ReadConfigVO {
 	public void setCancel_complete(String cancel_complete) {
 		this.cancel_complete = cancel_complete;
 	}
-	public String getTime_out() {
-		return time_out;
+	public String getMaintenance_yn() {
+		return maintenance_yn;
 	}
-	public void setTime_out(String time_out) {
-		this.time_out = time_out;
+	public void setMaintenance_yn(String maintenance_yn) {
+		this.maintenance_yn = maintenance_yn;
 	}
+
 	
 	
 
