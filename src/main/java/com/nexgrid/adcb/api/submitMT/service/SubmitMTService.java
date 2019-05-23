@@ -13,6 +13,7 @@ import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.common.vo.SmsSendVO;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
+import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.StringUtil;
 
 @Service("submitMT")
@@ -44,7 +45,7 @@ public class SubmitMTService {
 		String msisdn = smsVO.getMsisdn();
 		String originator = smsVO.getOriginator();
 		if( "".equals(messageId) || StringUtil.hasSpecialCharacter(messageId) || StringUtil.spaceCheck(messageId) || StringUtil.maxCheck(messageId, 60)
-				|| "".equals(message) || StringUtil.maxCheck(message, 160) || message.indexOf("코드") < 0 || message.indexOf("http") < 0
+				|| "".equals(message) || StringUtil.maxCheck(message, 160) || message.indexOf("U+") < 0 
 				|| "".equals(msisdn) || StringUtil.hasSpecialCharacter(msisdn) || StringUtil.spaceCheck(msisdn) || StringUtil.maxCheck(msisdn, 12)
 				|| "".equals(originator)
 				
@@ -80,13 +81,13 @@ public class SubmitMTService {
 		
 		try {
 			SmsSendVO smsVO = (SmsSendVO) paramMap.get("smsVO");
-			String message = smsVO.getMessage();
-			smsVO.setMessage(message.substring(0, message.indexOf("http")-1));
+			/*String message = smsVO.getMessage();
+			smsVO.setMessage(message.substring(0, message.indexOf("http")-1));*/
 			submitMTDAO.insertSmsSend(smsVO);
 			
 			// 결제이용동의가 필요한 경우에만 "http://www.uplus.co.kr/css/rfrm/prvs/RetrieveUbDnUseTermsPop_19.hpi?popYn=Y" 메시지를 보낸다.
 			if("Y".equals(terms_deny_yn)) {
-				smsVO.setMessage(message.substring(message.indexOf("http"), message.length()));
+				smsVO.setMessage(Init.readConfig.getSms_url());
 				submitMTDAO.insertSmsSend(smsVO);
 			}
 			

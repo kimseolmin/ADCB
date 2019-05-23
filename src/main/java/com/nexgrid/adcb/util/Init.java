@@ -95,6 +95,7 @@ public class Init{
 		    	readConfig.setCharge_complete(props.getProperty("CHARGE_COMPLETE"));
 		    	readConfig.setSection_excess(props.getProperty("SECTION_EXCESS"));
 		    	readConfig.setCancel_complete(props.getProperty("CANCEL_COMPLETE"));
+		    	readConfig.setSms_url(props.getProperty("SMS_URL"));
 		    	
 		    	//작업공지
 		    	readConfig.setMaintenance_yn(props.getProperty("Maintenance_YN"));

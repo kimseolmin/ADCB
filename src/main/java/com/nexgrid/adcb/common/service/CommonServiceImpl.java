@@ -116,7 +116,7 @@ public class CommonServiceImpl implements CommonService{
 			throw new CommonException(EnAdcbOmsCode.INVALID_HEADER_KEY);
 		}
 		
-		if(!(content_type.equals("application/json"))){
+		if((content_type.indexOf("application/json") < 0)){
 			throw new CommonException(EnAdcbOmsCode.INVALID_HEADER_VALUE);
 		}
 		

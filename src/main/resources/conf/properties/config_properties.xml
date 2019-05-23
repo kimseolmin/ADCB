@@ -69,6 +69,7 @@
 	<entry key="SECTION_EXCESS">[LG U+ 결제안내]&#10;{ctn}님이&#10;사용하신 정보이용료가&#10;{limitAmount}을 초과하였습니다.</entry>
 	<entry key="LIMIT_EXCESS2">▶ U+고객센터앱 선결제 바로가기&#10;☞ http://cv.uplus.kr/195.html</entry>
 	<entry key="CANCEL_COMPLETE">[LG U+ 취소안내]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}&#10;잔여한도 {SVC_CTG_AVAIL}</entry>
+	<entry key="SMS_URL">http://www.uplus.co.kr/css/rfrm/prvs/RetrieveUbDnUseTermsPop_19.hpi?popYn=Y</entry>
 	
 	<!-- 작업공지 -->
 	<entry key="Maintenance_YN">N</entry>

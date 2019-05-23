@@ -75,6 +75,7 @@ public class ReadConfigVO {
 	private String charge_complete = "";
 	private String section_excess = "";
 	private String cancel_complete = "";
+	private String sms_url = "";
 	
 	// 작업공지
 	private String maintenance_yn = "";
@@ -439,6 +440,12 @@ public class ReadConfigVO {
 	}
 	public void setCancel_complete(String cancel_complete) {
 		this.cancel_complete = cancel_complete;
+	}
+	public String getSms_url() {
+		return sms_url;
+	}
+	public void setSms_url(String sms_url) {
+		this.sms_url = sms_url;
 	}
 	public String getMaintenance_yn() {
 		return maintenance_yn;
