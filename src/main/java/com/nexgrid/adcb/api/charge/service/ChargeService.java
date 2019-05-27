@@ -578,7 +578,7 @@ public class ChargeService {
 		eaiVO.setNew_total(purchaseAmount.get("amount").toString());
 		eaiVO.setNew_ban(ncasRes.get("BAN"));
 		eaiVO.setNew_ace_no(ncasRes.get("ACENO"));
-		eaiVO.setNew_subs_no(ncasRes.get("SUB_NO"));
+		eaiVO.setNew_subs_no(ncasRes.get("CTN"));
 		eaiVO.setNew_request_id(paramMap.get("requestId").toString());
 		eaiVO.setNew_merchant_id(paramMap.containsKey("merchantId") ? paramMap.get("merchantId").toString() : "");
 		eaiVO.setNew_product_description(paramMap.get("productDescription").toString());

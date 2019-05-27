@@ -173,7 +173,7 @@ public class ReverseService {
 		eaiVO.setNew_total(payInfo.get("AMOUNT").toString());
 		eaiVO.setNew_ban(payInfo.get("BAN").toString());
 		eaiVO.setNew_ace_no(payInfo.get("ACE_NO").toString());
-		eaiVO.setNew_subs_no(payInfo.get("SUB_NO").toString());
+		eaiVO.setNew_subs_no(payInfo.get("CTN").toString());
 		eaiVO.setNew_request_id(paramMap.get("chargeRequestId").toString());
 		eaiVO.setNew_merchant_id(payInfo.get("MERCHANT_ID") == null ? "" : payInfo.get("MERCHANT_ID").toString());
 		eaiVO.setNew_product_description(payInfo.get("PRODUCT_DESCRIPTION").toString());

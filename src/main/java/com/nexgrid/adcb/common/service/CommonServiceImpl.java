@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -436,6 +437,8 @@ public class CommonServiceImpl implements CommonService{
         	if(!"I".equals(cust_type_code)) {
         		if("AccountProfile".equals(logVO.getApiType())) {
         			return false;
+        		}else if("Charge".equals(logVO.getApiType())){	// Charge API 경우에만 ReasonCode 117 -> 104로 바꿔달라는 요청이 있었음.
+        			throw new CommonException(HttpStatus.OK, EnAdcbOmsCode.NCAS_71.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_CORP.value(), EnAdcbOmsCode.NCAS_BLOCK_CORP.logMsg());
         		}else {
         			throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_CORP);
         		}
@@ -520,7 +523,9 @@ public class CommonServiceImpl implements CommonService{
     		if(age < 14 ) {
     			if("AccountProfile".equals(logVO.getApiType())) {
       			  return false;
-      		  	}else {
+      		  	}else if("Charge".equals(logVO.getApiType())){	// Charge API 경우에만 ReasonCode 117 -> 104로 바꿔달라는 요청이 있었음.
+        			throw new CommonException(HttpStatus.OK, EnAdcbOmsCode.NCAS_71.mappingCode(), EnAdcbOmsCode.NCAS_BLOCK_14.value(), EnAdcbOmsCode.NCAS_BLOCK_14.logMsg());
+        		}else {
       		  		throw new CommonException(EnAdcbOmsCode.NCAS_BLOCK_14);
       		  	}
     			
