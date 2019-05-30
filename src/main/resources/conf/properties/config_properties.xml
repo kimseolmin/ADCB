@@ -12,8 +12,8 @@
 
 	<!-- NCAS 연동 -->
 	<!-- <entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_netflix&amp;CPPWD=05WbD6MQR6lVtq57V2o/HA==&amp;CPTYPE=I&amp;CASECODE=TF1306&amp;SUB_NO=</entry> -->
-	<!-- <entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_adcb&amp;CPPWD=1q2w3e4r!1&amp;CPTYPE=I&amp;CASECODE=TF1395&amp;CTN=</entry> -->
-	<entry key="NCAS_URL">http://192.168.10.251:8090/test?CPID=mdu_adcb&amp;CPPWD=1q2w3e4r!1&amp;CPTYPE=I&amp;CASECODE=TF1395&amp;CTN=</entry>
+	<entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_adcb&amp;CPPWD=1q2w3e4r!1&amp;CPTYPE=I&amp;CASECODE=TF1395&amp;CTN=</entry>
+	<!-- <entry key="NCAS_URL">http://192.168.10.251:8090/test?CPID=mdu_adcb&amp;CPPWD=1q2w3e4r!1&amp;CPTYPE=I&amp;CASECODE=TF1395&amp;CTN=</entry> -->
 	<!-- <entry key="NCAS_URL">http://211.115.75.200:8081/NIF/CASInterface.jsp?CPID=mdu_lgudcb&amp;CPPWD=lgudcb!01&amp;CPTYPE=I&amp;CASECODE=TF1226&amp;CTN=</entry> -->
 	<entry key="NCAS_CHARSET">UTF-8</entry>
 	<entry key="NCAS_CONNECT_TIME_OUT">5000</entry>

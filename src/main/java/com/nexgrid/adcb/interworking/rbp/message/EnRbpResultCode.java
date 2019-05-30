@@ -11,7 +11,7 @@ public enum EnRbpResultCode {
 	, RS_4002("4002", "4", "통합한도 ERROR", HttpStatus.OK)
 	, RS_4003("4003", "104", "한도고객 아님", HttpStatus.OK)
 	, RS_4004("4004", "105", "존재하지 않는 고객", HttpStatus.OK)
-	, RS_4008("4008", "108", "잔여한도 부족", HttpStatus.OK)
+	, RS_4008("4008", "109", "잔여한도 부족", HttpStatus.OK)
 	, RS_4009("4009", "123", "중복된 Request", HttpStatus.OK)
 	, RS_4010("4010", "4", "해당 BR_ID 정보 없음.", HttpStatus.OK)
 	, RS_4011_CHARGE("4011", "106", "완료된 건에 대한 요청", Init.readConfig.getRbp_opcode_charge(), HttpStatus.OK)

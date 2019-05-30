@@ -53,7 +53,7 @@ public class SubmitMTService {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
 		}
 		
-		logVO.setSid(messageId);
+		logVO.setSid(msisdn);
 	}
 	
 	
@@ -83,7 +83,19 @@ public class SubmitMTService {
 			SmsSendVO smsVO = (SmsSendVO) paramMap.get("smsVO");
 			/*String message = smsVO.getMessage();
 			smsVO.setMessage(message.substring(0, message.indexOf("http")-1));*/
-			submitMTDAO.insertSmsSend(smsVO);
+			
+			// 80byte가 넘어가면 잘라서 두번보낸다.
+			if(smsVO.getMessage().getBytes().length > 80) {
+				String message = smsVO.getMessage();
+				smsVO.setMessage(new String(message.getBytes(), 0, 79));
+				submitMTDAO.insertSmsSend(smsVO);
+				
+				smsVO.setMessage(new String(message.getBytes(), 79, message.getBytes().length-79));
+				submitMTDAO.insertSmsSend(smsVO);
+			}else{
+				submitMTDAO.insertSmsSend(smsVO);
+			}
+			
 			
 			// 결제이용동의가 필요한 경우에만 "http://www.uplus.co.kr/css/rfrm/prvs/RetrieveUbDnUseTermsPop_19.hpi?popYn=Y" 메시지를 보낸다.
 			if("Y".equals(terms_deny_yn)) {

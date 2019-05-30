@@ -85,7 +85,16 @@ public class ChargeService {
 				|| !paramMap.containsKey("purchaseAmount") || !paramMap.containsKey("productDescription")) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_KEY);
 		}
-		Map<String, Object> purchaseAmount = (HashMap<String, Object>)paramMap.get("purchaseAmount");
+		
+		Map<String, Object> purchaseAmount = null;
+		try {
+			purchaseAmount = (HashMap<String, Object>)paramMap.get("purchaseAmount");
+		}catch(Exception e){
+			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
+		}
+		
+		
+		
 		if( purchaseAmount == null || purchaseAmount.size() == 0 || !purchaseAmount.containsKey("amount")
 				|| !purchaseAmount.containsKey("currency")) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_KEY);

@@ -60,7 +60,14 @@ public class RefundService {
 				|| !paramMap.containsKey("refundAmount") ) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_KEY);
 		}
-		Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
+		
+		Map<String, Object> refundAmount = null;
+		try {
+			refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
+		}catch(Exception e) {
+			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_VALUE);
+		}
+	
 		if( refundAmount == null || refundAmount.size() == 0 || !refundAmount.containsKey("amount")
 				|| !refundAmount.containsKey("currency")) {
 			throw new CommonException(EnAdcbOmsCode.INVALID_BODY_KEY);

@@ -135,12 +135,16 @@ public class RefundController {
 			try {
 				// BOKU에게 응답
 				logVO.setFlow("[ADCB] --> [SVC]");
+				
+				logVO.setResTime();
+
+				// OMS Write
+				commonService.omsLogWrite(logVO);
+				
 				if(paramMap.containsKey("duplicateRes") || EnAdcbOmsCode.CHARGE_DUPLICATE_REQ.value().equals(logVO.getResultCode())) { // 중복 요청일 경우
 					if(paramMap.containsKey("http_status")) {
 						response.setStatus( ((BigDecimal)paramMap.get("http_status")).intValue());
 					}
-					
-					logVO.setResTime();
 					logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
 					return dataMap;
 					
@@ -159,7 +163,6 @@ public class RefundController {
 					}
 					
 					dataMap.put("issuerRefundId", logVO.getSeqId());
-					logVO.setResTime();
 					logger.info("[" + logVO.getSeqId() + "] Response Data : " + dataMap);
 					
 					response.setContentType("application/json");
@@ -167,13 +170,18 @@ public class RefundController {
 					response.getWriter().flush();
 					response.getWriter().close();
 					
-
-					
 					// paramMap에 BOKU에게 준 응답값 저장
 					paramMap.put("bokuRes", dataMap);
 					
-					// BOKU에게 응답준 결과 DB update
-					refundService.updateRefundInfo(paramMap, logVO);
+					// 요청 전문이 정상일 경우에만
+					if(!"2".equals(logVO.getApiResultCode())) {
+						
+						// BOKU에게 응답준 결과 DB update
+						refundService.updateRefundInfo(paramMap, logVO);
+						
+						// SLA Insert
+						commonService.insertSLA(paramMap, logVO);
+					}
 					
 					// Refund API가 성공이거나 RBP연동 관련 에러가 났을 경우  
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode()) 
@@ -186,12 +194,10 @@ public class RefundController {
 						refundService.insertEAI(paramMap, logVO);
 					}
 					
-					// SLA Insert
-					commonService.insertSLA(paramMap, logVO);
+
 				}
 				
-				// OMS Write
-				commonService.omsLogWrite(logVO);
+
 				
 			}catch (Exception ex) {
 				logger.error("[" + logVO.getSeqId() + "] Error Flow : " + logVO.getFlow());

@@ -66,8 +66,8 @@ public class LogVO {
 	public LogVO(String apiType) {
 		setSeqId();
 		setReqTime();
-		
 		setApiType(apiType);
+		setSvcName("ADCB");
 	}
 	
 	

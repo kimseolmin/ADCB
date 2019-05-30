@@ -10,7 +10,7 @@ public class SmsSendVO {
 	//--------------------BOKU에서 들어오는 요청값이 저장될 변수--------------
 	private String messageId;
 	private String message;
-	private String msisdn;
+	private String msisdn=null;
 	private String originator;
 	private int validity;
 	
@@ -48,7 +48,10 @@ public class SmsSendVO {
 	}
 	public void setMsisdn(String msisdn) {
 		this.msisdn = msisdn;
-		this.to_ctn = StringUtil.getCtn344(msisdn);
+		if(msisdn != null) {
+			this.to_ctn = StringUtil.getCtn344(msisdn);
+		}
+		
 	}
 	public String getOriginator() {
 		return originator;

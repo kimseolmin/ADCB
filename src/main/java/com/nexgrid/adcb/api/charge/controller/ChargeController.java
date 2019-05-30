@@ -173,16 +173,23 @@ public class ChargeController {
 					// paramMap에 BOKU에게 준 응답값 저장
 					paramMap.put("bokuRes", dataMap);
 					
-					// BOKU에게 응답준 결과 DB update
-					chargeService.updateChargeInfo(paramMap, logVO);
+					// 요청 전문이 정상일 경우에만.
+					if(!"2".equals(logVO.getApiResultCode())) {
+						
+						// BOKU에게 응답준 결과 DB update
+						chargeService.updateChargeInfo(paramMap, logVO);
+						
+						// SLA Insert
+						commonService.insertSLA(paramMap, logVO);
+					}
+					
 					
 					// 청구 API가 성공일 경우에만 EAI
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode())) {
 						chargeService.insertEAI(paramMap, logVO);
 					}
 					
-					// SLA Insert
-					commonService.insertSLA(paramMap, logVO);
+
 				}
 				
 			}catch (Exception ex) {
