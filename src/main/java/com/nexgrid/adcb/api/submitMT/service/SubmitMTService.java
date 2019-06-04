@@ -87,10 +87,10 @@ public class SubmitMTService {
 			// 80byte가 넘어가면 잘라서 두번보낸다.
 			if(smsVO.getMessage().getBytes().length > 80) {
 				String message = smsVO.getMessage();
-				smsVO.setMessage(new String(message.getBytes(), 0, 79));
+				smsVO.setMessage(new String(message.getBytes(), 0, 78));
 				submitMTDAO.insertSmsSend(smsVO);
 				
-				smsVO.setMessage(new String(message.getBytes(), 79, message.getBytes().length-79));
+				smsVO.setMessage(new String(message.getBytes(), 78, message.getBytes().length-78));
 				submitMTDAO.insertSmsSend(smsVO);
 			}else{
 				submitMTDAO.insertSmsSend(smsVO);

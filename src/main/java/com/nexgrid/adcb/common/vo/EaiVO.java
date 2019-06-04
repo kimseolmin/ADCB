@@ -7,8 +7,8 @@ public class EaiVO {
 	private String new_request_type;				// 청구처리
 	private String new_ban_unpaid_yn_code;			// 연체여부
 	private String new_account_type;				// 결제 유형
-	private String new_smls_stlm_dv_cd = "99";		// 서비스 코드
-	private String new_smls_stlm_cmpny_cd = "0199";	// 결제대행사코드
+	private String new_smls_stlm_dv_cd = "95";		// 서비스 코드
+	private String new_smls_stlm_cmpny_cd = "0195";	// 결제대행사코드
 	private String new_cust_grd_cd;					// 고객한도등급
 	private String new_prss_yymm;					// 처리년월
 	private Date new_request_date;					// 거래시간

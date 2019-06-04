@@ -108,7 +108,8 @@
 					#{param.payInfo.CUST_GRD_CD},
 				</otherwise>
 			</choose>
-			#{param.issuerPaymentId}
+			#{param.payInfo.ISSUER_PAYMENTID}
+			
 			)
  	</insert>
  	
