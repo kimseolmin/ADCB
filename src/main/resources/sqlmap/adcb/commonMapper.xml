@@ -224,7 +224,7 @@
 	
 	<!-- EAI -->
 	<insert id="insertEAI" parameterType="com.nexgrid.adcb.common.vo.EaiVO">
-		INSERT INTO TB_ADCB_EAI_SDW (
+		INSERT INTO TB_ADCB_EAI_W (
 			NEW_REQUEST_TYPE,
 			NEW_BAN_UNPAID_YN_CODE,
 			NEW_ACCOUNT_TYPE,
