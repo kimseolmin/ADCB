@@ -128,6 +128,8 @@ public class ReverseController {
 			try {
 				if(paramMap.containsKey("duplicateRes")) { // 중복된 취소요청일 경우
 					dataMap.putAll((Map<String, Object>) paramMap.get("duplicateRes"));
+				}else if(paramMap.containsKey("RefundRes")) { // 이미 환불이 된 청구의 취소요청일 경우
+					dataMap = (Map<String, Object>) paramMap.get("RefundRes");
 				}else{
 					
 					// RPP 연동 관련 에러의 경우
@@ -158,6 +160,7 @@ public class ReverseController {
 				// 중복응답이 아니고, Transaction이 존재할 경우
 				if(!paramMap.containsKey("duplicateRes") && paramMap.containsKey("payInfo")) {
 					// SLA Insert
+					logVO.setIssuerRevserId(dataMap.get("issuerReverseId").toString());
 					commonService.insertSLA(paramMap, logVO);
 					
 					// RBP연동-차감취소 성공이거나 RBP연동 관련 에러가 났을 경우 

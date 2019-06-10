@@ -90,6 +90,10 @@ public class LogVO {
 			this.seqId = dTime + "." + rand01 + ".ADCB";
 		}
 	}
+	
+	public void setIssuerRevserId(String val) {
+		this.seqId = val;
+	}
 
 	public String getLogTime() {
 		return logTime;

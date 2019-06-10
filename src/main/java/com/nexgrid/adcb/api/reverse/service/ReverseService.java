@@ -1,6 +1,5 @@
 package com.nexgrid.adcb.api.reverse.service;
 
-import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
+import com.nexgrid.adcb.api.reverse.dao.ReverseDAO;
 import com.nexgrid.adcb.common.dao.CommonDAO;
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.service.CommonService;
@@ -30,6 +30,10 @@ public class ReverseService {
 	
 	@Autowired
 	private CommonService commonService;
+	
+	@Inject
+	private ReverseDAO reverseDAO;
+	
 	
 	/**
 	 * PaymentStatus 필수 Body값 체크
@@ -125,9 +129,37 @@ public class ReverseService {
 			
 		}else {	// 성공적인 거래의 취소요청일 경우
 			
-			// 환불이 된 건인데 취소요청이 들어온 경우
+			// 환불이 된 건인데 취소요청이 들어온 경우 -> 환불의 issuerRefundId를 reverse의 issuerReverseId로 줘야 한다.
 			if(payInfo.get("BALANCE") != null && payInfo.get("REVERSE_DT") == null) {
-				throw new CommonException(EnAdcbOmsCode.ALREADY_REFUNDED);
+				resMap.put("issuerPaymentId", payInfo.get("ISSUER_PAYMENTID"));
+				paramMap.put("issuerPaymentId", payInfo.get("ISSUER_PAYMENTID"));
+				String issuerRefundId;
+				
+				logVO.setFlow("[ADCB] --> [DB]");
+				
+				try {
+					issuerRefundId = reverseDAO.getIssuerRefundId(paramMap);
+				}catch(DataAccessException adcbExc){
+					/*SQLException se = (SQLException) adcbExc.getRootCause();
+					logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
+					
+					throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
+				}catch(ConnectException adcbExc) {
+					throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+				}catch (Exception adcbExc) {
+					throw new CommonException(EnAdcbOmsCode.DB_INVALID_ERROR, adcbExc.getMessage());
+				}
+				logVO.setFlow("[ADCB] <-- [DB]");
+				
+				Map<String, Object> Refundresult = new HashMap<>();
+				Refundresult.put("result", commonService.getSuccessResult());
+				Refundresult.put("paymentResponse", resMap);
+				Refundresult.put("issuerReverseId", issuerRefundId);
+				
+				paramMap.put("RefundRes", Refundresult);
+				
+				return false;
+				//throw new CommonException(EnAdcbOmsCode.ALREADY_REFUNDED);
 			}
 			
 			// 이미 취소가 된 경우
