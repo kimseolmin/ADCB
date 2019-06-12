@@ -1,5 +1,6 @@
 package com.nexgrid.adcb.api.reverse.service;
 
+import java.math.BigDecimal;
 import java.net.ConnectException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -131,6 +132,13 @@ public class ReverseService {
 			
 			// 환불이 된 건인데 취소요청이 들어온 경우 -> 환불의 issuerRefundId를 reverse의 issuerReverseId로 줘야 한다.
 			if(payInfo.get("BALANCE") != null && payInfo.get("REVERSE_DT") == null) {
+				
+				// 전액환불이 아닌 부분환불의 경우
+				int balance =  ((BigDecimal)payInfo.get("BALANCE")).intValue();
+				if(balance != 0) {
+					throw new CommonException(EnAdcbOmsCode.PARTIAL_REFUNDED);
+				}
+				
 				resMap.put("issuerPaymentId", payInfo.get("ISSUER_PAYMENTID"));
 				paramMap.put("issuerPaymentId", payInfo.get("ISSUER_PAYMENTID"));
 				String issuerRefundId;

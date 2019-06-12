@@ -26,6 +26,7 @@ public enum EnAdcbOmsCode {
 	, TRANSACTION_RESPONSE_FAIL("30000010", "402", "응답을 주지 못한 거래로 환불 또는 취소 요청이 들어옴", HttpStatus.OK)
 	, REVERSE_WINDOW_EXPIRED("30000011", "111", "취소 유효기간 만료", HttpStatus.OK)
 	, ALREADY_REVERSED("30000012", "106", "이미 취소된 요청", HttpStatus.OK)
+	, PARTIAL_REFUNDED("30000013", "4", "부분환불된 거래로 취소 요청이 들어옴", HttpStatus.OK)
 	, INVALID_ERROR("39999999", "4", HttpStatus.OK)
 	
 	
