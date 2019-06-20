@@ -47,7 +47,7 @@
 	
 		<Logger name="oms" additivity="false" level="info">
 			<AppenderRef ref="oms-log"/>
-	  		<AppenderRef ref="console" />
+	  		<!-- <AppenderRef ref="console" /> -->
 		</Logger>
 		<!-- <logger name="oms" additivity="false">
 			<level value="info" />
@@ -74,7 +74,7 @@
 		
 		
 		<Logger name="jdbc.sqlonly" additivity="false" level="info"> 
-	         <AppenderRef ref="console" />
+	       <!--   <AppenderRef ref="console" /> -->
 	    </Logger>
 		
 		
@@ -84,7 +84,7 @@
 								Server Start Log
 		=====================================================================
 		-->
-		<Root level="debug">
+		<Root level="info">
 			 <appender-ref ref="console" />
 		</Root>
 			

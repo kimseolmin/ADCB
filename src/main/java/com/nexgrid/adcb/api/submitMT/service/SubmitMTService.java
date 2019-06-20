@@ -83,13 +83,15 @@ public class SubmitMTService {
 			SmsSendVO smsVO = (SmsSendVO) paramMap.get("smsVO");
 			smsVO.setGubun("02");
 			
-			// 결제이용동의가 필요한 경우에만 "http://www.uplus.co.kr/css/rfrm/prvs/RetrieveUbDnUseTermsPop_19.hpi?popYn=Y" 메시지를 추가해서 보낸다.
-			if("Y".equals(terms_deny_yn)) {
-				String message = smsVO.getMessage() + " " + Init.readConfig.getSms_url();
-				smsVO.setMessage(message);
-			}
-			
+			String message = smsVO.getMessage() + " " + Init.readConfig.getSms_url();
+			smsVO.setMessage(message);
 			submitMTDAO.insertSmsSend(smsVO);
+			
+			// 결제이용동의가 필요한 경우에만 "http://www.uplus.co.kr/css/rfrm/prvs/RetrieveUbDnUseTermsPop_19.hpi?popYn=Y" 메시지를 추가해서 보낸다.
+//			if("Y".equals(terms_deny_yn)) {
+//				String message = smsVO.getMessage() + " " + Init.readConfig.getSms_url();
+//				smsVO.setMessage(message);
+//			}
 			
 			/*String message = smsVO.getMessage();
 			smsVO.setMessage(message.substring(0, message.indexOf("http")-1));*/
