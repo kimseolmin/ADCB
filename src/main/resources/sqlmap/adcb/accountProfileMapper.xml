@@ -13,7 +13,7 @@
 		WHERE 
 			INIT_DATE IN (#{param.current_month}, #{param.last_month})
 			AND CTN = #{param.ncasRes.CTN}
-			AND TO_CHAR (REG_DT, 'yyyymmdd') >= #{param.before_30}
+			AND REG_DT BETWEEN TO_DATE(#{param.day1}, 'YYYYMMDDHH24MISS') AND TO_DATE(#{param.day2}, 'YYYYMMDDHH24MISS')
  	</select>
  
  

@@ -214,8 +214,9 @@ public class AccountProfileService {
 		cal.add(Calendar.MONTH, -1);
 		paramMap.put("last_month", new SimpleDateFormat("yyyyMM").format(cal.getTime()));
 		cal.add(Calendar.MONTH, 1);
+		paramMap.put("day2", new SimpleDateFormat("yyyyMMdd").format(cal.getTime())+"235959");
 		cal.add(Calendar.DATE, -30);
-		paramMap.put("before_30", new SimpleDateFormat("yyyyMMdd").format(cal.getTime()));
+		paramMap.put("day1", new SimpleDateFormat("yyyyMMdd").format(cal.getTime())+"000000");
 		
 		try {
 			// 30일 이내 구매이력 체크

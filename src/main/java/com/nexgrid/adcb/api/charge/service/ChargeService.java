@@ -1,8 +1,6 @@
 package com.nexgrid.adcb.api.charge.service;
 
 import java.net.ConnectException;
-import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -10,12 +8,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import javax.inject.Inject;
 
 import org.apache.axis2.client.ServiceClient;
 import org.apache.commons.httpclient.ConnectTimeoutException;
+import org.mybatis.spring.MyBatisSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -528,8 +526,11 @@ public class ChargeService {
 		}catch(DataAccessException adcbExc){
 			/*SQLException se = (SQLException) adcbExc.getRootCause();
 			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
-			
-			throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
+			if(adcbExc instanceof MyBatisSystemException) {
+				throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
+			}else {
+				throw new CommonException(EnAdcbOmsCode.DB_ERROR, adcbExc.getMessage());
+			}
 		}catch(ConnectException adcbExc) {
 			throw new CommonException(EnAdcbOmsCode.DB_CONNECT_ERROR, adcbExc.getMessage());
 		}catch (Exception adcbExc) {
