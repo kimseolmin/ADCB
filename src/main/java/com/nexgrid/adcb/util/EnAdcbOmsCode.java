@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 public enum EnAdcbOmsCode {
 	
 	SUCCESS("20000000", "0", HttpStatus.OK)
+	, DUPLICAT_RESULT("20000001", "0", HttpStatus.OK)
 	, INVALID_URL_KEY("30100001", "2", "요청 URL 전문 형식 불일치", HttpStatus.OK)
 	, INVALID_URL_VALUE("30100002", "2", "요청 URL 필수 파라미터 값 오류", HttpStatus.OK)
 	, INVALID_HEADER_KEY("30200001", "2", "요청 HEADER 전문 형식 불일치", HttpStatus.OK)

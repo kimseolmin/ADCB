@@ -77,6 +77,7 @@ public class ChargeController {
 				dataMap = (Map<String, Object>)paramMap.get("duplicateRes");
 				Map<String, Object> result = (Map<String, Object>)dataMap.get("result");
 				logVO.setApiResultCode(result.get("reasonCode").toString());
+				logVO.setResultCode(EnAdcbOmsCode.DUPLICAT_RESULT.value());
 			}else {
 				// 최초 요청 데이터 저장
 				chargeService.insertChargeReq(paramMap, logVO);
@@ -97,8 +98,9 @@ public class ChargeController {
 				paramMap.put("http_status", HttpStatus.OK.value());
 				dataMap.put("result", commonService.getSuccessResult());
 				logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
+				logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 			}
-			logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
+			
 			
 			
 			
