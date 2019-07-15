@@ -81,8 +81,11 @@ public class SubmitMTService {
 		
 		try {
 			SmsSendVO smsVO = (SmsSendVO) paramMap.get("smsVO");
-			smsVO.setGubun("01");
-//			smsVO.setGubun("02");
+			smsVO.setGubun("02");
+			submitMTDAO.insertSmsSend(smsVO);
+			
+			
+//			smsVO.setGubun("01");
 //			
 //			String message = smsVO.getMessage() + " " + Init.readConfig.getSms_url();
 //			smsVO.setMessage(message);
@@ -98,16 +101,16 @@ public class SubmitMTService {
 			smsVO.setMessage(message.substring(0, message.indexOf("http")-1));*/
 			
 			// 80byte가 넘어가면 잘라서 두번보낸다.
-			if(smsVO.getMessage().getBytes().length > 80) {
-				String message = smsVO.getMessage();
-				smsVO.setMessage(new String(message.getBytes(), 0, 78));
-				submitMTDAO.insertSmsSend(smsVO);
-				
-				smsVO.setMessage(new String(message.getBytes(), 78, message.getBytes().length-78));
-				submitMTDAO.insertSmsSend(smsVO);
-			}else{
-				submitMTDAO.insertSmsSend(smsVO);
-			}
+//			if(smsVO.getMessage().getBytes().length > 80) {
+//				String message = smsVO.getMessage();
+//				smsVO.setMessage(new String(message.getBytes(), 0, 78));
+//				submitMTDAO.insertSmsSend(smsVO);
+//				
+//				smsVO.setMessage(new String(message.getBytes(), 78, message.getBytes().length-78));
+//				submitMTDAO.insertSmsSend(smsVO);
+//			}else{
+//				submitMTDAO.insertSmsSend(smsVO);
+//			}
 			
 			
 			// 결제이용동의가 필요한 경우에만 "http://www.uplus.co.kr/css/rfrm/prvs/RetrieveUbDnUseTermsPop_19.hpi?popYn=Y" 메시지를 보낸다.

@@ -44,7 +44,7 @@ public enum EnAdcbOmsCode {
 	
 	
 	, NCAS_BLOCK_CORP("51000003", "117", "법인폰 차단", HttpStatus.OK)
-	, NCAS_BLOCK_PAUSE("51000003", "104", "일시중지폰 차단", HttpStatus.OK)
+	, NCAS_BLOCK_PAUSE("51000010", "104", "일시중지폰 차단", HttpStatus.OK)
 	, NCAS_BLOCK_LOSS("51000004", "104", "분실등록폰 차단", HttpStatus.OK)
 	, NCAS_BLOCK_PREPAY("51000005", "118", "선불가입자 차단", HttpStatus.OK)
 	, NCAS_BLOCK_IRREG("51000006", "118", "직권사용자 차단", HttpStatus.OK)
