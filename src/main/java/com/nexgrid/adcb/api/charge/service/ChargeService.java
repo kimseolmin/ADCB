@@ -167,7 +167,7 @@ public class ChargeService {
     				mode = "2";
     			}
     			paramMap.put("MODE", mode);
-//    			commonService.doEsbCm181(paramMap, logVO);
+    			commonService.doEsbCm181(paramMap, logVO);
     		}
     		
     		
