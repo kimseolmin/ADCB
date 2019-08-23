@@ -24,9 +24,9 @@
 
 	<!-- RBP(통합한도) 연동 -->
 	<entry key="RBP_PRIMARY_IP">127.0.0.1</entry>
-	<entry key="RBP_PRIMARY_PORT">40000</entry>
+	<entry key="RBP_PRIMARY_PORT">20000</entry>
 	<entry key="RBP_SECONDARY_IP">127.0.0.1</entry>
-	<entry key="RBP_SECONDARY_PORT">40001</entry>
+	<entry key="RBP_SECONDARY_PORT">20001</entry>
 	<entry key="RBP_CONNECT_TIME_OUT">5000</entry>
 	<entry key="RBP_RECEIVE_TIME_OUT">60000000</entry>
 	<entry key="RBP_RECONNECT_SLEEP_TIME">1000</entry>
@@ -41,9 +41,9 @@
 	
 	<!-- RCSG 연동 -->
 	<entry key="RCSG_PRIMARY_IP">127.0.0.1</entry>
-	<entry key="RCSG_PRIMARY_PORT">40002</entry>
+	<entry key="RCSG_PRIMARY_PORT">20002</entry>
 	<entry key="RCSG_SECONDARY_IP">127.0.0.1</entry>
-	<entry key="RCSG_SECONDARY_PORT">40003</entry>
+	<entry key="RCSG_SECONDARY_PORT">20003</entry>
 	<entry key="RCSG_CONNECT_TIME_OUT">5000</entry>
 	<entry key="RCSG_RECEIVE_TIME_OUT">60000000</entry>
 	<entry key="RCSG_RECONNECT_SLEEP_TIME">1000</entry>

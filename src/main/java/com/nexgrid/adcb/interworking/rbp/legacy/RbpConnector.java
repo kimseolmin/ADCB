@@ -143,12 +143,8 @@ public class RbpConnector implements Runnable{
 		@Override
 		public void run() {
 			
-			/*if(test) {
-				// 정기적으로 health check
-				invokeHealthCheck();
-				test = false;
-			}*/
-//			invokeHealthCheck();
+
+			invokeHealthCheck();
 			
 		}
 		
