@@ -405,7 +405,14 @@ public class RefundService {
 		
 		
 		EaiVO eaiVO = new EaiVO();
-		eaiVO.setNew_request_type("0");
+		
+		// 19.09.03: 환불 년월과 결제 년월이 다른 경우 new_request_type이 1이어야 함.
+		if(reqCancel.get("END_USE_TIME").substring(0, 6).equals(payInfo.get("START_USE_TIME").toString().substring(0, 6))) {
+			eaiVO.setNew_request_type("0");
+		}else {
+			eaiVO.setNew_request_type("1");
+		}
+		
 		eaiVO.setNew_ban_unpaid_yn_code(payInfo.get("BAN_UNPAID_YN_CODE").toString());
 		eaiVO.setNew_account_type(paramMap.containsKey("Req_116") ? "03" : "05");	// 전체환불: 03, 부분환불: 05
 		eaiVO.setNew_cust_grd_cd(payInfo.get("CUST_GRD_CD") == null ? "" : payInfo.get("CUST_GRD_CD").toString());
