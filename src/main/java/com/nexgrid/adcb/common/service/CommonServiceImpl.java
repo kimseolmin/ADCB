@@ -602,7 +602,12 @@ public class CommonServiceImpl implements CommonService{
 		
 		if(rbpResMap.containsKey("CUST_GRD_CD")) {
 			if(rbpResMap.get("CUST_GRD_CD").equals("7")) { // 7등급 차단
-				throw new CommonException(EnAdcbOmsCode.RBP_BLOCK_GRADE);
+				if("AccountProfile".equals(logVO.getApiType())) {
+					return false;
+				}else {
+					throw new CommonException(EnAdcbOmsCode.RBP_BLOCK_GRADE);
+				}
+				
 			}
 		}
 		
