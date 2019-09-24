@@ -417,7 +417,10 @@ public class RefundService {
 		eaiVO.setNew_account_type(paramMap.containsKey("Req_116") ? "03" : "05");	// 전체환불: 03, 부분환불: 05
 		eaiVO.setNew_cust_grd_cd(payInfo.get("CUST_GRD_CD") == null ? "" : payInfo.get("CUST_GRD_CD").toString());
 		eaiVO.setNew_prss_yymm(payInfo.get("START_USE_TIME").toString().substring(0, 6));
-		eaiVO.setNew_request_date(new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(reqCancel.get("END_USE_TIME")));
+		
+		// 19.09.17: 환불년월일시분초 -> 결제년월일시분초
+		eaiVO.setNew_request_date(new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(payInfo.get("START_USE_TIME").toString()));
+		
 		eaiVO.setNew_total(refundAmount.get("amount").toString());
 		eaiVO.setNew_ban(payInfo.get("BAN").toString());
 		eaiVO.setNew_ace_no(payInfo.get("ACE_NO").toString());

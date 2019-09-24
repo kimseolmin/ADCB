@@ -216,7 +216,10 @@ public class ReverseService {
 		eaiVO.setNew_account_type("03");
 		eaiVO.setNew_cust_grd_cd(payInfo.get("CUST_GRD_CD") == null ? "" : payInfo.get("CUST_GRD_CD").toString());
 		eaiVO.setNew_prss_yymm(payInfo.get("START_USE_TIME").toString().substring(0, 6));
-		eaiVO.setNew_request_date(new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(reqCancel.get("END_USE_TIME")));
+		
+		// 19.09.17: 취소년월일시분초 -> 결제년월일시분초
+		eaiVO.setNew_request_date(new SimpleDateFormat("yyyyMMddHHmmssSSS").parse(payInfo.get("START_USE_TIME").toString()));
+		
 		eaiVO.setNew_total(payInfo.get("AMOUNT").toString());
 		eaiVO.setNew_ban(payInfo.get("BAN").toString());
 		eaiVO.setNew_ace_no(payInfo.get("ACE_NO").toString());
