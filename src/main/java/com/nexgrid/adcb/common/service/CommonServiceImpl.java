@@ -824,7 +824,7 @@ public class CommonServiceImpl implements CommonService{
 	public SmsSendVO addSmsInfo(Map<String, Object> paramMap, String contentType, String to_ctn) throws Exception {
 				
 		SmsSendVO smsVO = new SmsSendVO();
-		smsVO.setGubun("01");
+		smsVO.setGubun("02"); // sms:01, mms:02 (SMS-> MMS 수정 20190930_PAR)
 		smsVO.setTo_ctn(to_ctn);
 		
 		
