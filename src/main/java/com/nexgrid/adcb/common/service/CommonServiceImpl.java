@@ -600,6 +600,12 @@ public class CommonServiceImpl implements CommonService{
 		// 한도조회 결과 paramMap에 저장
 		paramMap.put("Res_"+opCode, rbpResMap);
 		
+		if("AccountProfile".equals(logVO.getApiType())) { //  charge API result와 다르게 reasonCode=0 (OK), eligibility=false_1910_PAR 추가
+			if(rbpResMap.get("adcbDiffResult") != null) {
+				return false;
+			}
+		}
+		
 		if(rbpResMap.containsKey("CUST_GRD_CD")) {
 			if(rbpResMap.get("CUST_GRD_CD").equals("7")) { // 7등급 차단
 				if("AccountProfile".equals(logVO.getApiType())) {

@@ -9,7 +9,7 @@ public enum EnRbpResultCode {
 	RS_4000("4000", "4", "SOC-CODE 미 등록", HttpStatus.OK)
 	, RS_4100("4100", "4", "SYSTEM ERROR", HttpStatus.OK)
 	, RS_4002("4002", "4", "통합한도 ERROR", HttpStatus.OK)
-	, RS_4003("4003", "104", "한도고객 아님", HttpStatus.OK)
+	, RS_4003("4003", "104", "한도고객 아님", HttpStatus.OK, true)
 	, RS_4004("4004", "105", "존재하지 않는 고객", HttpStatus.OK)
 	, RS_4008("4008", "109", "잔여한도 부족", HttpStatus.OK)
 	, RS_4009("4009", "123", "중복된 Request", HttpStatus.OK)
@@ -26,6 +26,7 @@ public enum EnRbpResultCode {
 	, RS_4044("4044", "110", "이전 월 내역에 대한 결제 취소", HttpStatus.OK)
 	, RS_5004("5004", "4", "START-USE-TIME 없음", HttpStatus.OK)
 	, RS_1100("1100", "4", "회선상태에 따른 서비스 임시 차단", HttpStatus.OK)
+	, RS_1200("1200", "118", "직권사용자 차단", HttpStatus.OK, true) // 오류코드 1200 추가_191011_par 
 	, RS_INVALID("4", "정의되지 않은 RESULT", HttpStatus.OK);
 	
 	
@@ -34,6 +35,7 @@ public enum EnRbpResultCode {
 	private String resMsg = "";
 	private String opCode = "";
 	private HttpStatus status = null;
+	private Boolean diffResult = false; // AccountProfile 에서 Charge와 다른 result인지 여부
 	
 	
 	EnRbpResultCode(String mappingCode, String resMsg, HttpStatus status){
@@ -49,6 +51,14 @@ public enum EnRbpResultCode {
 		this.status = status;
 	}
 	
+	EnRbpResultCode(String defaultValue, String mappingCode, String resMsg, HttpStatus status, Boolean diffResult){ // AccountProfile 에서 Charge와 다른 result인지 여부 추가_1910_par 
+		this.defaultValue = defaultValue;
+		this.mappingCode = mappingCode;
+		this.resMsg = resMsg;
+		this.status = status;
+		this.diffResult = diffResult;
+		
+	}
 	EnRbpResultCode(String defaultValue, String mappingCode, String resMsg, String opCode, HttpStatus status){
 		this.defaultValue = defaultValue;
 		this.mappingCode = mappingCode;
@@ -76,6 +86,9 @@ public enum EnRbpResultCode {
 	public HttpStatus getStatus() {
 		return this.status;
 	}
-	
-	
+
+	public Boolean getDiffResult() {
+		return diffResult;
+	}
+
 }

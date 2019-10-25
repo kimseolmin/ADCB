@@ -136,11 +136,19 @@ public class RbpClientService {
 				logVO.setRbpResultCode(result);
 				
 				if(!"0000".equals(resMap.get("RESULT"))) {
+					logger.info("[" + logVO.getSeqId() + "] RBP RESULT= " + result);
+					
 					// RBP 연동 결과 paramMap에 저장
 					paramMap.put("Res_" + opCode, resMap);
 					for(EnRbpResultCode e : EnRbpResultCode.values()) {
 						// 에러코드를 찾아서 매핑한다.
 						if(e.getDefaultValue().equals(result)) {
+							if("AccountProfile".equals(logVO.getApiType()) && e.getDiffResult()){ // charge API result와 다르게 reasonCode=0 (OK), eligibility=false로 _1910_PAR 추가
+								resMap.put("adcbDiffResult", "true");
+								
+								return resMap;
+							} 
+							
 							if("".equals(e.getOpCode())) { 
 								throw new CommonException(e.getStatus(), e.getMappingCode(), EnAdcbOmsCode.RBP_API.value() + e.getDefaultValue(), e.getResMsg());
 							}else { // RBP의 결과를 boku의 Reason코드로 매핑 시 opCode에 따라 다른 reasonCode를 줘야 하는 경우
