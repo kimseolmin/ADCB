@@ -136,7 +136,7 @@ public class RbpClientService {
 				logVO.setRbpResultCode(result);
 				
 				if(!"0000".equals(resMap.get("RESULT"))) {
-					logger.info("[" + logVO.getSeqId() + "] RBP RESULT= " + result);
+					logger.info("[" + logVO.getSeqId() + "] RBP RESULT=" + result + "(" + opCode  + ")");
 					
 					// RBP 연동 결과 paramMap에 저장
 					paramMap.put("Res_" + opCode, resMap);

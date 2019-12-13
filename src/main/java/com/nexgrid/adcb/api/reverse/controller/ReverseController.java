@@ -132,15 +132,16 @@ public class ReverseController {
 					dataMap = (Map<String, Object>) paramMap.get("RefundRes");
 				}else{
 					
-					// RPP 연동 관련 에러의 경우
-					if(EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
+					// RPP, RCSG 연동 관련 에러의 경우 (2020.01.28_par_RCSG도 추가)
+					if(EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))
+							|| EnAdcbOmsCode.RCSG_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
 						
-						// RPP 연동 관련 에러의 경우에는 BOKU에게는 성공으로 줘야 함.
+						// RPP, RCSG 연동 관련 에러의 경우에는 BOKU에게는 성공으로 줘야 함.
 						dataMap = new HashMap<>();
 						dataMap.put("result", commonService.getSuccessResult());
 						dataMap.put("paymentResponse", paramMap.get("paymentResponse"));
 						
-						// RPP 연동 관련 에러의 경우에는 BOKU에게는 성공으로 주기 때문에  OMS ResultCode도 성공으로 남긴다.
+						// RPP, RCSG 연동 관련 에러의 경우에는 BOKU에게는 성공으로 주기 때문에  OMS ResultCode도 성공으로 남긴다.
 						logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 						logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 					}
@@ -163,13 +164,16 @@ public class ReverseController {
 					logVO.setIssuerRevserId(dataMap.get("issuerReverseId").toString());
 					commonService.insertSLA(paramMap, logVO);
 					
-					// RBP연동-차감취소 성공이거나 RBP연동 관련 에러가 났을 경우 
+					// RBP연동-차감취소 성공이거나 RBP, RCSG 연동 관련 에러가 났을 경우 
 					if((chargeResponse && EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode()))
-							|| EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
+							|| EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))
+							|| EnAdcbOmsCode.RCSG_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
 						// charge_info UPDATE
 						paramMap.put("reverse_dt", new Date());
 						paramMap.put("issuerReverseId", logVO.getSeqId());
 						paramMap.put("transaction_type", "C");
+						
+						// 취소 처리 누적 금액 & 환불후 잔액 등 UPDATE
 						commonService.setBalance(paramMap, logVO);
 						
 						// EAI

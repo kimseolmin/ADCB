@@ -41,6 +41,7 @@ import com.nexgrid.adcb.common.vo.SmsSendVO;
 import com.nexgrid.adcb.interworking.rbp.message.EnRbpResultCode;
 import com.nexgrid.adcb.interworking.rbp.service.RbpClientService;
 import com.nexgrid.adcb.interworking.rbp.util.RbpKeyGenerator;
+import com.nexgrid.adcb.interworking.rcsg.service.RcsgClientService;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.LogUtil;
@@ -68,6 +69,9 @@ public class CommonServiceImpl implements CommonService{
 	
 	@Autowired
 	private RbpClientService rbpClientService;
+	
+	@Autowired
+	private RcsgClientService rcsgClientService;
 	
 	private org.slf4j.Logger serviceLog = LoggerFactory.getLogger(getClass());
 
@@ -805,7 +809,50 @@ public class CommonServiceImpl implements CommonService{
 		paramMap.put("Res_"+opCode, rbpResMap);
 	}
 	
+	/*
+	 * 2020.01.28_par 추가
+	 */
+	@Override
+	public void doRcsgCancel(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+		Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
+		String ctn = StringUtil.getCtn344(payInfo.get("CTN").toString());
+		String fee_type = payInfo.get("FEE_TYPE").toString();
+		String br_id = payInfo.get("BR_ID").toString();
+		//String refundInfo = payInfo.get("REFUNDINFO").toString();
+		String start_use_time = payInfo.get("START_USE_TIME").toString(); // 결제 시 start_use_time으로 셋팅
+		String price = payInfo.get("AMOUNT").toString();
+		
+		
+		Map<String, String> rcsgReqMap = new HashMap<String, String>();	// RCSG 요청
+		Map<String, String> rcsgResMap = null;	// RCSG 응답
+		
+		// RCSG연동을 위한 파마리터 셋팅
+		rcsgReqMap.put("CTN", ctn);	// 과금번호
+		rcsgReqMap.put("SOC_CODE", fee_type); // 가입자의 요금제 코드 
+		rcsgReqMap.put("CDRDATA", Init.readConfig.getRcsg_cdrdata()); // CDR 버전
+		rcsgReqMap.put("BR_ID", br_id); // Business RequestID
+		rcsgReqMap.put("RCVER_CTN", ctn); // 수신자의 전화번호
+		//rcsgReqMap.put("SERVICE_FILTER", refundInfo); // 즉시차감 return 전문의 REFUNDINFO값을 넣는다.
+		rcsgReqMap.put("SERVICE_FILTER", ctn);
+		rcsgReqMap.put("START_USE_TIME", start_use_time); 
+		rcsgReqMap.put("END_USE_TIME", StringUtil.getCurrentTimeMilli());
+		rcsgReqMap.put("CALLED_NETWORK", Init.readConfig.getRcsg_called_network()); // 착신 사업자 코드
+		rcsgReqMap.put("PRICE", price);
+		rcsgReqMap.put("PID", Init.readConfig.getRcsg_pid()); // Product ID
+		rcsgReqMap.put("DBID", Init.readConfig.getRcsg_dbid()); // DETAIL BILLING ID
 	
+		// 결제취소 요청 paramMap에 저장
+		String opCode = Init.readConfig.getRcsg_opcode_cancel();
+		paramMap.put("Req_"+opCode, rcsgReqMap);
+		
+		logVO.setFlow("[ADCB] --> [RCSG]");
+		rcsgResMap = rcsgClientService.doRequest(logVO, opCode, paramMap);
+			
+		// 즉시차감 결과 paramMap에 저장
+		paramMap.put("Res_"+opCode, rcsgResMap);
+
+	}
+
 	
 	 public void setBalance(Map<String, Object> paramMap, LogVO logVO) throws Exception{
 		 logVO.setFlow("[ADCB] --> [DB]");
@@ -878,11 +925,16 @@ public class CommonServiceImpl implements CommonService{
 		}else if("cancel_complete".equals(contentType)) {
 			Map<String, String> reqCancel = (Map<String, String>)(paramMap.containsKey("Req_116") ? paramMap.get("Req_116") : paramMap.get("Req_117"));
 			Map<String, String> resCancel = (Map<String, String>)(paramMap.containsKey("Res_116") ? paramMap.get("Res_116") : paramMap.get("Res_117"));
-			
+			Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
+			String young_fee_yn = payInfo.get("YOUNG_FEE_YN").toString(); // 실시간과금대상요금제(RCSG연동대상)
+																			// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'			
 			String start_date = reqCancel.get("END_USE_TIME"); // yyyyMMddHHmmssSSS
-			int svc_ctg_avail = Integer.parseInt(resCancel.get("SVC_CTG_AVAIL"));
 			int price = Integer.parseInt(reqCancel.get("PRICE"));
-			
+
+			// RBP의 경우에는 차감 취소된 데이터가 오고, RCSG의 경우에는 차감 취소되지 않은 데이터가 온다. 2019.11.01_par_수정
+			int svc_ctg_avail = "N".equals(young_fee_yn) ? 
+										Integer.parseInt(resCancel.get("SVC_CTG_AVAIL")) : Integer.parseInt(resCancel.get("INFO_AVAIL")) + price ;
+										
 			// [LG U+ 취소안내]&#10;{month}/{day} {hour}:{minute}&#10;ITUNES.COM&#10;{INFO_CHARGE}원&#10;잔여한도 {SVC_CTG_AVAIL}원
 			String msg = Init.readConfig.getCancel_complete();
 			msg = msg.replace("{month}", start_date.substring(4, 6)).replace("{day}", start_date.substring(6, 8))
@@ -957,7 +1009,8 @@ public class CommonServiceImpl implements CommonService{
 			throw new CommonException(EnAdcbOmsCode.MAINTENANCE);
 		}
 	}
-	 
+
+
 	 
 	 
 	

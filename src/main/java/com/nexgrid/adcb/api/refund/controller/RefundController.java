@@ -78,7 +78,7 @@ public class RefundController {
 				// 부분 환불처리 및 환불 유효기간 체크 & 결제 정보 저장
 				refundService.partialRefundCheck(paramMap, logVO);
 				
-				// refund (RBP 연동)
+				// refund (RBP, RCSG 연동)
 				refundService.refund(paramMap, logVO);
 				
 				// 취소 성공 시 SMS List paramMap에 저장
@@ -152,14 +152,15 @@ public class RefundController {
 					
 				}else { // 중복 요청이 아닐 경우에만 응답을 준 후  EAI, SLA, SMS를 처리한다. (BOKU가 최대 응답속도를 1초로 제한을 뒀기 때문.)
 					
-					// RPP 연동 관련 에러의 경우
-					if(EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
-						
-						// RPP 연동 관련 에러의 경우에는 BOKU에게는 성공으로 줘야 함.
+					// RPP, RCSG 연동 관련 에러의 경우 (2020.01.28_par_RCSG도 추가)
+					if(EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))
+							|| EnAdcbOmsCode.RCSG_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
+	
+						// RPP, RCSG 연동 관련 에러의 경우에는 BOKU에게는 성공으로 줘야 함.
 						dataMap = new HashMap<>();
 						dataMap.put("result", commonService.getSuccessResult());
 						
-						// RPP 연동 관련 에러의 경우에는 BOKU에게는 성공으로 주기 때문에  OMS ResultCode도 성공으로 남긴다.
+						// RPP, RCSG 연동 관련 에러의 경우에는 BOKU에게는 성공으로 주기 때문에  OMS ResultCode도 성공으로 남긴다.
 						logVO.setResultCode(EnAdcbOmsCode.SUCCESS.value());
 						logVO.setApiResultCode(EnAdcbOmsCode.SUCCESS.mappingCode());
 					}
@@ -185,9 +186,10 @@ public class RefundController {
 						commonService.insertSLA(paramMap, logVO);
 					}
 					
-					// Refund API가 성공이거나 RBP연동 관련 에러가 났을 경우  
+					// Refund API가 성공이거나 RBP, RCSG 연동 관련 에러가 났을 경우
 					if(EnAdcbOmsCode.SUCCESS.value().equals(logVO.getResultCode()) 
-							|| EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
+							|| EnAdcbOmsCode.RBP_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))
+							|| EnAdcbOmsCode.RCSG_API.value().substring(0, 2).equals(logVO.getResultCode().substring(0, 2))) {
 						
 						// 환불 처리 누적 금액 & 환불후 잔액 UPDATE
 						commonService.setBalance(paramMap, logVO);

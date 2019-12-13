@@ -38,6 +38,9 @@ public class RefundService {
 	@Autowired
 	private RbpClientService rbpClientService;
 	
+	@Autowired
+	private RcsgClientService rcsgClientService;
+	
 	@Inject
 	private RefundDAO refundDAO;
 	
@@ -235,10 +238,10 @@ public class RefundService {
 			throw new CommonException(EnAdcbOmsCode.TRANSACTION_FAIL);
 		}
 		
-		// 청소년 요금제의 거래로 환불을 요청한 경우
-		if("Y".equals(payInfo.get("YOUNG_FEE_YN"))) {
-			throw new CommonException(EnAdcbOmsCode.REFUND_YOUNG);
-		}
+		// 청소년 요금제의 거래로 환불을 요청한 경우 (2020.01.28_par 주석 처리)
+//		if("Y".equals(payInfo.get("YOUNG_FEE_YN"))) {
+//			throw new CommonException(EnAdcbOmsCode.REFUND_YOUNG);
+//		}
 		
 		Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
 		int refund = (Integer)refundAmount.get("amount");
@@ -279,6 +282,8 @@ public class RefundService {
 	public void refund(Map<String, Object> paramMap, LogVO logVO) throws Exception {
 		
 		Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
+		String young_fee_yn = payInfo.get("YOUNG_FEE_YN").toString(); // 실시간과금대상요금제(RCSG연동대상)
+																	// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
 		String svc_auth = payInfo.get("SVC_AUTH").toString(); // 부정사용자|장애인부가서비스|65세이상부가서비스
 															// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
 															// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
@@ -299,16 +304,29 @@ public class RefundService {
 			// ESB 연동
 			commonService.doEsbCm181(paramMap, logVO);
 		}
-		
+
 		// 통합한도 연동: 차감취소
 		int payAmount = ((BigDecimal)payInfo.get("AMOUNT")).intValue();
 		Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
 		int refundamount = (Integer)refundAmount.get("amount");
 		
 		if(payAmount == refundamount) {	// 전체 환불일 경우
-			commonService.doRbpCancel(paramMap, logVO);
+	    	//청소년요금제와 일반 구분
+	    	if("N".equals(young_fee_yn)){ // 14세 이상 중에 청소년요금제가 아닌 경우
+	    		// RBP 연동
+	    		commonService.doRbpCancel(paramMap, logVO);
+	    	}else {
+	    		// RCSG 연동 (2020.01.28_par 추가)
+	    		commonService.doRcsgCancel(paramMap, logVO); 
+	    	}
 		}else { // 부분 환불일 경우
-			doRbpCancelPart(paramMap, logVO);
+			if("N".equals(young_fee_yn)){ 
+				// RBP 연동
+				doRbpCancelPart(paramMap, logVO);
+			}else {
+				// RCSG 연동 (2020.01.28_par 추가)
+				doRcsgCancelPart(paramMap, logVO);
+			}
 		}
 	
 	}
@@ -389,6 +407,53 @@ public class RefundService {
 	 }
 	 
 	 
+	 
+	 /**
+	  * 부분취소 (RCSG연동) 2019.11.01_par
+	  * @param paramMap
+	  * @param logVO
+	  * @throws Exception
+	  */
+	 public void doRcsgCancelPart(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+		 
+		 Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
+		 String ctn = StringUtil.getCtn344(payInfo.get("CTN").toString());
+		 String fee_type = payInfo.get("FEE_TYPE").toString();
+		 String br_id = payInfo.get("BR_ID").toString();
+//		 String refundInfo = payInfo.get("REFUNDINFO").toString();
+		 String start_use_time = payInfo.get("START_USE_TIME").toString();
+		 Map<String, Object> refundAmount = (HashMap<String, Object>)paramMap.get("refundAmount");
+		 String price = refundAmount.get("amount").toString();
+		 
+		 Map<String, String> rcsgReqMap = new HashMap<String, String>();	// RCSG 요청
+		 Map<String, String> rcsgResMap = null;	// RCSG 응답
+		 
+		// RCSG연동을 위한 파마리터 셋팅
+		rcsgReqMap.put("CTN", ctn);	// 과금번호
+		rcsgReqMap.put("SOC_CODE", fee_type); // 가입자의 요금제 코드 
+		rcsgReqMap.put("CDRDATA", Init.readConfig.getRcsg_cdrdata()); // CDR 버전
+		rcsgReqMap.put("BR_ID", br_id); // Business RequestID
+		rcsgReqMap.put("RCVER_CTN", ctn); // 수신자의 전화번호
+//		rcsgReqMap.put("SERVICE_FILTER", refundInfo); // 즉시차감 return 전문의 REFUNDINFO값을 넣는다.
+		rcsgReqMap.put("SERVICE_FILTER", ctn);
+		rcsgReqMap.put("START_USE_TIME", start_use_time); 
+		rcsgReqMap.put("END_USE_TIME", StringUtil.getCurrentTimeMilli());
+		rcsgReqMap.put("CALLED_NETWORK", Init.readConfig.getRcsg_called_network()); // 착신 사업자 코드
+		rcsgReqMap.put("PRICE", price);
+		rcsgReqMap.put("PID", Init.readConfig.getRcsg_pid()); // Product ID
+		rcsgReqMap.put("DBID", Init.readConfig.getRcsg_dbid()); // DETAIL BILLING ID
+
+		// 부분취소 요청 paramMap에 저장
+		String opCode = Init.readConfig.getRcsg_opcode_cancel_part();
+		paramMap.put("Req_"+opCode, rcsgReqMap);
+			
+		logVO.setFlow("[ADCB] --> [RCSG]");
+		rcsgResMap = rcsgClientService.doRequest(logVO, opCode, paramMap);
+			
+		// 즉시차감 결과 paramMap에 저장
+		paramMap.put("Res_"+opCode, rcsgResMap);
+	 }
+
 	 
 	 
 	/**

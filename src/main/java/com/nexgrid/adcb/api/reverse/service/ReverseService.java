@@ -177,10 +177,10 @@ public class ReverseService {
 				paramMap.put("duplicateRes", duplicateRes);
 			}
 			
-			// 청소년요금제의 거래일 경우
-			if("Y".equals(payInfo.get("YOUNG_FEE_YN"))) {
-				throw new CommonException(EnAdcbOmsCode.REFUND_YOUNG);
-			}
+			// 청소년요금제의 거래일 경우 (2020.01.28_par 주석)
+//			if("Y".equals(payInfo.get("YOUNG_FEE_YN"))) {
+//				throw new CommonException(EnAdcbOmsCode.REFUND_YOUNG);
+//			}
 			
 			resMap.put("issuerPaymentId", payInfo.get("ISSUER_PAYMENTID"));
 			chargeResponse = true;
@@ -255,6 +255,8 @@ public class ReverseService {
 	public void reverse(Map<String, Object> paramMap, LogVO logVO) throws Exception {
 		
 		Map<String, Object> payInfo = (Map<String, Object>)paramMap.get("payInfo");
+		String young_fee_yn = payInfo.get("YOUNG_FEE_YN").toString(); // 실시간과금대상요금제(RCSG연동대상)
+														// 실시간과금대상요금제에 가입되어있는 경우 'Y', 미가입은 'N'
 		String svc_auth = payInfo.get("SVC_AUTH").toString(); // 부정사용자|장애인부가서비스|65세이상부가서비스
 															// 입력정보: LRZ0001705|LRZ0003849|LRZ0003850
 															// 출력정보: 0|1 (가입은 '1', 미가입은 '0')
@@ -276,8 +278,16 @@ public class ReverseService {
 			commonService.doEsbCm181(paramMap, logVO);
 		}
 		
-		// 통합한도 연동: 차감취소
-		commonService.doRbpCancel(paramMap, logVO);
+    	//청소년요금제와 일반 구분
+    	if("N".equals(young_fee_yn)){ // 14세 이상 중에 청소년요금제가 아닌 경우
+			// 통합한도 연동: 차감취소
+			commonService.doRbpCancel(paramMap, logVO);
+			
+    	}else {
+    		// RCSG 연동: 차감취소 (2020.01.28_par 추가)
+    		commonService.doRcsgCancel(paramMap, logVO);
+    	}
+    	
 	}
 	
 	

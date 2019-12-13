@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgHeader;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgInvokeCancel;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgInvokeCancelPart;
 import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgInvokeCharge;
 import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgInvokeConQry;
 import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgInvokeSelectLimit;
@@ -121,6 +123,14 @@ public class RcsgMessageConverter {
 			}
 		}else if(Init.readConfig.getRcsg_opcode_charge().equals(opCode)) { // 한도 즉시 차감
 			for(EnRcsgInvokeCharge e : EnRcsgInvokeCharge.values()) {
+				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
+			}
+		}else if(Init.readConfig.getRbp_opcode_cancel().equals(opCode)) { // 결제 취소 (2020.01.28_par 추가)
+			for(EnRcsgInvokeCancel e : EnRcsgInvokeCancel.values()) {
+				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
+			}
+		}else if(Init.readConfig.getRbp_opcode_cancel_part().equals(opCode)) { // 결제 취소 (2020.01.28_par 추가)
+			for(EnRcsgInvokeCancelPart e : EnRcsgInvokeCancelPart.values()) {
 				body += getStrParameter(tagMap.get(e.toString()), reqMap.get(e.toString()), e.getDefaultValue());
 			}
 		}

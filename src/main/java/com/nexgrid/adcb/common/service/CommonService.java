@@ -123,7 +123,17 @@ public interface CommonService {
 	
 	
 	
-	 /**
+	/**
+	 * RCSG 연동: 차감취소 (2020.01.28_par 추가)
+	 * @param paramMap
+	 * @param logVO
+	 * @throws Exception
+	 */
+	void doRcsgCancel(Map<String, Object> paramMap, LogVO logVO) throws Exception;
+	
+	
+	
+	/**
 	  * 환불 처리 누적 금액 & 환불후 잔액 UPDATE
 	  * @param paramMap
 	  * @param logVO

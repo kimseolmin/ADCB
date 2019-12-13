@@ -1,7 +1,7 @@
 package com.nexgrid.adcb.interworking.rcsg.message;
 
-public enum EnRcsgInvokeCharge {
-// 필수인 항목과 amount만 보냄 _2020.01.28_par 수정
+public enum EnRcsgInvokeCancel { // 2020.01.28_par 생성
+// 필수인 항목과 amount만 보냄
 	  CTN
 	, SOC_CODE
 	, CDRDATA
@@ -15,7 +15,7 @@ public enum EnRcsgInvokeCharge {
 	, SERVICE_TYPE("00")
 	, SERVICE_FILTER
 	, START_USE_TIME
-	, STATUS("100C")
+	, STATUS("101C") //차감취소시 101C 고정
 	, END_USE_TIME
 //	, CALL_REFERENCE
 	, CALLED_NETWORK("102200")
@@ -42,10 +42,10 @@ public enum EnRcsgInvokeCharge {
 	private int tagLength = 3;
 	private String defaultValue = null;
 	
-	EnRcsgInvokeCharge() {
+	EnRcsgInvokeCancel() {
 	}
 	
-	EnRcsgInvokeCharge(String defaultValue) {
+	EnRcsgInvokeCancel(String defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 

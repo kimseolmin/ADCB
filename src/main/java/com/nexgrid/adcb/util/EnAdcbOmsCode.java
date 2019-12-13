@@ -19,7 +19,7 @@ public enum EnAdcbOmsCode {
 	, TRANSACTION_NOT_FOUND("30000002", "107", "거래내역을 찾을 수 없음", HttpStatus.OK)
 	, REFUND_DUPLICATE_REQ("30000003", "123", "환불 API 중복 요청", HttpStatus.OK)
 	, UNKNOWN_STATUS("30000004", "7", "PaymentStatus: unknown status", HttpStatus.OK)
-	, REFUND_YOUNG("30000005", "400", "청소년 요금제는 환불 불가능", HttpStatus.OK)
+//	, REFUND_YOUNG("30000005", "400", "청소년 요금제는 환불 불가능", HttpStatus.OK) // 청소년 요금제 환불 기능 추가됨 (2020.01.28_par 주석)
 	, REFUND_WINDOW_EXPIRED("30000006", "110", "환불 유효기간 만료", HttpStatus.OK)
 	, EXCEED_ORIGINAL_AMOUNT("30000007", "113", "환불액이 원래 거래금액 또는 부분환급 후 남은 금액보다 많음", HttpStatus.OK)
 	, ALREADY_REFUNDED("30000008", "112", "이 거래는 이미 완전히 환불됨", HttpStatus.OK)

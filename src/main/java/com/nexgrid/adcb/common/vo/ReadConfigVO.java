@@ -57,6 +57,7 @@ public class ReadConfigVO {
 	private String rcsg_opcode_select = "111"; // 한도 조회
 	private String rcsg_opcode_charge = "114"; // 한도 즉시 차감
 	private String rcsg_opcode_cancel= "116"; // 결제 취소
+	private String rcsg_opcode_cancel_part= "117"; // 부분 취소 (2020.01.28_par 추가)
 	private String rcsg_msg_gbn_invoke = "1"; // 연결 상태 확인 시 메세지
 	private String rcsg_msg_gbn_return = "2"; // 서버로부터 연결 상태 확인 시 응답에 대한 응답 메세지
 	private String rcsg_interface_version = ""; // 연동 버전 정의
@@ -361,6 +362,12 @@ public class ReadConfigVO {
 	}
 	public void setRcsg_opcode_cancel(String rcsg_opcode_cancel) {
 		this.rcsg_opcode_cancel = rcsg_opcode_cancel;
+	}
+	public String getRcsg_opcode_cancel_part() {
+		return rcsg_opcode_cancel_part;
+	}
+	public void setRcsg_opcode_cancel_part(String rcsg_opcode_cancel_part) {
+		this.rcsg_opcode_cancel_part = rcsg_opcode_cancel_part;
 	}
 	public String getRcsg_msg_gbn_invoke() {
 		return rcsg_msg_gbn_invoke;

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import com.nexgrid.adcb.common.exception.CommonException;
 import com.nexgrid.adcb.common.vo.LogVO;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgReturnCancelPart;
+import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgReturnCancel;
 import com.nexgrid.adcb.interworking.rcsg.legacy.RcsgConnector;
 import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgResultCode;
 import com.nexgrid.adcb.interworking.rcsg.message.EnRcsgReturnCharge;
@@ -106,8 +108,20 @@ public class RcsgClientService {
 							throw new CommonException(EnAdcbOmsCode.RCSG_RES_BODY_KEY);
 						}
 					}
-				}else if(Init.readConfig.getRcsg_opcode_charge().equals(opCode)) {
+				}else if(Init.readConfig.getRcsg_opcode_charge().equals(opCode)) { // 즉시차감
 					for(EnRcsgReturnCharge e: EnRcsgReturnCharge.values()) {
+						if(!resMap.containsKey(e.toString())) {
+							throw new CommonException(EnAdcbOmsCode.RCSG_RES_BODY_KEY);
+						}
+					}
+				}else if(Init.readConfig.getRcsg_opcode_cancel().equals(opCode)) { // 차감취소 (2020.01.28_par 추가)
+					for(EnRcsgReturnCancel e : EnRcsgReturnCancel.values()) {
+						if(!resMap.containsKey(e.toString())) {
+							throw new CommonException(EnAdcbOmsCode.RCSG_RES_BODY_KEY);
+						}
+					}
+				}else if(Init.readConfig.getRcsg_opcode_cancel_part().equals(opCode)) { // 부분취소 (2020.01.28_par 추가)
+					for(EnRcsgReturnCancelPart e : EnRcsgReturnCancelPart.values()) {
 						if(!resMap.containsKey(e.toString())) {
 							throw new CommonException(EnAdcbOmsCode.RCSG_RES_BODY_KEY);
 						}
@@ -120,6 +134,8 @@ public class RcsgClientService {
 				String result = resMap.get("RESULT");
 				logVO.setRcsgResultCode(result);
 				if(!"0000".equals(resMap.get("RESULT"))) {
+					logger.info("[" + logVO.getSeqId() + "] RCSG RESULT=" + result + "(" + opCode  + ")");
+					
 					// RCSG 연동 결과 paramMap에 저장
 					paramMap.put("Res_" + opCode, resMap);
 					for(EnRcsgResultCode e : EnRcsgResultCode.values()) {
