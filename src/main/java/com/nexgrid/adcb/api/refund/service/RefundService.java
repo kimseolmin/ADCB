@@ -290,19 +290,23 @@ public class RefundService {
 		String handicapped = svc_auth.split("\\|")[1]; // 장애인부가서비스
 		String old = svc_auth.split("\\|")[2]; // 65세이상부가서비스
 		
-		// 취약계층인지 판단하여 취약계층이면 대리인 정보 가져옴
-		if("1".equals(handicapped) || "1".equals(old)) {
-			paramMap.put("SUB_NO", payInfo.get("SUB_NO"));
-			paramMap.put("CTN", payInfo.get("CTN"));
-			String mode = "";	// 1:장애인처리, 2:65세이상처리
-			if("1".equals(handicapped)) {
-				mode = "1";
-			}else {
-				mode = "2";
+		// 취약계층인지 판단하여 취약계층이면 대리인 정보 가져옴 - 일반 요금제
+		if("N".equals(young_fee_yn)){ // 14세 이상 중에 청소년요금제가 아닌 경우
+			
+			if("1".equals(handicapped) || "1".equals(old)) {
+				paramMap.put("SUB_NO", payInfo.get("SUB_NO"));
+				paramMap.put("CTN", payInfo.get("CTN"));
+				String mode = "";	// 1:장애인처리, 2:65세이상처리
+				if("1".equals(handicapped)) {
+					mode = "1";
+				}else {
+					mode = "2";
+				}
+				paramMap.put("MODE", mode);
+				// ESB 연동
+				commonService.doEsbCm181(paramMap, logVO);
 			}
-			paramMap.put("MODE", mode);
-			// ESB 연동
-			commonService.doEsbCm181(paramMap, logVO);
+			
 		}
 
 		// 통합한도 연동: 차감취소
