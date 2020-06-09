@@ -219,7 +219,7 @@ public class ChargeService {
 		reqVO.setEntrNo(sub_no); // 가입번호
 		reqVO.setLmtStlmUseDenyYn("N"); // 한도결제이용거부여부
 		reqVO.setChngRsnCd("LCR1011");	// 변경사유코드(LCR1011:고객요청)
-		reqVO.setLendDvVlue("400"); // 인입구분값(400:PG사이용동의)
+		reqVO.setLendDvVlue("200"); // 인입구분값  400(PG사이용동의)->200(APP)_변경_2020.05.04_par
 		reqVO.setNextOperatorId("1100000284");	//처리자ID
 		reqBody.addDsInputInVO(reqVO);
 		reqRecord.setRequestBody(reqBody);

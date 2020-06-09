@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,11 +128,13 @@ private static SequenceNoManager seqNoManager;
 	 */
 	public void returnHealthCheck(Map<String, String> reqMap) {
 		try {
+			ConcurrentHashMap<String, String> reqHMap = new ConcurrentHashMap<String, String>();
+			reqHMap.putAll(reqMap); // ConcurrentHashMap으로 변경(2020.05.04_par)
 			// 정상으로 보냄.
-			reqMap.put("CON_STS", "1");
-			sendMsg(Init.readConfig.getRcsg_msg_gbn_return(), Init.readConfig.getRcsg_opcode_con_qry(), reqMap);
+			reqHMap.put("CON_STS", "1");
+			sendMsg(Init.readConfig.getRcsg_msg_gbn_return(), Init.readConfig.getRcsg_opcode_con_qry(), reqHMap);
 		}catch (Exception e) {
-			logger.error("[Health Check Error" + e.getMessage());
+			logger.error("[Health Check Error" + e.getMessage(), e);
 		}
 	}
 	
@@ -163,7 +166,7 @@ private static SequenceNoManager seqNoManager;
 			// (health check는 10초마다 한번씩, 다른 요청이 있었을 경우 마지막 보낸 시간에서 10초)
 			if(lastSendTime < System.currentTimeMillis() - 1000 * 10) {
 				this.logVO = new LogVO("healthCheck");
-				Map<String, String> reqMap = new HashMap<String, String>();
+				ConcurrentHashMap<String, String> reqMap = new ConcurrentHashMap<String, String>();
 				reqMap.put("CON_ID", conId + "");
 				Map<String, String> resMap = sendMsg(Init.readConfig.getRcsg_msg_gbn_invoke(), Init.readConfig.getRcsg_opcode_con_qry(), reqMap);
 				String logSeq = "[" + logVO.getSeqId() + "] ";
@@ -181,7 +184,7 @@ private static SequenceNoManager seqNoManager;
 				
 			}
 		}catch (Exception e) {
-			logger.error("[Health Check " + getName() + "] RCSG Error : " + e.getMessage(), e);
+			logger.error("[" + logVO.getSeqId() + "]" + "[Health Check " + getName() + "] RCSG Error : " + e.getMessage(), e);
 		}
 		
 	}
@@ -196,7 +199,7 @@ private static SequenceNoManager seqNoManager;
 	 * @return
 	 * @throws Exception
 	 */
-	public Map<String, String> sendMsg(String msgGbn, String opCode, Map<String, String> reqMap) throws Exception{
+	public Map<String, String> sendMsg(String msgGbn, String opCode, ConcurrentHashMap<String, String> reqMap) throws Exception{
 		updateLastSendTime();
 		
 		reqMap.put("OP_CODE", opCode);
@@ -267,11 +270,11 @@ private static SequenceNoManager seqNoManager;
 					reconnect();
 					logger.info("RCSG Connected!!! [serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
 				}catch(Exception e) {
-					logger.error("RCSG not Connected...... Sleep for " + Init.readConfig.getRcsg_reconnect_sleep_time() + " [serverIp : " + serverIp + ", serverPort : " + serverPort + "]");
+					logger.error("RCSG not Connected...... Sleep for " + Init.readConfig.getRcsg_reconnect_sleep_time() + " [serverIp : " + serverIp + ", serverPort : " + serverPort + "]", e);
 					try {
 						Thread.sleep(Long.parseLong(Init.readConfig.getRcsg_reconnect_sleep_time()));
 					}catch (Exception e1) {
-						e1.printStackTrace();
+						logger.error ("Internal Etc Error : ", e1);
 					}
 				}
 			}
@@ -279,14 +282,14 @@ private static SequenceNoManager seqNoManager;
 			try {
 				Thread.sleep(100);
 			}catch (InterruptedException e) {
-				e.printStackTrace();
+				logger.error ("Internal Etc Error : ", e);
 			}
 		}
 		
 		try {
 			disconnect();
 		}catch (IOException e) {
-			e.printStackTrace();
+			logger.error ("Internal Etc Error : ", e);
 		}
 	}
 	

@@ -1,11 +1,10 @@
 package com.nexgrid.adcb.interworking.rbp.legacy;
 
-import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.nexgrid.adcb.common.vo.LogVO;
 import com.nexgrid.adcb.interworking.rbp.util.RbpMessageConverter;
 import com.nexgrid.adcb.interworking.util.MessageQueue;
 import com.nexgrid.adcb.util.Init;
@@ -32,7 +31,7 @@ public class RbpMessageSender extends Thread{
 	 * queue에 요청 메시지 넣음
 	 * @param reqMap
 	 */
-	public void putMessage(Map<String, String> reqMap) {
+	public void putMessage(ConcurrentHashMap<String, String> reqMap) {
 		this.msgQueue.put(reqMap);
 		logger.debug("[RBP msg put] : [" + reqMap.toString() + "]" );	
 	}
@@ -41,21 +40,21 @@ public class RbpMessageSender extends Thread{
 
 	@Override
 	public void run() {
-		Map<String, String> reqMap = null;
+		ConcurrentHashMap<String, String> reqMap = null;
 		while(isRun) {
-			reqMap = (Map<String, String>) this.msgQueue.pop();
+			reqMap = (ConcurrentHashMap<String, String>) this.msgQueue.pop();
 			
 			if(reqMap != null) {
 				try {
 					sendMsg(reqMap);
 				}catch(Exception e) {
-					e.printStackTrace();
+					logger.error ("Internal Etc Error RBP msgQueue.Pop : ", e);
 				}
 			}else {
 				try {
 					Thread.sleep(10);
 				}catch (Exception e) {
-					e.printStackTrace();
+					logger.error ("Internal Etc Error RBP msgQueue.Pop : ", e);
 				}
 			}
 		}
@@ -76,7 +75,7 @@ public class RbpMessageSender extends Thread{
 	 * @param reqMap
 	 * @throws Exception
 	 */
-	public void sendMsg(Map<String, String > reqMap) throws Exception{
+	public void sendMsg(ConcurrentHashMap<String, String > reqMap) throws Exception{
 		String msgGbn = reqMap.get("MESSAGE_GBN");
 		String opCode = reqMap.get("OP_CODE");
 		

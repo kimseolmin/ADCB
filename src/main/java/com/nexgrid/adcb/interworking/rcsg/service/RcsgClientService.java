@@ -3,6 +3,7 @@ package com.nexgrid.adcb.interworking.rcsg.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,7 @@ public class RcsgClientService {
 			try {
 				Thread.sleep(100);
 			}catch (Exception e){
-				
+				logger.error("RCSG init Error : ", e); // 2020.05.04_par추가
 			}
 		}
 		
@@ -73,15 +74,16 @@ public class RcsgClientService {
 	/**
 	 * RCSG에 message 전송
 	 * @param logVO logVO의 seqId로 요청 thread의 응답이 제대로 왔는지 확인 가능
-	 * @param opCode 001:연결상태확인, 111:한도조회, 114:한도즉시차감, 116:결제취소
+	 * @param opCode 001:연결상태확인, 111:한도조회, 114:한도즉시차감, 116:결제취소, 117:부분취소
 	 * @param reqMap RCSG 요청 데이터
 	 * @return RCSG 응답 데이터
 	 * @throws Exception
 	 */
 	public Map<String, String> doRequest(LogVO logVO, String opCode, Map<String, Object> paramMap) throws Exception{
-		
-		Map<String, String> reqMap = (Map<String, String>)paramMap.get("Req_"+opCode);
+		ConcurrentHashMap<String, String> reqMap = new ConcurrentHashMap<String, String>(); 
 		Map<String, String> resMap = null;
+		
+		reqMap.putAll((Map<String, String>)paramMap.get("Req_" + opCode)); // ConcurrentHashMap으로 변경(2020.05.04_par)
 		
 		for(RcsgConnector rcsgConn : connList) {
 			if(rcsgConn.isConnected()) {
@@ -92,6 +94,7 @@ public class RcsgClientService {
 					throw common;
 				}
 				catch(Exception e) {
+					logger.error("[" + logVO.getSeqId() + "]", e); // 2020.05.04_par추가
 					logVO.setFlow("[ADCB] --> [RCSG]");
 					throw new CommonException(EnAdcbOmsCode.RCSG_INVALID_ERROR, e.getMessage());
 				}

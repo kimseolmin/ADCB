@@ -3,6 +3,7 @@ package com.nexgrid.adcb.interworking.rcsg.util;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -102,7 +103,7 @@ public class RcsgMessageConverter {
 	 * @param reqMap RCSG 요청데이터
 	 * @return
 	 */
-	public synchronized String getInvokeMessage(String msgGbn, String opCode, Map<String, String> reqMap) {
+	public synchronized String getInvokeMessage(String msgGbn, String opCode, ConcurrentHashMap<String, String> reqMap) {
 		String header = "";
 		String body = "";
 		
