@@ -362,10 +362,11 @@ public class CommonServiceImpl implements CommonService{
 			sb.append("RBP_RES_TIME=").append(logVO.getRbpResTime()).append("|");
 			sb.append("RBP_RESULT_CODE=").append(logVO.getRbpResultCode()).append("|");
 			
-			sb.append("ESB_MPS208_REQ_TIME=").append(logVO.getEsbMps208ReqTime()).append("|");
-			sb.append("ESB_MPS208_RES_TIME=").append(logVO.getEsbMps208ResTime()).append("|");
-			sb.append("ESB_MPS208_RESULT_CODE=").append(logVO.getEsbMps208ResultCode()).append("|");
-			
+			sb.append("API_MPS208_REQ_TIME=").append(logVO.getApiMps208ReqTime()).append("|");
+			sb.append("API_MPS208_RES_TIME=").append(logVO.getApiMps208ResTime()).append("|");
+			sb.append("API_MPS208_RESULT_CODE=").append(logVO.getApiMps208ResultCode()).append("|");
+			sb.append("API_MPS208_RESULT_MSG=").append(logVO.getApiMps208ResultMsg()).append("|");
+
 			sb.append("ESB_CM181_REQ_TIME=").append(logVO.getEsbCm181ReqTime()).append("|");
 			sb.append("ESB_CM181_RES_TIME=").append(logVO.getEsbCm181ResTime()).append("|");
 			sb.append("ESB_CM181_RESULT_CODE=").append(logVO.getEsbCm181ResultCode());

@@ -19,7 +19,7 @@
 	
 	<bean id="dataSourceSpied"
 		class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="java:/comp/env/jdbc/adcbDB" />		
+		<property name="jndiName" value="java:/comp/env/jdbc/adcbDB" />
 	</bean>
 	
 

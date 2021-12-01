@@ -74,7 +74,10 @@ public enum EnAdcbOmsCode {
 	, ESB_TIMEOUT("54888888", "4", "ESB Timeout", HttpStatus.OK)
 	, ESB_API("5410", "4", HttpStatus.OK)
 	, ESB_4004("54104004", "105", "존재하지 않는 고객", HttpStatus.OK)
-	, ESB_INVALID_ERROR("54999999", "4", HttpStatus.OK);
+	, ESB_INVALID_ERROR("54999999", "4", HttpStatus.OK)
+
+	, API_MPS208_ERROR("55000000", "4","API (MPS208) 연동 중 에러가 발생하였습니다.", HttpStatus.OK)
+	, API_MPS208_INVALID_ERROR("55999999", "4", "API (MPS208) 연동 중 알수 없는 에러가 발생하였습니다.", HttpStatus.OK);
 	
 	
 	

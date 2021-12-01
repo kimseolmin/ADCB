@@ -44,9 +44,10 @@ public class LogVO {
 	private String rcsgResTime = "";					// RCSG 접속 요청 발생 시간
 	private String rcsgResultCode = "";					// RCSG 결과 코드
 	
-	private String esbMps208ReqTime = "";					// 약관동의 ESB 접속 요청 발생 시간
-	private String esbMps208ResTime = "";					// 약관동의 ESB 접속 요청 발생 시간
-	private String esbMps208ResultCode = "";				// 약관동의 ESB 결과 코드
+	private String apiMps208ReqTime = "";					// 약관동의 API 접속 요청 발생 시간
+	private String apiMps208ResTime = "";					// 약관동의 API 접속 요청 발생 시간
+	private String apiMps208ResultCode = "";				// 약관동의 API 결과 코드
+	private String apiMps208ResultMsg = "";					// 약관동의 API 결과 메시지
 	
 	
 	private String esbCm181ReqTime = "";					// 약관동의 ESB 접속 요청 발생 시간
@@ -342,33 +343,40 @@ public class LogVO {
 	}
 
 
-	public String getEsbMps208ReqTime() {
-		return esbMps208ReqTime;
+	public String getApiMps208ReqTime() {
+		return apiMps208ReqTime;
 	}
 
 
-	public void setEsbMps208ReqTime() {
-		this.esbMps208ReqTime = StringUtil.getCurrentTimeMilli();
+	public void setApiMps208ReqTime() {
+		this.apiMps208ReqTime = StringUtil.getCurrentTimeMilli();
 	}
 
 
-	public String getEsbMps208ResTime() {
-		return esbMps208ResTime;
+	public String getApiMps208ResTime() {
+		return apiMps208ResTime;
 	}
 
 
-	public void setEsbMps208ResTime() {
-		this.esbMps208ResTime = StringUtil.getCurrentTimeMilli();
+	public void setApiMps208ResTime() {
+		this.apiMps208ResTime = StringUtil.getCurrentTimeMilli();
 	}
 
 
-	public String getEsbMps208ResultCode() {
-		return esbMps208ResultCode;
+	public String getApiMps208ResultCode() {
+		return apiMps208ResultCode;
 	}
 
+	public void setApiMps208ResultCode(String esbMps208ResultCode) {
+		this.apiMps208ResultCode = apiMps208ResultCode;
+	}
 
-	public void setEsbMps208ResultCode(String esbMps208ResultCode) {
-		this.esbMps208ResultCode = esbMps208ResultCode;
+	public String getApiMps208ResultMsg() {
+		return apiMps208ResultCode;
+	}
+
+	public void setApiMps208ResultMsg(String esbMps208ResultMsg) {
+		this.apiMps208ResultMsg = apiMps208ResultMsg;
 	}
 
 

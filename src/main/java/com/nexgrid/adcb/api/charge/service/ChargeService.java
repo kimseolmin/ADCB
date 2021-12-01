@@ -11,8 +11,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.axis2.client.ServiceClient;
-import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.mybatis.spring.MyBatisSystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,19 +34,17 @@ import com.nexgrid.adcb.interworking.rcsg.util.RcsgKeyGenerator;
 import com.nexgrid.adcb.util.EnAdcbOmsCode;
 import com.nexgrid.adcb.util.Init;
 import com.nexgrid.adcb.util.StringUtil;
+import com.nexgrid.apim.module.ApimContext;
+import com.nexgrid.apim.module.dto.ApimResponse;
+import com.nexgrid.apim.service.ApimService;
+import com.nexgrid.apim.service.constants.ApimServiceCode;
+import com.nexgrid.apim.service.mps208.model.Mps208ReqBody;
+import com.nexgrid.apim.service.mps208.model.Mps208ReqHeader;
+import com.nexgrid.apim.service.mps208.model.Mps208Request;
+import com.nexgrid.apim.service.mps208.model.Mps208Response;
+import com.nexgrid.apim.service.mps208.model.ReqData;
 
 import lguplus.u3.webservice.cm181.RetrieveMobilePayArmPsblYnServiceStub.DsResOutVO;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.BusinessHeader;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.DsInputInVO;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.DsOutputOutVO;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.ESBHeader;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.RequestBody;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.RequestRecord;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.ResponseBody;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.ResponseRecord;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.UpdateLmtStlmUseDenyYn;
-import lguplus.u3.webservice.mps208.UpdateLmtStlmUseDenyYnServiceStub.UpdateLmtStlmUseDenyYnResponse;
 
 @Service("chargeService")
 public class ChargeService {
@@ -67,6 +63,9 @@ public class ChargeService {
 	
 	@Inject
 	private CommonDAO commonDAO;
+
+	@Autowired
+	private ApimContext apimContext;
 	
 	private static final Logger logger = LoggerFactory.getLogger(ChargeService.class);
 
@@ -146,12 +145,13 @@ public class ChargeService {
     	} else {
     		terms_deny_yn = cust_flag.substring(0, 1);
     	}
-    	
-    	// 약관동의가 필요한 경우 ESB 연동
-    	if("Y".equals(terms_deny_yn)) {
-    		// ESB 연동
-    		doEsbMps208(paramMap, logVO);
-    	}
+
+		// 약관동의가 필요한 경우 ESB 연동
+		if("Y".equals(terms_deny_yn)) {
+			// ESB 연동
+			// [101049]
+			doApiMps208(paramMap, logVO);
+		}
     	
     	//청소년요금제와 일반 구분
     	if("N".equals(young_fee_yn)){ // 14세 이상 중에 청소년요금제가 아닌 경우
@@ -167,6 +167,7 @@ public class ChargeService {
     				mode = "2";
     			}
     			paramMap.put("MODE", mode);
+				// [101049]
     			commonService.doEsbCm181(paramMap, logVO);
     		}
     		
@@ -184,118 +185,83 @@ public class ChargeService {
 	
 	
 	/**
-	 * ESB(MPS208) 연동 - 한도결제이용거부여부 변경
+	 * API(MPS208) 연동 - 한도결제이용거부여부 변경
 	 * @param paramMap
 	 * @param logVO
 	 * @throws Exception
 	 */
-	public void doEsbMps208(Map<String, Object> paramMap, LogVO logVO) throws Exception {
+	public void doApiMps208(Map<String, Object> paramMap, LogVO logVO) throws Exception {
 		
 		logVO.setFlow("[ADCB] --> [ESB]");
+
 		Map<String, String> ncasRes = (HashMap<String,String>) paramMap.get("ncasRes");
-		
-		String sub_no = ncasRes.get("SUB_NO");	// 고객의 가입번호
-		
-		ESBHeader header = new ESBHeader();
-		RequestRecord reqRecord = new RequestRecord();
-		RequestBody reqBody = new RequestBody();
-		ResponseRecord resRecord = null;
-		BusinessHeader bizHeader = null;
-		String esbUrl = Init.readConfig.getEsb_mps208_url();
-		int esbTimeout = Integer.parseInt(Init.readConfig.getEsb_time_out());
-		
-		
-		// ESB 헤더 셋팅
-		header.setServiceID("MPS208");
-		header.setTransactionID(commonService.getEsbTransactionId());
-		header.setSystemID("ADCB");
-		header.setErrCode("");
-		header.setErrMsg("");
-		header.setReserved("");
-		reqRecord.setESBHeader(header);
-		
-		// ESB 요청값 셋팅
-		DsInputInVO reqVO = new DsInputInVO();
-		reqVO.setEntrNo(sub_no); // 가입번호
-		reqVO.setLmtStlmUseDenyYn("N"); // 한도결제이용거부여부
-		reqVO.setChngRsnCd("LCR1011");	// 변경사유코드(LCR1011:고객요청)
-		reqVO.setLendDvVlue("200"); // 인입구분값  400(PG사이용동의)->200(APP)_변경_2020.05.04_par
-		reqVO.setNextOperatorId("1100000284");	//처리자ID
-		reqBody.addDsInputInVO(reqVO);
-		reqRecord.setRequestBody(reqBody);
-		
-		UpdateLmtStlmUseDenyYn reqIn = new UpdateLmtStlmUseDenyYn();
-		reqIn.setRequestRecord(reqRecord);
+		String sub_no = ncasRes.get("SUB_NO");    // 고객의 가입번호
+
 		String seq = "[" + logVO.getSeqId() + "] ";
-		
+
+		// API ( MPS208 ) 파라미터 세팅
+		Mps208Request request = new Mps208Request();
+
+		Mps208ReqHeader mps208header = new Mps208ReqHeader();
+		mps208header.setXUserId("1100000284"); // 처리자 ID
+
+		Mps208ReqBody mps208ReqBody = new Mps208ReqBody();
+		ReqData data = new ReqData();
+		data.setEntrId(sub_no); // 가입번호
+		data.setLmtStlmUseDenyYn("N"); // 한도결제 이용거부 여부
+		data.setChngRsnCd("LCR1011"); // 변경사유코드(LCR1011:고객요청)
+		data.setLendDvVlue("200"); // 인입 구분값(400:PG사이용동의) -> 200(APP)_변경_2020.05.04_par
+
+		List<ReqData> dataList = new ArrayList<>();
+		dataList.add(data);
+		mps208ReqBody.setDsInput(dataList);
+
+		request.setHeader(mps208header);
+		request.setBody(mps208ReqBody);
+
 		try {
-			logVO.setEsbMps208ReqTime();
-			logger.info(seq + "---------------------------- ESB(MPS208) START ----------------------------");
-			logger.info(seq + "ESB(MPS208) Request Url : " + esbUrl);
-			logger.info(seq + "ESB(MPS208) Request Header : " + header.toString());
-			logger.info(seq + "ESB(MPS208) Request Body : " + reqVO.toString());
-			
-			// ESB 호출
-			UpdateLmtStlmUseDenyYnServiceStub stub = new UpdateLmtStlmUseDenyYnServiceStub(esbUrl);
-			
-			// ESB Timeout 셋팅
-			ServiceClient serviceClient = stub._getServiceClient();
-			serviceClient.getOptions().setTimeOutInMilliSeconds(esbTimeout);
-			stub._setServiceClient(serviceClient);
-			
-			// ESB 호출 응답
-			UpdateLmtStlmUseDenyYnResponse esbRes = stub.updateLmtStlmUseDenyYn(reqIn);
-			
-			logVO.setFlow("[ADCB] <-- [ESB]");
-			logVO.setEsbMps208ResTime();
-			
-			resRecord = esbRes.getResponseRecord();
-			header = resRecord.getESBHeader();
-			logger.info(seq + "ESB(MPS208) Response Header : " + header.toString());
-			
-		}catch(Exception e) {
-			if (e.getCause() instanceof ConnectTimeoutException) {
-				throw new CommonException(EnAdcbOmsCode.ESB_TIMEOUT);
-			}else {
-				throw new CommonException(EnAdcbOmsCode.ESB_INVALID_ERROR, e.getMessage());
-			}
-		}
-		
-		
-		if("".equals(header.getErrCode())) { // 성공
-			ResponseBody resBody = resRecord.getResponseBody();
-			bizHeader = resRecord.getBusinessHeader();
-			logger.info(seq + "ESB(MPS208) Response BusinessHeader : " + bizHeader.toString());
-			
-			if (!"N0000".equals(bizHeader.getResultCode())) {
-				// 에러
-				throw new CommonException(EnAdcbOmsCode.ESB_HEADER, bizHeader.getResultMessage());
-			}
-			
-			if(resBody != null) {
-				DsOutputOutVO resVO = resBody.getDsOutputOutVO();
-				logger.info(seq + "ESB(MPS208) Response Body : " + resVO.toString());
-				
-				if("0000".equals(resVO.getResultCode())) {
-					// 한도결제이용거부여부가 정상적으로 변경된 경우
-					paramMap.put("esbMps208", resVO);
-					
-				}else {
-					if("4004".equals(resVO.getResultCode())) {
-						throw new CommonException(EnAdcbOmsCode.ESB_4004);
-					}else {
-						throw new CommonException(EnAdcbOmsCode.ESB_API.status(), EnAdcbOmsCode.ESB_API.mappingCode(), EnAdcbOmsCode.ESB_API.value() + resVO.getResultCode(), resVO.getResultMsg());
-					}
+			logVO.setApiMps208ReqTime();
+
+			logger.info(seq + "============================ API(MPS208) START ============================");
+			logger.info(seq + "API(MPS208) Request Header : " + mps208header);
+			logger.info(seq + "API(MPS208) Request Body : " + mps208ReqBody);
+
+			ApimService<Mps208Request, ApimResponse<Mps208Response>> service = apimContext.getInstance()
+					.getService(ApimServiceCode.MPS208);
+
+			ApimResponse<Mps208Response> response = service.request(request);
+
+			logVO.setApiMps208ResTime();
+
+			if(response.getHttpStatus().is2xxSuccessful()){ // 일단 요청은 성공
+
+				logger.info(seq + "## API(MPS208) 연동 결과: " + response.getBody().getDsRsltInfo());
+
+				if(response.getBody().getDsRsltInfo().getRsltCd().equals("SUCCESS")){
+					logVO.setApiMps208ResultCode("0000"); // 정상적으로 성공시 코드가 SUCCESS 로 넘어옴
+					logVO.setApiMps208ResultMsg(response.getBody().getDsRsltInfo().getRsltMsg());
+
+				}else{
+					// SUCCESS 가 아니면 코드와 실패사유가 넘어옴
+					logVO.setApiMps208ResultCode(response.getBody().getDsRsltInfo().getRsltCd());
+					logVO.setApiMps208ResultMsg(response.getBody().getDsRsltInfo().getRsltMsg());
+
+					throw new CommonException(EnAdcbOmsCode.API_MPS208_ERROR);
 				}
-				
+
+			}else{
+				throw new CommonException(EnAdcbOmsCode.API_MPS208_INVALID_ERROR);
 			}
-			
-			logger.info(seq + "---------------------------- ESB(MPS208) END ----------------------------");
-			
-		}else{
-			throw new CommonException(EnAdcbOmsCode.ESB_HEADER, header.getErrMsg());
+
+
+		}catch(Exception e) {
+			logger.error(e.getMessage());
+			throw new CommonException(EnAdcbOmsCode.API_MPS208_INVALID_ERROR);
 		}
-		
+
+
+		logger.info(seq + "============================ ESB(MPS208) END ============================");
+
 	}
 	
 	

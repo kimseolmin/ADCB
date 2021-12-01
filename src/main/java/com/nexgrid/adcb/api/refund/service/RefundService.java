@@ -304,6 +304,7 @@ public class RefundService {
 				}
 				paramMap.put("MODE", mode);
 				// ESB 연동
+				// [101049]
 				commonService.doEsbCm181(paramMap, logVO);
 			}
 			

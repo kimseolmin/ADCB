@@ -258,7 +258,7 @@ public class ChargeController {
 			
 			// NCAS 연동
 			commonService.getNcasGetMethod(paramMap, logVO);
-			chargeService.doEsbMps208(paramMap, logVO);
+			chargeService.doApiMps208(paramMap, logVO);
 			dataMap.put("result", commonService.getSuccessResult());
 			
 			
