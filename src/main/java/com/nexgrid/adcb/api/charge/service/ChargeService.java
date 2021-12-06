@@ -260,7 +260,7 @@ public class ChargeService {
 		}
 
 
-		logger.info(seq + "============================ ESB(MPS208) END ============================");
+		logger.info(seq + "============================ API (MPS208) END ============================");
 
 	}
 	
