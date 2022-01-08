@@ -52,7 +52,7 @@
 			#{logVO.resultCode},
 			#{logVO.reqTime},
 			#{logVO.resTime},
-			#{logVO.apiType},
+			#{logVO.apiType2},
 			#{logVO.apiResultCode},
 			#{param.http_status},
 			<choose>
@@ -260,7 +260,43 @@
 		 	)
 	</insert>
 	
-	
+	<!-- EAI (Kafka 용) -->
+	<insert id="insertEAIKafka" parameterType="com.nexgrid.adcb.common.vo.EaiVO">
+		INSERT INTO TB_KAFKA_SDW (
+			NEW_REQUEST_TYPE,
+			NEW_BAN_UNPAID_YN_CODE,
+			NEW_ACCOUNT_TYPE,
+			NEW_SMLS_STLM_DV_CD,
+			NEW_SMLS_STLM_CMPNY_CD,
+			NEW_CUST_GRD_CD,
+			NEW_PRSS_YYMM,
+			NEW_REQUEST_DATE,
+			NEW_TOTAL,
+			NEW_BAN,
+			NEW_ACE_NO,
+			NEW_SUBS_NO,
+			NEW_REQUEST_ID,
+			NEW_MERCHANT_ID,
+			NEW_PRODUCT_DESCRIPTION
+			)
+		 VALUES (
+		 	#{new_request_type},
+			#{new_ban_unpaid_yn_code},
+			#{new_account_type},
+			#{new_smls_stlm_dv_cd},
+			#{new_smls_stlm_cmpny_cd},
+			#{new_cust_grd_cd},
+			#{new_prss_yymm},
+			#{new_request_date},
+			#{new_total},
+			#{new_ban},
+			#{new_ace_no},
+			#{new_subs_no},
+			#{new_request_id},
+			#{new_merchant_id},
+			#{new_product_description}
+		 	)
+	</insert>
 	
 	<!-- SMS 정보 리스트 INSERT -->
 	<insert id="insertSmsList" parameterType="com.nexgrid.adcb.common.vo.SmsSendVO">

@@ -80,8 +80,9 @@ public class ReadConfigVO {
 	
 	// 작업공지
 	private String maintenance_yn = "";
-	
-	
+
+	// ESB (MPS208), Apim 사용
+	private String use_esb_apim_mps208 = "";
 	
 	
 	public String getAdcb_config_path() {
@@ -461,7 +462,12 @@ public class ReadConfigVO {
 		this.maintenance_yn = maintenance_yn;
 	}
 
-	
+	public String getUse_esb_apim_mps208() {
+		return use_esb_apim_mps208;
+	}
+	public void setUse_esb_apim_mps208(String use_esb_apim_mps208) {
+		this.use_esb_apim_mps208 = use_esb_apim_mps208;
+	}
 	
 
 }

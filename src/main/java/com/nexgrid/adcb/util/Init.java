@@ -99,8 +99,10 @@ public class Init{
 		    	
 		    	//작업공지
 		    	readConfig.setMaintenance_yn(props.getProperty("Maintenance_YN"));
-		    	
-		    	
+
+				// ESB/APIM 연동
+				readConfig.setUse_esb_apim_mps208(props.getProperty("USE_ESB_APIM_MPS208"));
+
 		    } catch (Exception e) {
 				// TODO: handle exception
 		    	log.error("########## Server Start Error ##########", e);

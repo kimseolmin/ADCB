@@ -335,6 +335,25 @@
                     <mainClass>org.test.int1.Main</mainClass>
                 </configuration>
             </plugin>
+
+			<!--외부 jar 빌드시 war에 포함되도록-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+
+				<configuration>
+					<webResources>
+						<resource>
+							<!-- 로컬 lib파일 경로 -->
+							<directory>${basedir}/lib</directory>
+							<includes>
+								<include>*.jar</include>
+							</includes>
+							<targetPath>WEB-INF/lib</targetPath>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
         </plugins>
     </build>
 </project>

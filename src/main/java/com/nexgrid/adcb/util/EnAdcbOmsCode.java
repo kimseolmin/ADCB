@@ -76,12 +76,15 @@ public enum EnAdcbOmsCode {
 	, ESB_4004("54104004", "105", "존재하지 않는 고객", HttpStatus.OK)
 	, ESB_INVALID_ERROR("54999999", "4", HttpStatus.OK)
 
-	, API_MPS208_ERROR("55000000", "4","API (MPS208) 연동 중 에러가 발생하였습니다.", HttpStatus.OK)
-	, API_MPS208_INVALID_ERROR("55999999", "4", "API (MPS208) 연동 중 알수 없는 에러가 발생하였습니다.", HttpStatus.OK);
-	
-	
-	
-	
+	, API_MPS208_4100("55004100","4", "API (MPS208) 4100 - SYSTEM ERROR", HttpStatus.OK)
+	, API_MPS208_4004("55004004","105", "API (MPS208) 4004 - 존재하지 않는 고객", HttpStatus.OK)
+	, API_MPS208_4040("55004040","4", "API (MPS208) 4040 - 수신 Data 항목 오류 (Field 값 Validation 오류)", HttpStatus.OK)
+	, API_MPS208_TIMEOUT("55008888","4", "API (MPS208) Timeout", HttpStatus.OK)
+	, API_MPS208_INVALID_ERROR("55009999","4", "API (MPS208) 연동 중 알수 없는 에러가 발생하였습니다.", HttpStatus.OK);
+
+
+
+
 	private String value = "";
 	private String mappingCode = "";
 	private String logMsg = "";

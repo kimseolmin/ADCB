@@ -73,5 +73,9 @@
 	
 	<!-- 작업공지 -->
 	<entry key="Maintenance_YN">N</entry>
-	
+
+	<!-- ESB/APIM 사용 -->
+	<!-- esb : esb 연동, apim : apim 연동-->
+	<entry key="USE_ESB_APIM_MPS208">esb</entry>
+
 </properties>

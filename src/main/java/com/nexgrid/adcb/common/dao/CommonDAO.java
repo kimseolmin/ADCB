@@ -89,6 +89,14 @@ public interface CommonDAO {
 	 * @throws Exception
 	 */
 	int insertEAI(EaiVO eaiVO) throws Exception;
+
+	/**
+	 * EAI INSERT (Kafka)
+	 * @param eaiVO
+	 * @return
+	 * @throws Exception
+	 */
+	int insertEAIKafka(EaiVO eaiVO) throws Exception;
 	
 	
 	

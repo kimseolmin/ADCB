@@ -65,7 +65,14 @@
 			<appender-ref ref="service-log"/>
 			<appender-ref ref="console" />
 		</category> -->
-		
+
+		<Logger name="com.nexgrid.apim" additivity="false" level="info">
+			<AppenderRef ref="service-log" />
+			<AppenderRef ref="console" />
+		</Logger>
+
+		<Logger name="com.netflix" additivity="false" level="info">
+		</Logger>
 		
 		<Logger name="com.nexgrid.adcb.util.Init" additivity="false" level="info">
 			<AppenderRef ref="service-log"/>

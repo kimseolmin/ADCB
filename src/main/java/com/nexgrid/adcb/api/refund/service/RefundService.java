@@ -503,6 +503,7 @@ public class RefundService {
 		logVO.setFlow("[ADCB] --> [DB]");
 		try {
 			commonDAO.insertEAI(eaiVO);
+			commonDAO.insertEAIKafka(eaiVO);
 		}catch(DataAccessException adcbExc){
 			/*SQLException se = (SQLException) adcbExc.getRootCause();
 			logVO.setRsCode(Integer.toString(se.getErrorCode()));*/
