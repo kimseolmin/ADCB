@@ -76,6 +76,6 @@
 
 	<!-- ESB/APIM 사용 -->
 	<!-- esb : esb 연동, apim : apim 연동-->
-	<entry key="USE_ESB_APIM_MPS208">esb</entry>
+	<entry key="USE_ESB_APIM_MPS208">apim</entry>
 
 </properties>
