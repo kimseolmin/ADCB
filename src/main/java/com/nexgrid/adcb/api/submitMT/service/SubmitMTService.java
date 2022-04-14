@@ -45,7 +45,7 @@ public class SubmitMTService {
 		String msisdn = smsVO.getMsisdn();
 		String originator = smsVO.getOriginator();
 		if( "".equals(messageId) || StringUtil.hasSpecialCharacter(messageId) || StringUtil.spaceCheck(messageId) || StringUtil.maxCheck(messageId, 60)
-				|| "".equals(message) || StringUtil.maxCheck(message, 160) || message.indexOf("U+") < 0 
+				|| "".equals(message) || StringUtil.maxCheck(message, 500) || message.indexOf("U+") < 0
 				|| "".equals(msisdn) || StringUtil.hasSpecialCharacter(msisdn) || StringUtil.spaceCheck(msisdn) || StringUtil.maxCheck(msisdn, 12)
 				|| "".equals(originator)
 				
